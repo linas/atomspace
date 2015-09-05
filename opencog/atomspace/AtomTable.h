@@ -260,9 +260,8 @@ public:
     }
 
     /**
-     * Adds an atom to the table. If the atom already is in the
-     * atomtable, then the truth values and attention values of the
-     * two are merged (how, exactly? Is this doe corrrectly!?)
+     * Adds an atom to the table. If the atom is already in the
+     * atomtable, then the existing atom is returned instead.
      *
      * If the async flag is set, then the atom addition is performed
      * asynchronously; the atom might not be fully added by the time
@@ -275,7 +274,7 @@ public:
      * it also uses the big global lock, at the moment.  This needs
      * fixing, mostly be creating a second mutex for the atom insertion,
      * and also giving each index its own uique mutex, to avoid
-     * collsions.  So teh API is here, but more work is stil needed.
+     * collsions.  So the API is here, but more work is stil needed.
      *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
