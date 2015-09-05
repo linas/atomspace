@@ -36,6 +36,8 @@ namespace opencog
 /**
  * Implements map from string to atom pointers. Used to implement
  * the lookup of atoms according to thier name.
+ *
+ * Un-named atoms cannot be indexed.
  */
 class StringIndex
 {
@@ -45,10 +47,12 @@ class StringIndex
 	public:
 		void insert(const std::string& str, Atom* a)
 		{
+			if (0 == str.size()) return;
 			idx.insert(std::pair<std::string, Atom*>(str, a));
 		}
 		Atom* get(const std::string& str) const
 		{
+			if (0 == str.size()) return NULL;
 			std::map<std::string, Atom*>::const_iterator it;
 			it = idx.find(str);
 			if (it != idx.end()) return it->second;
@@ -56,6 +60,7 @@ class StringIndex
 		}
 		void remove(const std::string& str)
 		{
+			if (0 == str.size()) return;
 			idx.erase(str);
 		}
 		size_t size(void) const

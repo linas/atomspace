@@ -128,6 +128,10 @@ AtomTable::AtomTable(const AtomTable& other)
 
 Handle AtomTable::getHandle(Type t, std::string name) const
 {
+    // Nameless atoms cannot be searched; ergo are unique.
+    if (0 == name.size())
+        return Handle::UNDEFINED;
+
     // Special types need validation
     try {
         if (NUMBER_NODE == t) {
