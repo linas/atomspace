@@ -30,7 +30,8 @@ using namespace opencog;
 void StateLink::init()
 {
 	// Must have name and body
-	if (2 != _outgoing.size())
+	size_t sz = _outgoing.size();
+	if (2 != sz and 1 != sz)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting name and state, got size %d", _outgoing.size());
 
