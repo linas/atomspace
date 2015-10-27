@@ -25,7 +25,7 @@
 
 #include <map>
 
-#include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
 {
@@ -44,7 +44,7 @@ namespace opencog
 /// is used to name things, and StateLink, which is used to maintain
 /// current state.
 ///
-class UniqueLink : public FreeLink
+class UniqueLink : public FunctionLink
 {
 protected:
 	void init(bool);
@@ -65,6 +65,7 @@ public:
 	UniqueLink(Link &l);
 
 	Handle get_alias(void) const { return _outgoing[0]; }
+	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
 typedef std::shared_ptr<UniqueLink> UniqueLinkPtr;

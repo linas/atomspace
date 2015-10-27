@@ -61,7 +61,7 @@ void UniqueLink::init(bool allow_open)
 
 UniqueLink::UniqueLink(Type type, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: FreeLink(type, oset, tv, av)
+	: FunctionLink(type, oset, tv, av)
 {
 	if (not classserver().isA(type, UNIQUE_LINK))
 	{
@@ -77,20 +77,20 @@ UniqueLink::UniqueLink(Type type, const HandleSeq& oset,
 
 UniqueLink::UniqueLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: FreeLink(UNIQUE_LINK, oset, tv, av)
+	: FunctionLink(UNIQUE_LINK, oset, tv, av)
 {
 	init(true);
 }
 
 UniqueLink::UniqueLink(const Handle& name, const Handle& defn,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: FreeLink(UNIQUE_LINK, HandleSeq({name, defn}), tv, av)
+	: FunctionLink(UNIQUE_LINK, HandleSeq({name, defn}), tv, av)
 {
 	init(true);
 }
 
 UniqueLink::UniqueLink(Link &l)
-	: FreeLink(l)
+	: FunctionLink(l)
 {
 	// Type must be as expected
 	Type type = l.getType();
@@ -119,6 +119,7 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 	// variables in it.
 	for (const LinkPtr& defl : defs)
 	{
+		if (defl->getArity() < 2) continue;
 		if (defl->getOutgoingAtom(0) == alias)
 		{
 			if (allow_open)
@@ -134,6 +135,11 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 	throw InvalidParamException(TRACE_INFO,
 	                            "Cannot find defined hypergraph for atom %s",
 	                            alias->toString().c_str());
+}
+
+Handle UniqueLink::execute(AtomSpace* as) const
+{
+	return get_unique(_outgoing[0], _type, false);
 }
 
 /* ===================== END OF FILE ===================== */

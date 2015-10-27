@@ -106,4 +106,9 @@ Handle StateLink::get_other(void) const
 	return Handle();
 }
 
+Handle StateLink::execute(AtomSpace* as) const
+{
+	return get_state(_outgoing[0]);
+}
+
 /* ===================== END OF FILE ===================== */

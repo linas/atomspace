@@ -73,6 +73,7 @@ public:
 	 */
 	static Handle get_link(const Handle& alias);
 	static Handle get_state(const Handle& alias);
+	virtual Handle execute(AtomSpace*) const;
 };
 
 typedef std::shared_ptr<StateLink> StateLinkPtr;
