@@ -132,7 +132,8 @@ void FreeVariables::find_variables(const Handle& h)
 Handle FreeVariables::substitute_nocheck(const Handle& term,
                                      const HandleSeq& args) const
 {
-	// If it is a singleton, just return that singleton.
+	// If it is a singleton (i.e. term is a VariableNode), just
+	// return that singleton.
 	std::map<Handle, unsigned int>::const_iterator idx;
 	idx = index.find(term);
 	if (idx != index.end())

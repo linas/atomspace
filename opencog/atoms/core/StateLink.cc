@@ -109,7 +109,18 @@ Handle StateLink::get_other(void) const
 
 Handle StateLink::execute(AtomSpace* as) const
 {
+#if THIS_FAILS_SEE_BELOW
 	return get_state(_outgoing[0]);
+#endif
+
+	// Chances are good that `this` has not yet been inserted in any
+	// atomspace, because it has been freshly minted with PutLink.
+	// This will be our only chance to get it into an atomspace,
+	// and so we do that.  Note: the get_state() call will fail if
+	// `this` is not in some atomspace.
+	Handle self(as->add_atom(((Atom*) this)->shared_from_this()));
+	LinkPtr lself(LinkCast(self));
+	return get_state(lself->getOutgoingAtom(0));
 }
 
 /* ===================== END OF FILE ===================== */
