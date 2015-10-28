@@ -285,11 +285,6 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (LAMBDA_LINK == atom_type) {
         if (NULL == LambdaLinkCast(atom))
             return createLambdaLink(*LinkCast(atom));
-    } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
-/* More circular-dependency heart-ache
-        if (NULL == FunctionLinkCast(atom))
-            return FunctionLink::factory(LinkCast(atom));
-*/
     }
 
     // Very special handling for DeleteLink's
@@ -327,6 +322,13 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
             old_state = slp->get_other();
         }
         return slp;
+    }
+
+    else if (classserver().isA(atom_type, FUNCTION_LINK)) {
+/* More circular-dependency heart-ache
+        if (NULL == FunctionLinkCast(atom))
+            return FunctionLink::factory(LinkCast(atom));
+*/
     }
     return atom;
 }
