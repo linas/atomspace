@@ -113,6 +113,8 @@ Handle StateLink::execute(AtomSpace* as) const
 	return get_state(_outgoing[0]);
 #endif
 
+// #define THIS_CREATES_CONFUSION
+#ifdef THIS_CREATES_CONFUSION
 	// Chances are good that `this` has not yet been inserted in any
 	// atomspace, because it has been freshly minted with PutLink.
 	// This will be our only chance to get it into an atomspace,
@@ -121,6 +123,15 @@ Handle StateLink::execute(AtomSpace* as) const
 	Handle self(as->add_atom(((Atom*) this)->shared_from_this()));
 	LinkPtr lself(LinkCast(self));
 	return get_state(lself->getOutgoingAtom(0));
+#endif
+
+#define THIS_SHOULD_WORK 1
+#ifdef THIS_SHOULD_WORK
+	if (_outgoing.size() != 1)
+		return ((Atom*) this)->getHandle();
+
+	return get_state(_outgoing[0]);
+#endif
 }
 
 /* ===================== END OF FILE ===================== */
