@@ -196,6 +196,8 @@ static TruthValuePtr do_eval_stack(AtomSpace* as,
                      const Handle& evelnk, AtomSpace* scratch,
                      DbgStack& call_stack)
 {
+	call_stack.push(evelnk);
+
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
 	{
@@ -389,12 +391,19 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const Handle& evelnk)
 	}
 	catch (const std::exception& ex)
 	{
+		// Well, its not actually a stack, right now; its a trace ...
+		std::string msg = "Eval exception: ";
+		msg += ex.what();
+		int n = 0;
 		while (not call_stack.empty())
 		{
-			 call_stack.pop();
+			msg += "\nCall Trace ";
+			msg += ++n;
+			msg += ": ";
+			msg += call_stack.top()->toString();
+			call_stack.pop();
 		}
-		throw SyntaxException(TRACE_INFO,
-			"Eval exception %s", ex.what());
+		throw SyntaxException(TRACE_INFO, msg.c_str());
 	}
 }
 
