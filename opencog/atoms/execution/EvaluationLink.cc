@@ -19,6 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <stack>
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -28,7 +29,6 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
@@ -165,6 +165,8 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	return false;
 }
 
+typedef std::stack<Handle> DbgStack;
+
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
 /// Expects the argument to be an EvaluationLink, which should have the
@@ -190,8 +192,9 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 /// that were wrapped up by TrueLink, FalseLink. This is needed to get
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
-TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
-                     const Handle& evelnk, AtomSpace* scratch)
+static TruthValuePtr do_eval_stack(AtomSpace* as,
+                     const Handle& evelnk, AtomSpace* scratch,
+                     DbgStack& call_stack)
 {
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
@@ -207,7 +210,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Instantiator inst(scratch);
 		Handle args(inst.execute(sna.at(1)));
 
-		return do_evaluate(scratch, sna.at(0), args);
+		return EvaluationLink::do_evaluate(scratch, sna.at(0), args);
 	}
 	else if (EQUAL_LINK == t)
 	{
@@ -220,7 +223,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	else if (NOT_LINK == t)
 	{
 		LinkPtr l(LinkCast(evelnk));
-		TruthValuePtr tv(do_eval_scratch(as, l->getOutgoingAtom(0), scratch));
+		TruthValuePtr tv(do_eval_stack(as, l->getOutgoingAtom(0), scratch, call_stack));
 		return SimpleTruthValue::createTV(
 		              1.0 - tv->getMean(), tv->getCount());
 	}
@@ -229,7 +232,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		LinkPtr l(LinkCast(evelnk));
 		for (const Handle& h : l->getOutgoingSet())
 		{
-			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
+			TruthValuePtr tv(do_eval_stack(as, h, scratch, call_stack));
 			if (tv->getMean() < 0.5)
 				return tv;
 		}
@@ -240,7 +243,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		LinkPtr l(LinkCast(evelnk));
 		for (const Handle& h : l->getOutgoingSet())
 		{
-			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
+			TruthValuePtr tv(do_eval_stack(as, h, scratch, call_stack));
 			if (0.5 < tv->getMean())
 				return tv;
 		}
@@ -262,7 +265,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
+				TruthValuePtr tv(do_eval_stack(as, oset[i], scratch, call_stack));
 				if (tv->getMean() < 0.5)
 					return tv;
 			}
@@ -285,7 +288,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
+				TruthValuePtr tv(do_eval_stack(as, oset[i], scratch, call_stack));
 				if (0.5 < tv->getMean())
 					return tv;
 			}
@@ -318,7 +321,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
 		LinkPtr l(LinkCast(evelnk));
-		return do_eval_scratch(as, l->getOutgoingAtom(0), scratch);
+		return do_eval_stack(as, l->getOutgoingAtom(0), scratch, call_stack);
 	}
 	else if (PUT_LINK == t)
 	{
@@ -348,11 +351,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Handle red = pl->reduce();
 
 		// Step (3)
-		return do_eval_scratch(as, red, scratch);
+		return do_eval_stack(as, red, scratch, call_stack);
 	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
-		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
+		return do_eval_stack(as, DefineLink::get_definition(evelnk), scratch, call_stack);
 	}
 
 	// We get exceptions here in two differet ways: (a) due to user
@@ -370,9 +373,29 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		evelnk->toString().c_str());
 }
 
+TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
+                     const Handle& evelnk, AtomSpace* scratch)
+{
+	DbgStack call_stack;
+	return do_eval_stack(as, evelnk, scratch, call_stack);
+}
+
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const Handle& evelnk)
 {
-	return do_eval_scratch(as, evelnk, as);
+	DbgStack call_stack;
+	try
+	{
+		return do_eval_stack(as, evelnk, as, call_stack);
+	}
+	catch (const std::exception& ex)
+	{
+		while (not call_stack.empty())
+		{
+			 call_stack.pop();
+		}
+		throw SyntaxException(TRACE_INFO,
+			"Eval exception %s", ex.what());
+	}
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
