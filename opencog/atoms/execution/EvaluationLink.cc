@@ -398,7 +398,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const Handle& evelnk)
 		while (not call_stack.empty())
 		{
 			msg += "\nCall Trace ";
-			msg += ++n;
+			msg += std::to_string(++n);
 			msg += ": ";
 			msg += call_stack.top()->toString();
 			call_stack.pop();
