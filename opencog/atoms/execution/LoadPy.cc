@@ -9,11 +9,18 @@
 using namespace opencog;
 
 /**
- * Hack around a circular shared-library dependency with python.
+ * Hack around a circular shared-library dependency bug that CMake
+ * forces onto us. Its a CMake bug aka "feature", due to a MS Windows
+ * bug aka "feature".  Microsoft Windows sucks. I resent that I have
+ * to waste my time working around Windows bugs when I'm running
+ * Linux. This is just fucked up.
+ *
  * This is a hack; the cython API is mis-designed.
  */
 
 static void* ((*pyev)(void)) = nullptr;
+static void ((*pyap)(void*, const char*, void*, void*)) = nullptr;
+static void ((*pyaptv)(void*, const char*, void*, void*)) = nullptr;
 
 static void load_py_libs(const std::string& libname)
 {
@@ -53,13 +60,51 @@ static void load_py_libs(const std::string& libname)
 		throw RuntimeException(TRACE_INFO,
 			"Unable to find symbol \"get_python_evaluator_instance\": %s %s",
 			 libname.c_str(), dlsymError);
+
+	pyap = (void ((*)(void*, const char*, void*, void*)))
+		dlsym(dynLibrary, "cwrap_python_apply");
+	dlsymError = dlerror();
+	if (dlsymError)
+		throw RuntimeException(TRACE_INFO,
+			"Unable to find symbol \"cwrap_python_apply\": %s %s",
+			 libname.c_str(), dlsymError);
+
+	pyaptv = (void ((*)(void*, const char*, void*, void*)))
+		dlsym(dynLibrary, "cwrap_python_apply_tv");
+	dlsymError = dlerror();
+	if (dlsymError)
+		throw RuntimeException(TRACE_INFO,
+			"Unable to find symbol \"cwrap_python_apply_tv\": %s %s",
+			 libname.c_str(), dlsymError);
 }
 
-PythonEval& get_python_instance()
+PythonEval& opencog::get_python_instance(void)
 {
 	if (nullptr == pyev)
 		load_py_libs("libPythonEval.so");
 
 	void *pi = (pyev)();
 	return *((PythonEval*) pi);
+}
+
+Handle opencog::python_apply(AtomSpace* as, const std::string& expr,
+                             const Handle& args)
+{
+	if (nullptr == pyev)
+		load_py_libs("libPythonEval.so");
+
+	Handle reth;
+	(pyap)((void*) as, expr.c_str(), (void*) &args, (void*) &reth);
+	return reth;
+}
+
+TruthValuePtr opencog::python_apply_tv(AtomSpace* as, const std::string& expr,
+                                       const Handle& args)
+{
+	if (nullptr == pyev)
+		load_py_libs("libPythonEval.so");
+
+	TruthValuePtr rettv;
+	(pyaptv)((void*) as, expr.c_str(), (void*) &args, (void*) &rettv);
+	return rettv;
 }

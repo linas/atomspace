@@ -30,6 +30,7 @@
 
 #include "ExecutionOutputLink.h"
 #include "Instantiator.h"
+#include "LoadPy.h"
 
 using namespace opencog;
 
@@ -168,8 +169,12 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		// Get a reference to the python evaluator. 
 		// Be sure to specify the atomspace in which the
 		// evaluation is to be performed.
+#ifdef CMAKE_WORKS_NOW
 		PythonEval& applier = PythonEval::instance();
 		Handle h = applier.apply(as, schema.substr(pos), args);
+#else
+		Handle h = python_apply(as, schema.substr(pos), args);
+#endif
 
 		// Return the handle
 		return h;

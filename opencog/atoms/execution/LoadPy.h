@@ -9,7 +9,8 @@
 
 namespace opencog {
 
-PythonEval& get_python_instance();
+PythonEval& get_python_instance(void);
+Handle python_apply(AtomSpace*, const std::string&, const Handle&);
+TruthValuePtr python_apply_tv(AtomSpace*, const std::string&, const Handle&);
 
 };
-

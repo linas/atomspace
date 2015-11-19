@@ -1268,7 +1268,7 @@ void* get_python_evaluator_instance(void)
 	return (void*) &PythonEval::instance();
 }
 
-void cwrap_python_apply(void* pas, char* str, void* pargs, void* rethand)
+void cwrap_python_apply(void* pas, const char* str, void* pargs, void* rethand)
 {
 	AtomSpace* as = (AtomSpace*) pas;
 	std::string expr = str;
@@ -1278,7 +1278,7 @@ void cwrap_python_apply(void* pas, char* str, void* pargs, void* rethand)
 	*res = applier.apply(as, expr, args);
 }
 
-void cwrap_python_apply_tv(void* pas, char* str, void* pargs, void* rettv)
+void cwrap_python_apply_tv(void* pas, const char* str, void* pargs, void* rettv)
 {
 	AtomSpace* as = (AtomSpace*) pas;
 	std::string expr = str;

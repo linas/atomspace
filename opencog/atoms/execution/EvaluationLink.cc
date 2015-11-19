@@ -33,6 +33,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
 #include "EvaluationLink.h"
+#include "LoadPy.h"
 
 using namespace opencog;
 
@@ -470,8 +471,12 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		while (' ' == schema[pos]) pos++;
 
 		// Be sure to specify the atomspace in which to work!
+#ifdef CMAKE_WORKS_NOW
 		PythonEval &applier = PythonEval::instance();
 		return applier.apply_tv(as, schema.substr(pos), args);
+#else
+		return python_apply_tv(as, schema.substr(pos), args);
+#endif
 #else
 		throw RuntimeException(TRACE_INFO,
 			 "Cannot evaluate python GroundedPredicateNode!");
