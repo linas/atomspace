@@ -1,21 +1,15 @@
+LINK_LIBRARIES(atomspace clearbox execution)
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(FreeLinkUTest)
-	TARGET_LINK_LIBRARIES(FreeLinkUTest atomspace smob)
+	TARGET_LINK_LIBRARIES(FreeLinkUTest smob)
 	ADD_CXXTEST(RandomUTest)
-	TARGET_LINK_LIBRARIES(RandomUTest atomspace smob clearbox execution)
+	TARGET_LINK_LIBRARIES(RandomUTest smob)
 	ADD_CXXTEST(ReductUTest)
-	TARGET_LINK_LIBRARIES(ReductUTest atomspace smob clearbox execution)
+	TARGET_LINK_LIBRARIES(ReductUTest smob)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(DefineLinkUTest)
-TARGET_LINK_LIBRARIES(DefineLinkUTest atomspace)
-
 ADD_CXXTEST(DeleteLinkUTest)
-TARGET_LINK_LIBRARIES(DeleteLinkUTest execution atomspace)
-
 ADD_CXXTEST(PutLinkUTest)
-TARGET_LINK_LIBRARIES(PutLinkUTest execution atomspace)
-
 ADD_CXXTEST(StateLinkUTest)
-TARGET_LINK_LIBRARIES(StateLinkUTest execution atomspace)

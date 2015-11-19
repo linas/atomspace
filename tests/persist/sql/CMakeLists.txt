@@ -14,6 +14,7 @@ LINK_DIRECTORIES(
 LINK_LIBRARIES(
 	atomspace
 	persist-sql
+	execution
 )
 
 # The two tests below currrently work and pass, as of 10 December 2013.

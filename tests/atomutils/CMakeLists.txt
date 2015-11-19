@@ -2,6 +2,7 @@ LINK_LIBRARIES(
 	atomutils
 	atomspace
 	clearbox
+	execution
 	smob
 )
 

@@ -251,23 +251,12 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
-/*
-    XXX FIXME: cannot do this, due to a circular shared library
-    dependency between python and itself: python depends on
-    ExecutionOutputLink, and ExecutionOutputLink depends on python.
-    Boo.  I tried fixing this, but it is hard, somehow.
-
-*/
     } else if (EVALUATION_LINK == atom_type) {
-/*
         if (NULL == EvaluationLinkCast(atom))
             return createEvaluationLink(*LinkCast(atom));
-*/
     } else if (EXECUTION_OUTPUT_LINK == atom_type) {
-/*
         if (NULL == ExecutionOutputLinkCast(atom))
             return createExecutionOutputLink(*LinkCast(atom));
-*/
     } else if (GET_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
@@ -290,10 +279,8 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         if (NULL == ImplicationLinkCast(atom))
             return createImplicationLink(*LinkCast(atom));
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
-/* More circular-dependency heart-ache
         if (NULL == FunctionLinkCast(atom))
             return FunctionLink::factory(LinkCast(atom));
-*/
     }
 
     // Very special handling for DeleteLink's
@@ -353,18 +340,10 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createPatternLink(*LinkCast(atom));
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
-/*
-    XXX FIXME: cannot do this, due to a circular shared library
-    dependency between python and itself: python depends on
-    ExecutionOutputLink, and ExecutionOutputLink depends on python.
-    Boo.  I tried fixing this, but it is hard, somehow.
-*/
     if (EVALUATION_LINK == atom_type)
-        // return createEvaluationLink(*LinkCast(atom));
-        return createLink(*LinkCast(atom));
+        return createEvaluationLink(*LinkCast(atom));
     if (EXECUTION_OUTPUT_LINK == atom_type)
-        //return createExecutionOutputLink(*LinkCast(atom));
-        return createLink(*LinkCast(atom));
+        return createExecutionOutputLink(*LinkCast(atom));
     if (GET_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
     if (PUT_LINK == atom_type)
@@ -382,9 +361,7 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
     if (IMPLICATION_LINK == atom_type)
         return createImplicationLink(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
-        // XXX FIXME more circular-dependency heart-ache
-        // return FunctionLink::factory(LinkCast(atom));
-        return createLink(*LinkCast(atom));
+        return FunctionLink::factory(LinkCast(atom));
     if (classserver().isA(atom_type, LINK))
         return createLink(*LinkCast(atom));
 

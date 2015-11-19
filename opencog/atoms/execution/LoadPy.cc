@@ -15,7 +15,17 @@ using namespace opencog;
  * to waste my time working around Windows bugs when I'm running
  * Linux. This is just fucked up.
  *
+ * Why am I complaining?  The GNU C library linker/loader is quite
+ * entirely capable of dynamically loading libraries by itself, thank
+ * you very much.  So loading them by hand, like the below, is totally
+ * pointless; the GNU C loader does this better than I ever could.
+ * However, Windows can't do this, and CMake tries to be cross-platform,
+ * and so CMake does not allow this either. As a result, I have to hack
+ * around this, and dynamically load by hand.
+ *
  * This is a hack; the cython API is mis-designed.
+ *
+ * XXX This should be fixed someday ...
  */
 
 static void* ((*pyev)(void)) = nullptr;

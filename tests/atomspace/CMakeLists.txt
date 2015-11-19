@@ -3,11 +3,12 @@ LINK_LIBRARIES(
 	atomutils
 	atomspace
 	clearbox
+	execution
 )
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(AtomTableUTest)
-	TARGET_LINK_LIBRARIES(AtomTableUTest smob clearbox)
+	TARGET_LINK_LIBRARIES(AtomTableUTest smob)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(ClassServerUTest)
