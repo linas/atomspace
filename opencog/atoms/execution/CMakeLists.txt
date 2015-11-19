@@ -11,6 +11,7 @@ ADD_LIBRARY (execution SHARED
 	ExecutionOutputLink.cc
 	Instantiator.cc
 	ExecSCM.cc
+	LoadPy.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
