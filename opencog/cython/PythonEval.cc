@@ -1262,3 +1262,8 @@ std::string PythonEval::poll_result()
     _result.clear();
     return r;
 }
+
+void* get_python_evaluator_instance(void)
+{
+	return (void*) &PythonEval::instance();
+}

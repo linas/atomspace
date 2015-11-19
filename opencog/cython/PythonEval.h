@@ -207,5 +207,10 @@ void global_python_finalize();
 
 } /* namespace opencog */
 
+// Allow access via dynamic loading
+extern "C" {
+    void* get_python_evaluator_instance(void);
+};
+
 #endif /* HAVE_CYTHON */
 #endif /* OPENCOG_PYTHON_EVAL_H */

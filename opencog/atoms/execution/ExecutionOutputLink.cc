@@ -168,7 +168,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		// Get a reference to the python evaluator. 
 		// Be sure to specify the atomspace in which the
 		// evaluation is to be performed.
-		PythonEval &applier = PythonEval::instance();
+		PythonEval& applier = PythonEval::instance();
 		Handle h = applier.apply(as, schema.substr(pos), args);
 
 		// Return the handle
