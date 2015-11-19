@@ -1267,3 +1267,23 @@ void* get_python_evaluator_instance(void)
 {
 	return (void*) &PythonEval::instance();
 }
+
+void cwrap_python_apply(void* pas, char* str, void* pargs, void* rethand)
+{
+	AtomSpace* as = (AtomSpace*) pas;
+	std::string expr = str;
+	Handle args = *(Handle*) pargs;
+	PythonEval& applier = PythonEval::instance();
+	Handle* res = (Handle*) rethand;
+	*res = applier.apply(as, expr, args);
+}
+
+void cwrap_python_apply_tv(void* pas, char* str, void* pargs, void* rettv)
+{
+	AtomSpace* as = (AtomSpace*) pas;
+	std::string expr = str;
+	Handle args = *(Handle*) pargs;
+	PythonEval& applier = PythonEval::instance();
+	TruthValuePtr* tvp = (TruthValuePtr*) rettv;
+	*tvp = applier.apply_tv(as, expr, args);
+}

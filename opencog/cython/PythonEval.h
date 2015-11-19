@@ -210,6 +210,8 @@ void global_python_finalize();
 // Allow access via dynamic loading
 extern "C" {
     void* get_python_evaluator_instance(void);
+    void cwrap_python_apply(void*, char*, void*, void*);
+    void cwrap_python_apply_tv(void*, char*, void*, void*);
 };
 
 #endif /* HAVE_CYTHON */
