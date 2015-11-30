@@ -30,13 +30,15 @@ public:
 
     void setUp()
     {
-        std::cout <<_scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-        std::cout << _scm.eval("(use-modules (opencog))");
-        std::cout << _scm.eval("(load-from-path \"opencog.scm\")");
     }
 
     void test_constuctor()
     {
+        // std::cout <<_scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+        std::cout <<_scm.eval("(add-to-load-path \"../opencog/scm\")");
+        // std::cout << _scm.eval("(use-modules (opencog))");
+        std::cout << _scm.eval("(load-from-path \"opencog.scm\")");
+
         Handle h = _scm.eval_h("(ConceptNode \"asdf\")");
         std::cout << "Ola!\n";
         TS_ASSERT(h != Handle::UNDEFINED);
