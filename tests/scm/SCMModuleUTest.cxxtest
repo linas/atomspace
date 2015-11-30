@@ -1,11 +1,19 @@
 
+#include <iostream>
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+
+using namespace opencog;
+
 class SCMModuleUTest : public CxxTest::TestSuite
 {
 private:
     AtomSpace _as;
     SchemeEval _scm;
 public:
-    ActionUTest() : _scm(&_as)
+    SCMModuleUTest() : _scm(&_as)
     {
         // Print output to standard
         logger().setLevel(Logger::DEBUG);
@@ -13,7 +21,7 @@ public:
         logger().setPrintLevelFlag(true);
     }
 
-    ~ActionUTest()
+    ~SCMModuleUTest()
     {
         // erase the log file if no assertions failed
         //if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -22,9 +30,14 @@ public:
 
     void setUp()
     {
-        cout <<_scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-        cout << _scm.eval("(use-modules (opencog))");
+        std::cout <<_scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+        std::cout << _scm.eval("(use-modules (opencog))");
         // cout << _scm.eval("(load \"test-rbs.scm\")");
-        cout << _scm.eval("(ConceptNode \"asdf\")");
+        std::cout << _scm.eval("(ConceptNode \"asdf\")");
+    }
+
+    void test_constuctor()
+    {
+        std::cout << "Ola!\n";
     }
 };
