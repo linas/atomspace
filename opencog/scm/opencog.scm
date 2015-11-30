@@ -21,8 +21,6 @@
 (define-module (opencog))
 (load-extension "libsmob" "opencog_guile_init")
 
-(use-modules (system base compile))
-
 ; Create a global to hold the atomspace ... to (try to) prevent guile
 ; GC from collecting it.  Unfortunately, there appears to be a GC bug
 ; in guile-2.1 that causes this to be collected, anyway.  Its as if
