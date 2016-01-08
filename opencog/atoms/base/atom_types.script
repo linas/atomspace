@@ -128,6 +128,22 @@ VARIABLE_LIST <- LIST_LINK
 // Variadic, the globbed values are meant to be of all same type.
 GLOB_NODE <- VARIABLE_NODE
 
+// The FuzzyLink is an imprecise-pattern specifier.  It is used to
+// specify a pattern that is then matched only approximately by the
+// pattern matcher, to find "similar" graphs.
+// See also GlobNode, which performs a more narrow kind of matching.
+// (viz. bunch-in-a-row globbing)
+FUZZY_LINK <- ORDERED_LINK
+
+// The PreciseLink can only appear under the FuzzyLink, and is used
+// to indicate a portion of the pattern graph that must be matched
+// exactly (precisely).  XXX FIXME. In the long run, it might be better
+// to have the degree-of-fuziness indicated in some special truth-value
+// or something like that, so that preciseness could be variable in
+// degree from 1.0 to 0.0. But for now, I don't know how to create a
+// nice API for this stuff, so I am going to wing it, and use this link.
+PRECISE_LINK <- ORDERED_LINK
+
 // Everything under a QuoteLink is interpreted literally.
 QUOTE_LINK <- ORDERED_LINK
 
@@ -252,13 +268,6 @@ ARROW_LINK <- ORDERED_LINK
 // The type specification is "precise", in contrast to the fuzzy
 // type specification, below.
 SIGNATURE_LINK <- ORDERED_LINK
-
-// The FuzzyLink is a kind of type specification that can be imprecise.
-// It is used to specify a pattern that is then matched only
-// approximately by the pattern matcher, to find "similar" graphs.
-// See also GlobNode, which performs a more narrow kind of matching.
-// (viz. bunch-in-a-row globbing)
-FUZZY_LINK <- SIGNATURE_LINK
 
 // A type binder: it binds a type to a VariableNode. Always arity-2,
 // the first position must be a Variablenode, the second must be a type.
