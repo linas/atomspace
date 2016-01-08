@@ -150,7 +150,6 @@ void VariableList::get_vartype(const Handle& htypelink)
 	{
 		std::set<Type> typeset;
 		std::set<Handle> deepset;
-		std::set<Handle> fuzzset;
 
 		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
 		size_t tss = tset.size();
@@ -173,16 +172,6 @@ void VariableList::get_vartype(const Handle& htypelink)
 
 				deepset.insert(ht);
 			}
-			else if (FUZZY_LINK == var_type)
-			{
-				const HandleSeq& fuz = LinkCast(ht)->getOutgoingSet();
-				if (1 != fuz.size())
-					throw SyntaxException(TRACE_INFO,
-						"Unexpected contents in FuzzyLink\n"
-						"Expected arity==1, got %s", vartype->toString().c_str());
-
-				fuzzset.insert(ht);
-			}
 			else
 			{
 				throw InvalidParamException(TRACE_INFO,
@@ -196,8 +185,6 @@ void VariableList::get_vartype(const Handle& htypelink)
 			_varlist._simple_typemap.insert({varname, typeset});
 		if (0 < deepset.size())
 			_varlist._deep_typemap.insert({varname, deepset});
-		if (0 < fuzzset.size())
-			_varlist._fuzzy_typemap.insert({varname, fuzzset});
 	}
 	else if (SIGNATURE_LINK == t)
 	{
@@ -210,18 +197,6 @@ void VariableList::get_vartype(const Handle& htypelink)
 		std::set<Handle> ts;
 		ts.insert(vartype);
 		_varlist._deep_typemap.insert({varname, ts});
-	}
-	else if (FUZZY_LINK == t)
-	{
-		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
-		if (1 != tset.size())
-			throw SyntaxException(TRACE_INFO,
-				"Unexpected contents in FuzzyLink\n"
-				"Expected arity==1, got %s", vartype->toString().c_str());
-
-		std::set<Handle> ts;
-		ts.insert(vartype);
-		_varlist._fuzzy_typemap.insert({varname, ts});
 	}
 	else
 	{

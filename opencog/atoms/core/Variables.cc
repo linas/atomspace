@@ -197,8 +197,6 @@ bool Variables::is_equal(const Variables& other) const
 			if (doth == other._deep_typemap.end()) return false;
 			if (dime->second != doth->second) return false;
 		}
-
-		// XXX TODO fuzzy?
 	}
 
 	// If we got toe here, everything must be OK.
@@ -260,17 +258,6 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		{
 			if (value_is_type(sig, val)) return true;
 		}
-		ret = false;
-	}
-
-	// Fuzzy deep type restrictions?
-	VariableDeepTypeMap::const_iterator fit =
-		_fuzzy_typemap.find(var);
-	if (_fuzzy_typemap.end() != fit)
-	{
-		// const std::set<Handle> &fuzzset = dit->second;
-		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
 		ret = false;
 	}
 

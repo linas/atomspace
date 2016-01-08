@@ -72,11 +72,6 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 		}
 		return false;
 	}
-	else if (FUZZY_LINK == dpt)
-	{
-		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
-	}
 
 	// If it is a node, not a link, then it is a type-constant,
 	// and thus must match perfectly.

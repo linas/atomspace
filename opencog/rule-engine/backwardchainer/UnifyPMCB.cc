@@ -83,18 +83,14 @@ bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 			// Check if any typed variable maps to a variable, and if so,
 			// store the reverse mapping. XXX This is not correct,
 			// if there are non-trivial type restrictions (i.e. deep
-			// types of fuzzy types). FIXME
+			// types). FIXME
 			if (DefaultPatternMatchCB::_vars->_simple_typemap.count(p.first) == 1
-			    && DefaultPatternMatchCB::_vars->_simple_typemap.at(p.first).count(p.second->getType()) == 0)
+			    and DefaultPatternMatchCB::_vars->_simple_typemap.at(p.first).count(p.second->getType()) == 0)
 				true_var_soln[p.second] = p.first;
 			else
 				true_var_soln[p.first] = p.second;
 
 			if (0 < DefaultPatternMatchCB::_vars->_deep_typemap.size())
-				throw RuntimeException(TRACE_INFO,
-					"Not implemented!  XXX FIXME!");
-
-			if (0 < DefaultPatternMatchCB::_vars->_fuzzy_typemap.size())
 				throw RuntimeException(TRACE_INFO,
 					"Not implemented!  XXX FIXME!");
 		}
