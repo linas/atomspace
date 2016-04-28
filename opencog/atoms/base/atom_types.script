@@ -155,6 +155,12 @@ UNQUOTE_LINK <- ORDERED_LINK
 // instead of blocking beta-reduction, it blocks execution.
 DONT_EXEC_LINK <- ORDERED_LINK
 
+// Everything under an ExecLink is "eagerly" executed. The primary use
+// of this link type is to wrap EvaluatableLink's aka "predicates" to
+// force thier evaluation (thus causing side-effects - e.g. SequentialAnds
+// which perform some behavior).
+EXEC_LINK <- ORDERED_LINK
+
 // A FreeLink is any kind of link that might have free variables in it.
 // The FreeLink exists for one purpose: to make visible/explicit all of
 // free variables in the link. The primary user is the pattern matcher.
