@@ -216,6 +216,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// We do, however, ignore the resulting TV, which is also
 		// awkward.  I'm confused about how to handle this best.
 		// The behavior tree uses this!
+		// I suspect that the correct solution here is to force the
+		// user to use the ExecLink (see below).
 		// Anyway, do_evaluate() will throw if rex is not evaluatable.
 		if (SET_LINK == rex->getType())
 		{
@@ -405,6 +407,19 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	{
 		if (_vmap->empty()) return expr;
 		return beta_reduce(expr, *_vmap);
+	}
+
+	if (EXEC_LINK == t)
+	{
+		Handle rex = expr;
+		if (not _vmap->empty()) rex = beta_reduce(expr, *_vmap);
+		for (const Handle& plo : rex->getOutgoingSet())
+		{
+			EvaluationLink::do_evaluate(_as, plo, true);
+		}
+		// !!?? XXX FIXME what, exactly should we return here? Some
+		// atom, I suppose, but which?
+		return rex->getOutgoingAtom(0);
 	}
 
 	// None of the above. Create a duplicate link, but with an outgoing
