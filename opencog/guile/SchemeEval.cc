@@ -824,15 +824,25 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	if (_in_shell)
 		redirect_output();
 
-	_caught_error = false;
-	_error_msg.clear();
-	set_captured_stack(SCM_BOOL_F);
-	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                 evo, (void *) sexpr,
-	                 SchemeEval::catch_handler_wrapper, this,
-	                 SchemeEval::preunwind_handler_wrapper, this);
+	// If we are already nested in the evaluator, do not catch any
+	// exceptions. We want to pass these up to the higher layers.
+	SCM rc = SCM_EOL;
+	if (_in_eval)
+	{
+		rc = evo((void *) sexpr);
+	}
+	else
+	{
+		_caught_error = false;
+		_error_msg.clear();
+		set_captured_stack(SCM_BOOL_F);
+		rc = scm_c_catch(SCM_BOOL_T,
+		                 evo, (void *) sexpr,
+		                 SchemeEval::catch_handler_wrapper, this,
+		                 SchemeEval::preunwind_handler_wrapper, this);
 
-	_eval_done = true;
+		_eval_done = true;
+	}
 
 	// Restore the outport
 	if (_in_shell)
@@ -973,10 +983,7 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 	if (_in_eval) {
 		// scm_from_utf8_string is lots faster than scm_from_locale_string
 		SCM expr_str = scm_from_utf8_string(expr.c_str());
-		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
-
-		// Pass evaluation errors out of the wrapper.
-		if (eval_error()) return TruthValue::NULL_TV();
+		SCM rc = scm_eval_string(expr_str);
 		return SchemeSmob::to_tv(rc);
 	}
 
@@ -1179,8 +1186,6 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 	// Just go.
 	if (_in_eval) {
 		SCM tv_smob = do_apply_scm(func, varargs);
-		if (eval_error())
-			return TruthValue::NULL_TV();
 		return SchemeSmob::to_tv(tv_smob);
 	}
 
