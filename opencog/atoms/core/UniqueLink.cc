@@ -124,6 +124,7 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 			if (allow_open)
 			{
 				UniqueLinkPtr ulp(UniqueLinkCast(defl));
+				if (nullptr == ulp) continue;
 				if (0 < ulp->get_vars().varseq.size()) continue;
 			}
 			return defl->getHandle();

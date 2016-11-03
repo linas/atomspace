@@ -22,6 +22,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -233,6 +234,19 @@ void ScopeUTest::test_hide(void)
 	// Alpha conversion should make for equal.
 	Handle getx = eval->eval_h("getx");
 	Handle getv = eval->eval_h("getv");
+
+ContentHash chx = getx->get_hash();
+ContentHash chv = getv->get_hash();
+printf("duuude chx= %lx chv=%lx\n", chx, chv);
+ScopeLinkPtr wanted = ScopeLinkCast(getx);
+if (nullptr == wanted) wanted = ScopeLink::factory(getx);
+chx = wanted->get_hash();
+wanted = ScopeLinkCast(getv);
+if (nullptr == wanted) wanted = ScopeLink::factory(getv);
+chv = wanted->get_hash();
+printf("duuude scoped chx= %lx chv=%lx\n", chx, chv);
+
+
 	TS_ASSERT_EQUALS(getx, getv);
 
 	Handle forall = eval->eval_h("forall");

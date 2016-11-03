@@ -38,8 +38,26 @@
 
 using namespace opencog;
 
+long opencog::slch = 0;
+long opencog::slca=0;
+long opencog::slctor=0;
+
+namespace opencog {
+long slinit=0;
+
+long slneedcast=0;
+long sleq=0;
+long slcont=0;
+long slconta=0;
+long slconteq=0;
+long slconteqa=0;
+
+long scoha=0;
+};
+
 void ScopeLink::init(void)
 {
+slinit++;
 	extract_variables(_outgoing);
 }
 
@@ -80,6 +98,7 @@ ScopeLink::ScopeLink(Type t, const Handle& body,
                      TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, HandleSeq({body}), tv, av)
 {
+slctor++;
 	if (skip_init(t)) return;
 	init();
 }
@@ -88,6 +107,7 @@ ScopeLink::ScopeLink(Type t, const HandleSeq& oset,
                      TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, oset, tv, av)
 {
+slctor++;
 	if (skip_init(t)) return;
 	init();
 }
@@ -95,6 +115,7 @@ ScopeLink::ScopeLink(Type t, const HandleSeq& oset,
 ScopeLink::ScopeLink(Link &l)
 	: Link(l)
 {
+slctor++;
 	if (skip_init(l.getType())) return;
 	init();
 }
@@ -182,13 +203,20 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	if (other == this) return true;
 	if (other->getType() != _type) return false;
 
+sleq++;
 	ScopeLinkPtr scother(ScopeLinkCast(other));
+	// ScopeLink* scother(dynamic_cast<ScopeLink*>(other.operator->()));
 	if (nullptr == scother)
+{
+slneedcast++;
 		scother = createScopeLink(*LinkCast(other));
+		// scother = createScopeLink(*LinkCast(other)).operator->();
+}
 
 	// If the hashes are not equal, they can't possibly be equivalent.
 	if (get_hash() != scother->get_hash()) return false;
 
+slcont++;
 	// Some derived classes (such as BindLink) have multiple body parts,
 	// so it is not enough to compare this->_body to other->_body.
 	// They tricky bit, below, is skipping over variable decls correctly,
@@ -216,9 +244,11 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 			const Handle& other_h(otho[i + other_vardecl_offset]);
 			if (h->operator!=(*((AtomPtr) other_h))) return false;
 		}
+slconteq++;
 		return true;
 	}
 
+slconta++;
 	// If we are here, we need to perform alpha conversion to test
 	// equality.  Other terms, with our variables in place of its
 	// variables, should be same as our terms.
@@ -232,6 +262,7 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 		if (*((AtomPtr)h) != *((AtomPtr) other_h)) return false;
 	}
 
+slconteqa++;
 	return true;
 }
 
@@ -252,6 +283,7 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 //
 ContentHash ScopeLink::compute_hash() const
 {
+scoha++;
 	ContentHash hsh = ((1UL<<35) - 325) * getType();
 	hsh += (hsh <<5) + ((1UL<<47) - 649) * _varlist.varseq.size();
 

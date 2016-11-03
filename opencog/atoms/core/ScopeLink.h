@@ -157,10 +157,14 @@ public:
 	static ScopeLinkPtr factory(Type, const HandleSeq&);
 };
 
+extern long slch, slca, slctor;
 static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ScopeLink>(AtomCast(h)); }
+	{ slch++; 
+return std::dynamic_pointer_cast<ScopeLink>(AtomCast(h)); }
 static inline ScopeLinkPtr ScopeLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<ScopeLink>(a); }
+	{ 
+slca++;
+return std::dynamic_pointer_cast<ScopeLink>(a); }
 
 // XXX temporary hack ...
 #define createScopeLink std::make_shared<ScopeLink>

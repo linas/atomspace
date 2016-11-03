@@ -25,8 +25,15 @@
 
 using namespace opencog;
 
+
+namespace opencog {
+long imctor=0;
+};
+
+
 void ImplicationLink::init(void)
 {
+imctor++;
 	extract_variables(_outgoing);
 }
 

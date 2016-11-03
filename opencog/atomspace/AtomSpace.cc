@@ -351,13 +351,20 @@ Handle AtomSpace::get_node(Type t, const string& name)
     return Handle::UNDEFINED;
 }
 
+namespace opencog {
+long asal = 0, asalt = 0;
+};
+
 Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 {
     Handle h(createLink(t, outgoing));
 
+asal++;
     // Is this atom already in the atom table?
     Handle hexist = _atom_table.getHandle(h);
     if (hexist) return hexist;
+
+asalt++;
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.

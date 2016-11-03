@@ -164,6 +164,10 @@ void StateLinkUTest::test_setting()
 	// The incoming set should two vars, one apple.
 	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
 	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+IncomingSet defs = bananna->getIncomingSet();
+for(const LinkPtr& defl : defs) {
+printf("duude banana has inco=%s\n", defl->toString().c_str());
+}
 	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
 	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
 	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));

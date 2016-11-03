@@ -278,10 +278,52 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
     return getLinkHandle(a);
 }
 
+namespace opencog {
+extern long slneedcast;
+extern long sleq;
+extern long slcont;
+extern long slconta;
+extern long slconteq;
+extern long slconteqa;
+extern long linkha;
+extern long scoha;
+extern long imctor;
+extern long asal;
+extern long asalt;
+};
+long atgetl = 0;
+long atsco =0;
 Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
 {
     Type t = a->getType();
     const HandleSeq &seq = a->getOutgoingSet();
+atgetl++;
+
+if (0 == atgetl%1000) {
+printf("duuude atomspace add link:=%ld\n", asal);
+printf("duuude atomspace add link realllt:=%ld\n", asalt);
+printf("duuude atomtable getlink=%ld\n", atgetl);
+printf("duuude atomtable scope check=%ld\n", atsco);
+printf("\n");
+printf("duuude atomtable scopelinkcast hand=%ld\n", slch);
+printf("duuude atomtable scopelinkcast atptr=%ld\n", slca);
+printf("duuude atomtable scopelink ctor=%ld\n", slctor);
+printf("duuude atomtable scopelink need create in equal=%ld\n", slneedcast);
+printf("\n");
+printf("duuude atomtable scopelink call is_equall=%ld\n", sleq);
+printf("duuude atomtable scopelink content compar=%ld\n", slcont);
+printf("duuude atomtable scopelink content compar w/alpha=%ld\n", slconta);
+printf("duuude scopelink content eq =%ld\n", slconteq);
+printf("duuude scopelink content eq w/alpha=%ld\n", slconteqa);
+
+printf("\n");
+printf("duuude atomtable link has=%ld\n", linkha);
+printf("duuude atomtable scoh has=%ld\n", scoha);
+printf("duuude atomtable impl kin ctor=%ld\n", imctor);
+
+
+printf("----------------\n");
+}
 
     // We need to keep track of the quote nesting, as this affects
     // how embedded ScopeLinks are treated, below.  That is, unquoted
@@ -393,7 +435,7 @@ bool AtomTable::in_environ(const AtomPtr& atom) const
 }
 
 // C++ atom types support.  Try to cast, if possible.
-AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
+AtomPtr AtomTable::do_cast_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
@@ -455,9 +497,9 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
 
         // Removing the old state simply won't work, if the key is
         // not in the atom table. So make sure the key is present.
-        Handle alias = slp->get_alias();
-        Handle tails = add(alias, false);
-        if (tails != alias)
+        Handle key = slp->get_alias();
+        Handle tails = add(key, false);
+        if (tails != key)
             slp = createStateLink(tails, slp->get_state());
 
         // If this is a closed StateLink, (i.e. has no variables)
@@ -467,8 +509,12 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         if (slp->is_closed()) {
             try {
                 Handle old_state = StateLink::get_link(tails);
-                if (old_state) this->extract(old_state, true);
-            } catch(const InvalidParamException& ex) {}
+                if (old_state) {
+printf("duuude found old state for %s\n", tails->toString().c_str());
+printf("duuude that old state is %s\n", old_state->toString().c_str());
+this->extract(old_state, true);
+}
+            } catch (const InvalidParamException& ex) {}
         }
 
         return slp;
@@ -533,9 +579,9 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
           "AtomTable - failed factory call!");
 }
 
-AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
+AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
 {
-	AtomPtr clone(do_factory(atom_type, atom));
+	AtomPtr clone(do_cast_factory(atom_type, atom));
 	if (nullptr == clone) return clone;
 	clone->_uuid = atom->_uuid;
 	return clone;
@@ -604,7 +650,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
-    atom = factory(atom_type, atom);
+    atom = cast_factory(atom_type, atom);
 
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();
@@ -617,17 +663,18 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     Handle hexist(getHandle(atom));
     if (hexist) return hexist;
 
-    // If this atom is in some other atomspace or not in any atomspace,
-    // then we need to clone it. We cannot insert it into this atomtable
-    // as-is.  (We already know that its not in this atomspace, or its
-    // environ.)
-    if (atom->isLink()) {
-        // Well, if the link was in some other atomspace, then
-        // the outgoing set will probably be too. (It might not
-        // be if the other atomspace is a child of this one).
+    // If this atom is in some other atomspace, then we need to clone
+    // it. We cannot insert it into this atomtable as-is.  (We already
+    // know that its not in this atomspace, or its environ.)
+    if ((nullptr != atom->_atomTable) and atom->isLink())
+    {
+        // Well, if the link was in some other atomspace, then the
+        // outgoing set will probably be too. (Although, it might not
+        // be, if the other atomspace is a child of this one).
         // So we recursively clone that too.
         HandleSeq closet;
-        for (const Handle& h : atom->getOutgoingSet()) {
+        for (const Handle& h : atom->getOutgoingSet())
+        {
             // operator->() will be null if its a ProtoAtom that is
             // not an atom.
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
@@ -645,11 +692,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         atom = clone_factory(atom_type, atom);
         atom->_uuid = save;
     }
-
-    // Clone, if we haven't done so already. We MUST maintain our own
-    // private copy of the atom, else crazy things go wrong.
-    if (atom == orig)
-        atom = clone_factory(atom_type, atom);
 
     // Sometimes one inserts an atom that was previously deleted.
     // In this case, the removal flag might still be set. Clear it.
