@@ -157,6 +157,7 @@ class PythonEval : public GenericEval
         virtual void eval_expr(const std::string&);
         virtual std::string poll_result(void);
         virtual void interrupt(void);
+        virtual void hangup(void);
 
         // The synchronous-output interface.
         std::string eval(const std::string& expr)

@@ -1467,3 +1467,13 @@ void PythonEval::interrupt(void)
 
     logger().warn("[PythonEval] interrupt not implemented!\n");
 }
+
+void PythonEval::hangup(void)
+{
+    // What we want to do here is to somehow disconnect from the
+    // python i/o subsystem. However, that subsystem is currently
+    // just plain broken, so there is nothing to do.
+    _result += "PythonEval: hangup not implemented!\n";
+
+    logger().warn("[PythonEval] hangup not implemented!\n");
+}

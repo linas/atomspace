@@ -104,7 +104,22 @@ class GenericEval
 		virtual void begin_eval(void) = 0;
 		virtual void eval_expr(const std::string&) = 0;
 		virtual std::string poll_result(void) = 0;
+
+		/**
+		 * Implement a user-interrupt (ctrl-C at the keyboard) that
+		 * will interrupt (kill, throw exception) whatever the eval
+		 * above is currently running.  Typically, the interrupt is
+		 * issued from a different thread than what is running eval.
+		 */
 		virtual void interrupt(void) = 0;
+
+		/**
+		 * Implement an i/o hangup. If the eval was started from the
+		 * cogserver shell, and the user closes the socket to the shell,
+		 * there is no way to send output back to the user. This informs
+		 * the evaluator of the hangup, so it can discard output.
+		 */
+		virtual void hangup(void) = 0;
 };
 
 /** @}*/
