@@ -91,6 +91,7 @@ class SchemeEval : public GenericEval
 		// Support for interruption from a shell.
 		SCM _eval_thread;
 		static void * c_wrap_interrupt(void *);
+		static void * c_wrap_hangup(void *);
 		
 		// Output port, for any printing done by scheme code.
 		SCM _outport;
@@ -155,6 +156,7 @@ class SchemeEval : public GenericEval
 		void eval_expr(const std::string&);
 		std::string poll_result(void);
 		void interrupt(void);
+		void hangup(void);
 
 		// The synchronous-output interfaces.
 		std::string eval(const std::string& expr)
