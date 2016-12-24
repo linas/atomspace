@@ -68,6 +68,7 @@ void SchemeEval::init(void)
 	_pexpr = NULL;
 	_eval_done = false;
 	_poll_done = false;
+	_hangup = false;
 
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
@@ -88,10 +89,10 @@ void SchemeEval::capture_port(void)
 	if (_in_server) return;
 
 	// Lock to prevent racey setting of the output port.
-	// XXX FIXME This lock is not needed, because in guile 2.2,
+	// XXX FIXME This lock is not needed, because in guile-2.2,
 	// at least, every thread has its own output port, and so its
 	// impossible for two different threads to compete to set the
-	// same outport.  Not to sure about guile-2.0, though... so
+	// same outport.  Not too sure about guile-2.0, though... so
 	// I'm leaving the lock in, for now. Its harmless.
 	std::lock_guard<std::mutex> lck(init_mtx);
 
@@ -129,10 +130,18 @@ void SchemeEval::capture_port(void)
 /// Use the async I/O mechanism, if we are in the cogserver.
 ///
 /// Note, by the way, that Guile implements the current port as a fluid
-/// on each thread. So this save and restore gives us exactly the right
-/// per-thread semantics.
+/// on each thread. So the save and restore implemented here gives us
+/// exactly the right per-thread semantics.
 void SchemeEval::redirect_output(void)
 {
+	// If the cogserver shell has hung up, then its pointless to
+	// redirect output -- bad, even as it will pile up in the pipe,
+	// and never be collected. Thus, we allow output to just go to
+	// stdout (i.e. to where the cogserver is running).  The
+	// alternative here would be to redirect to a pipe, but attach
+	// one end of it to /dev/null. But I'm lazy, so won't do that.
+	if (_hangup) return;
+
 	_in_redirect++;
 	if (1 < _in_redirect) return;
 	capture_port();
@@ -144,6 +153,7 @@ void SchemeEval::redirect_output(void)
 	scm_set_current_output_port(_outport);
 
 	_eval_thread = scm_current_thread();
+printf("duuude redirrect output capture thread null=%d\n", SCM_EOL==_eval_thread);
 }
 
 void SchemeEval::restore_output(void)
@@ -151,11 +161,14 @@ void SchemeEval::restore_output(void)
 	_in_redirect --;
 	if (0 < _in_redirect) return;
 
+	if (_in_redirect < 0 and _hangup) return;
+
 	// Restore the previous outport (if its still alive)
 	if (scm_is_false(scm_port_closed_p(_saved_outport)))
 		scm_set_current_output_port(_saved_outport);
 	scm_gc_unprotect_object(_saved_outport);
 
+printf("duuude restore output thread null=%d\n", SCM_EOL==_eval_thread);
 	_eval_thread = SCM_EOL;
 }
 
@@ -227,6 +240,7 @@ static thread_local bool thread_is_inited = false;
 // user hits control-C at a telnet prompt.
 static SCM throw_except(void)
 {
+printf("duuude scheme enter thor-except\n");
 	scm_throw(
 		scm_from_utf8_symbol("user-interrupt"),
 		scm_list_2(
@@ -428,20 +442,21 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  * different ways:
  *
  * 1) It buffers up incomplete, line-by-line input, until there's
- *	been enough input received to evaluate without error.
+ *    been enough input received to evaluate without error.
  * 2) It catches errors, and prints the catch in a reasonably nicely
- *	formatted way.
+ *    formatted way.
  * 3) It converts any returned scheme expressions to a string, for easy
- *	printing.
+ *    printing.
  * 4) It concatenates any data sent to the scheme output port (e.g.
- *	printed output from the scheme (display) function) to the returned
- *	string.
+ *    printed output from the scheme (display) function) to the
+ *    returned string.
  *
  * An "unforgiving" evaluator, with none of these amenities, can be
  * found in eval_h(), below.
  */
 void SchemeEval::eval_expr(const std::string &expr)
 {
+printf("duuude SchemeEval::eval_expr exp=%s<<<\n", expr.c_str());
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
 	// Just go.
@@ -542,6 +557,7 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	_input_line += expr;
 
+printf("duuude wtf in do_eval, gonna redirect out for %s\n", expr.c_str());
 	redirect_output();
 	_caught_error = false;
 	_pending_input = false;
@@ -557,18 +573,21 @@ void SchemeEval::do_eval(const std::string &expr)
 	_rc = scm_gc_protect_object(_rc);
 
 	restore_output();
+printf("duuude wtf in do_eval, done restoring out for %s\n", expr.c_str());
 
 	if (saved_as)
 		SchemeSmob::ss_set_env_as(saved_as);
 
 	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
 
+	_hangup = false;
 	_eval_done = true;
 	_wait_done.notify_all();
 }
 
 void SchemeEval::begin_eval()
 {
+printf("duude begin eval\n");
 	_eval_done = false;
 	_poll_done = false;
 }
@@ -621,6 +640,18 @@ std::string SchemeEval::do_poll_result()
 {
 	per_thread_init();
 	if (_poll_done) return "";
+
+static int cnt=0;
+if (cnt < 20) {
+printf("duuude in do_poll %d, eval_done=%d\n", cnt, _eval_done);
+cnt++;
+}
+	if (_hangup)
+	{
+		drain_output();
+		restore_output();
+		return "";
+	}
 
 	if (not _eval_done)
 	{
@@ -801,6 +832,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
  */
 void SchemeEval::interrupt(void)
 {
+printf("duuude scheme eval interrupt no thread =%d\n", SCM_EOL == _eval_thread);
 	if (SCM_EOL == _eval_thread) return;
 	scm_with_guile(c_wrap_interrupt, this);
 }
@@ -809,8 +841,11 @@ void * SchemeEval::c_wrap_interrupt(void* p)
 {
 	SchemeEval *self = (SchemeEval *) p;
 	SCM thr = self->_eval_thread;
+printf("duuude scheme eval wrapinterrupt no thr=%d\n", SCM_EOL == thr);
 	if (SCM_EOL == thr) return self;
 
+printf("duuude scheme eval wrap thowit evaldone=%d poldone=%d \n",
+self->_eval_done, self->_poll_done);
 	scm_system_async_mark_for_thread(throw_thunk, thr);
 
 	return self;
@@ -847,21 +882,33 @@ void * SchemeEval::c_wrap_interrupt(void* p)
  *    would be surprised by this erratic behavior.
  * C) Implement hangup.  There are no surprises for the user: no hangs,
  *    no crashes/kills.
+ *
+ * Note that, due to the threaded nature of SchemeShell, that the user
+ * might call hangup() before evaluation is even started!
+ *
+XXX FIXME -- this cannot possibly work. If the shell is exiting, and
+runs its dtor, then it will try to put this evaluator back into the
+pool of free, unused evaluators.  But this must not be done, because
+this evaluator is still in use! ... Its in use, because some thread
+somewhere is stuck in do_eval(), in scm_c_catch(), and that thread has
+"this" on it's stack. Thus, this instance must not be released until
+that scm_c_catch terminates, and returns to the caller.  The obvious
+way to "fix" this very unhealthy state of affairs is to do nothing,
+and allow that shell to hang in perpetuity. i.e. we must NOT implement
+hangup()!
  */
 void SchemeEval::hangup(void)
 {
-	if (SCM_EOL == _eval_thread) return;
 	scm_with_guile(c_wrap_hangup, this);
 }
 
 void * SchemeEval::c_wrap_hangup(void* p)
 {
 	SchemeEval *self = (SchemeEval *) p;
-	SCM thr = self->_eval_thread;
-	if (SCM_EOL == thr) return self;
 
-
+printf("duuuude eval hangup!\n");
 	// XXX TODO implement me.
+	self->_hangup = true;
 
 	return self;
 }
