@@ -68,6 +68,10 @@ private:
 	static SCM equalp_misc(SCM, SCM);
 	static SCM mark_misc(SCM);
 	static size_t free_misc(SCM);
+	static std::atomic<size_t> _tv_pend_cnt;
+	static std::atomic<size_t> _tv_total_cnt;
+	static std::atomic<size_t> _tv_pend_sz;
+	static std::atomic<size_t> _tv_total_sz;
 
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ProtoAtomPtr&);

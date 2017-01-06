@@ -15,6 +15,11 @@
 
 using namespace opencog;
 
+std::atomic<size_t> SchemeSmob::_tv_pend_cnt(0);
+std::atomic<size_t> SchemeSmob::_tv_total_cnt(0);
+std::atomic<size_t> SchemeSmob::_tv_pend_sz(0);
+std::atomic<size_t> SchemeSmob::_tv_total_sz(0);
+
 SCM SchemeSmob::mark_misc(SCM misc_smob)
 {
 	scm_t_bits misctype = SCM_SMOB_FLAGS(misc_smob);
@@ -86,6 +91,16 @@ size_t SchemeSmob::free_misc(SCM node)
 		case COG_TV:
 			TruthValue *tv;
 			tv = (TruthValue *) SCM_SMOB_DATA(node);
+#if 1
+			_tv_pend_cnt -= 1;
+			_tv_pend_sz -= sizeof(*tv);
+if (0 == _tv_total_cnt % 1000000) {
+printf("duuude its pend cnt=%lu (%lu) tot=%lu (%lu)\n",
+(size_t) _tv_pend_cnt, (size_t) _tv_pend_sz, (size_t) _tv_total_cnt, (size_t) _tv_total_sz);
+logger().info("duuude its pend cnt=%lu (%lu) tot=%lu (%lu)",
+(size_t) _tv_pend_cnt, (size_t) _tv_pend_sz, (size_t) _tv_total_cnt, (size_t) _tv_total_sz);
+}
+#endif
 			scm_gc_unregister_collectable_memory (tv,
 			                  sizeof(*tv), "opencog tv");
 			delete tv;
