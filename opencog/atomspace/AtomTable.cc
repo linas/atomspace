@@ -57,7 +57,10 @@
 
 using namespace opencog;
 
-// Nothig should ever get the uuid of zero. Zero is reserved for
+std::recursive_mutex AtomTable::_mtx;
+int AtomTable::_lock_count = 0;
+
+// Nothing should ever get the uuid of zero. Zero is reserved for
 // "no atomtable" (in the persist code).
 static std::atomic<UUID> _id_pool(1);
 
@@ -89,7 +92,7 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
 AtomTable::~AtomTable()
 {
     // Disconnect signals. Only then clear the resolver.
-    table_lock lck(this);
+    table_lock lck;
     addedTypeConnection.disconnect();
 
     // No one who shall look at these atoms shall ever again
@@ -250,7 +253,7 @@ Handle AtomTable::getNodeHandle(AtomPtr& a) const
     }
 
     ContentHash ch = a->get_hash();
-    table_lock lck(this);
+    table_lock lck;
 
     auto range = _atom_store.equal_range(ch);
     auto bkt = range.first;
@@ -314,7 +317,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, Quotation quotation) const
         a = wanted;
     }
 
-    table_lock lck(this);
+    table_lock lck;
 
     // So ... check to see if we have it or not.
     auto range = _atom_store.equal_range(ch);
@@ -514,7 +517,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // Lock before checking to see if this kind of atom can already
     // be found in the atomspace.  We need to lock here, to avoid two
     // different threads from trying to add exactly the same atom.
-    table_lock lck(this);
+    table_lock lck;
 
     // Check again, under the lock this time.
     if (in_environ(atom))
@@ -623,7 +626,7 @@ void AtomTable::put_atom_into_index(const AtomPtr& atom)
         throw RuntimeException(TRACE_INFO,
           "AtomTable - transient should not index atoms!");
 
-    table_lock lck(this);
+    table_lock lck;
     Atom* pat = atom.operator->();
     typeIndex.insertAtom(pat);
 
@@ -659,7 +662,7 @@ size_t AtomTable::getNumLinks() const
 
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
 {
-    table_lock lck(this);
+    table_lock lck;
 
     size_t result = _size_by_type[type];
     if (subclass)
@@ -724,7 +727,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // incoming set also grabs a lock, we need this mutex to be
     // recursive. We need to lock here to avoid confusion if multiple
     // threads are trying to delete the same atom.
-    table_lock lck(this);
+    table_lock lck;
 
     if (atom->isMarkedForRemoval()) return result;
     atom->markForRemoval();
@@ -878,7 +881,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 // This is the resize callback, when a new type is dynamically added.
 void AtomTable::typeAdded(Type t)
 {
-    table_lock lck(this);
+    table_lock lck;
     //resize all Type-based indexes
     size_t new_size = classserver().getNumberOfClasses();
     _size_by_type.resize(new_size);

@@ -84,26 +84,25 @@ private:
     // because we need to lock twice during atom insertion and
     // removal: we need to keep the indexes stable while we search
     // them during add/remove.
-    mutable std::recursive_mutex _mtx;
-    mutable int _lock_count;
+    static std::recursive_mutex _mtx;
+    static int _lock_count;
 
     // Helper class for RAII locking.
     class table_lock : std::unique_lock<std::recursive_mutex>
     {
-        const AtomTable* _at;
-        int __save_count;
+        int __save_count = 0;
     public:
-        table_lock(const AtomTable* at) : _at(at), __save_count(0)
-        { _at->_mtx.lock(); at->_lock_count++; }
+        table_lock()
+        { _mtx.lock(); _lock_count++; }
         ~table_lock()
-        { relock_all(); _at->_lock_count--; _at->_mtx.unlock(); }
+        { relock_all(); _lock_count--; _mtx.unlock(); }
         void unlock_all(void)
-        {  __save_count = _at->_lock_count;
-           while (_at->_lock_count)
-            { _at->_lock_count--; _at->_mtx.unlock(); } }
+        {  __save_count = _lock_count;
+           while (_lock_count)
+            { _lock_count--; _mtx.unlock(); } }
         void relock_all(void)
         {  while (__save_count)
-            { _at->_mtx.lock(); _at->_lock_count++; __save_count--; } }
+            { _mtx.lock(); _lock_count++; __save_count--; } }
     };
 
     // Cached count of the number of atoms in the table.
@@ -234,7 +233,7 @@ public:
                      bool subclass = false,
                      bool parent = true) const
     {
-        table_lock lck(this);
+        table_lock lck;
         if (parent && _environ)
             _environ->getHandlesByType(result, type, subclass, parent);
         return std::copy(typeIndex.begin(type, subclass),
@@ -249,7 +248,7 @@ public:
                         bool subclass = false,
                         bool parent = true) const
     {
-        table_lock lck(this);
+        table_lock lck;
         if (parent && _environ)
             _environ->foreachHandleByType(func, type, subclass);
         std::for_each(typeIndex.begin(type, subclass),
