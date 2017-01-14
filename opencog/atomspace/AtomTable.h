@@ -84,18 +84,19 @@ private:
     class table_lock : std::unique_lock<std::recursive_mutex>
     {
         const AtomTable* _at;
-        int __save_count = 0;
+        int __save_count;
     public:
-        table_lock(const AtomTable* at) :
-           std::unique_lock<std::recursive_mutex> (at->_mtx), _at(at)
-        { at->_lock_count++; }
-        ~table_lock() { relock_all(); _at->_lock_count--; }
+        table_lock(const AtomTable* at) : _at(at), __save_count(0)
+        { _at->_mtx.lock(); at->_lock_count++; }
+        ~table_lock()
+        { relock_all(); _at->_lock_count--; _at->_mtx.unlock(); }
         void unlock_all(void)
         {  __save_count = _at->_lock_count;
-           while (_at->_lock_count) { _at->_lock_count--; unlock(); } }
+           while (_at->_lock_count)
+            { _at->_lock_count--; _at->_mtx.unlock(); } }
         void relock_all(void)
         {  while (__save_count)
-            { lock(); _at->_lock_count++; __save_count--; } }
+            { _at->_mtx.lock(); _at->_lock_count++; __save_count--; } }
     };
 
     // Cached count of the number of atoms in the table.
