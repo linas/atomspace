@@ -53,6 +53,13 @@ namespace opencog
 
 typedef std::set<AtomPtr> AtomPtrSet;
 
+// XXX FIXME Replace boost:signals2 by something faster. The boost
+// signals library is stunningly heavy-weight, as can be seen by
+// running gdb, and then looking at the stack trace inside a call:
+// the delivery of a signal grows the stack by eleven frames!
+// Count'em! Eleven stack frames! We need something better than that.
+// Maybe something like std::vector<std::function>.  The requirements
+// here are extremely simple, we don't need any fancy signals, at all.
 typedef boost::signals2::signal<void (const Handle&)> AtomSignal;
 typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
 typedef boost::signals2::signal<void (const Handle&,
