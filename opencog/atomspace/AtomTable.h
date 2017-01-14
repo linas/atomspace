@@ -73,11 +73,30 @@ class AtomTable
 
 private:
 
-    // Single, global mutex for locking the indexes.
-    // Its recursive because we need to lock twice during atom insertion
-    // and removal: we need to keep the indexes stable while we search
+    // Single mutex for all add/remove operations.  Its recursive
+    // because we need to lock twice during atom insertion and
+    // removal: we need to keep the indexes stable while we search
     // them during add/remove.
-    static std::recursive_mutex _mtx;
+    mutable std::recursive_mutex _mtx;
+    mutable int _lock_count;
+
+    // Helper class for RAII locking.
+    class table_lock : std::unique_lock<std::recursive_mutex>
+    {
+        const AtomTable* _at;
+        int __save_count = 0;
+    public:
+        table_lock(const AtomTable* at) :
+           std::unique_lock<std::recursive_mutex> (at->_mtx), _at(at)
+        { at->_lock_count++; }
+        ~table_lock() { relock_all(); _at->_lock_count--; }
+        void unlock_all(void)
+        {  __save_count = _at->_lock_count;
+           while (_at->_lock_count) { _at->_lock_count--; unlock(); } }
+        void relock_all(void)
+        {  while (__save_count)
+            { lock(); _at->_lock_count++; __save_count--; } }
+    };
 
     // Cached count of the number of atoms in the table.
     size_t _size;
@@ -207,7 +226,7 @@ public:
                      bool subclass = false,
                      bool parent = true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        table_lock(this);
         if (parent && _environ)
             _environ->getHandlesByType(result, type, subclass, parent);
         return std::copy(typeIndex.begin(type, subclass),
