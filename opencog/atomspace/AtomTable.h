@@ -226,7 +226,7 @@ public:
                      bool subclass = false,
                      bool parent = true) const
     {
-        table_lock(this);
+        table_lock lck(this);
         if (parent && _environ)
             _environ->getHandlesByType(result, type, subclass, parent);
         return std::copy(typeIndex.begin(type, subclass),
@@ -241,7 +241,7 @@ public:
                         bool subclass = false,
                         bool parent = true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        table_lock lck(this);
         if (parent && _environ)
             _environ->foreachHandleByType(func, type, subclass);
         std::for_each(typeIndex.begin(type, subclass),
