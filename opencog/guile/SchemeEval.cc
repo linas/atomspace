@@ -9,7 +9,6 @@
 
 #include <atomic>
 
-#define _GNU_SOURCE
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -77,6 +76,7 @@ void SchemeEval::init(void)
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
 foo = 0;
+inuse = true;
 
 	_gc_ctr = 0;
 }
@@ -622,6 +622,8 @@ return syscall(SYS_gettid);
 void SchemeEval::save_rc(SCM rc)
 {
 if (0 != foo) {
+logger().info("evaldone=%d poldone=%d iseol=%d inuse=%d\n", _eval_done,
+_poll_done, rc==SCM_EOL, inuse);
 logger().error("oh noooooooooo! foo=%d  tid=%d\n", foo, gettid());
 }
 foo = gettid();
@@ -1082,13 +1084,21 @@ static SchemeEval* get_from_pool(void)
 {
 	std::lock_guard<std::mutex> lock(pool_mtx);
 	SchemeEval* ev = NULL;
-	if (pool.try_pop(ev)) return ev;
+	if (pool.try_pop(ev)) {
+if (ev->inuse) {
+logger().error("ohhhh nooooo! pool ev was in use!!!!!!!!!"); }
+ev->inuse = true;
+return ev;
+}
 	return new SchemeEval();
 }
 
 static void return_to_pool(SchemeEval* ev)
 {
 	ev->clear_pending();
+if (not ev->inuse) {
+logger().error("ohhhh nooooo! was not in use!"); }
+ev->inuse = false;
 	std::lock_guard<std::mutex> lock(pool_mtx);
 	pool.push(ev);
 }

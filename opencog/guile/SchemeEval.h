@@ -77,6 +77,9 @@ class SchemeEval : public GenericEval
 		std::string _answer;
 
 pid_t foo;
+public:
+bool inuse;
+private:
 		void save_rc(SCM);
 		SCM _rc;
 
