@@ -76,6 +76,7 @@ class SchemeEval : public GenericEval
 		const std::string *_pexpr;
 		std::string _answer;
 
+pid_t foo;
 		void save_rc(SCM);
 		SCM _rc;
 

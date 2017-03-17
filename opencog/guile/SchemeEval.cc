@@ -9,9 +9,14 @@
 
 #include <atomic>
 
+#define _GNU_SOURCE
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+
+#include <sys/syscall.h>
+#include <sys/types.h>
+
 
 #include <cstddef>
 #include <libguile.h>
@@ -71,6 +76,7 @@ void SchemeEval::init(void)
 
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
+foo = 0;
 
 	_gc_ctr = 0;
 }
@@ -607,11 +613,22 @@ std::string SchemeEval::poll_port()
 /// you witness a crash in this code, then there is a bug in the code
 /// that is using this instance!  There have been bugs in the past, in
 /// the cogserver SchemeShell.
+
+pid_t gettid()
+{
+return syscall(SYS_gettid);
+}
+
 void SchemeEval::save_rc(SCM rc)
 {
+if (0 != foo) {
+logger().error("oh noooooooooo! foo=%d  tid=%d\n", foo, gettid());
+}
+foo = gettid();
 	scm_gc_unprotect_object(_rc);
 	_rc = rc;
 	_rc = scm_gc_protect_object(_rc);
+foo = 0;
 }
 
 /// Get output from evaluator, if any; block otherwise.
