@@ -231,18 +231,26 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 //
 // There's a lot of prime-numbers in the code below, but the
 // actual mixing and avalanching is extremely poor. I'm hoping
-// its good enogh for hash buckets, but have not verified.
+// its good enough for hash buckets, but have not verified.
+//
+// (In the code below, the numbers of the form `((1UL<<35) - 325)`
+// etc. are all prime numbers. "Mixing" refers to code having the
+// form `hash += (hash<<5) + other_stuff;` -- the shift and add
+// mixes the bits. "Avalanching" refers to single-bit differences
+// rapidly turning into multi-bit differences.)
 //
 // There's also an issue that there are multiple places where the
 // hash must not mix, and must stay abelian, in order to deal with
-// unordered links and alpha-conversion.
+// unordered links and alpha-conversion. (Here, "abelian" refers to
+// order independence; addition is abelian; while "mixing" as
+// defined above, is non-abelian).
 //
 ContentHash ScopeLink::compute_hash() const
 {
 	ContentHash hsh = ((1UL<<35) - 325) * getType();
 	hsh += (hsh <<5) + ((1UL<<47) - 649) * _varlist.varseq.size();
 
-	// It is not safe to mx here, since the sort order of the
+	// It is not safe to mix here, since the sort order of the
 	// typemaps will depend on the variable names. So must be
 	// abelian.
 	ContentHash vth = 0;
@@ -301,14 +309,14 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	// Quotation
 	quotation.update(t);
 
-	// Other embedded ScopeLinks might be hiding some of our varialbes...
+	// Other embedded ScopeLinks might be hiding some of our variables...
 	bool issco = classserver().isA(t, SCOPE_LINK);
 	UnorderedHandleSet bsave;
 	if (issco)
 	{
-		// Prevent current hidden vars from harm.
+		// Protect current hidden vars from harm.
 		bsave = bound_vars;
-		// Add the Scope links vars to the hidden set.
+		// Add the Scope link vars to the hidden set.
 		ScopeLinkPtr sco(ScopeLinkCast(h));
 		if (nullptr == sco)
 			sco = ScopeLinkCast(classserver().factory(h));
@@ -318,16 +326,24 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 
 	// Prevent mixing for UnorderedLinks. The `mixer` var will be zero
 	// for UnorderedLinks. The problem is that two UnorderdLinks might
-	// be alpha-equivalent, but have thier atoms presented in a
+	// be alpha-equivalent, but have their atoms presented in a
 	// different order. Thus, the hash must be computed in a purely
-	// commutative fashion: using only addition, so as never create
+	// commutative fashion: using only addition, so as to never create
 	// any entropy, until the end.
+	//
+	// XXX As discussed in issue #1176, a better fix would be to
+	// compute the individual term_hashes first, then sort them,
+	// and then mix them!  This provides the desired qualities:
+	// different unordered links can be directly compared, and also
+	// have good mixing/avalanching properties. The code below
+	// only allows for compare; it fails to mix.
+	//
 	bool is_ordered = not classserver().isA(t, UNORDERED_LINK);
 	ContentHash mixer = (ContentHash) is_ordered;
 	ContentHash hsh = ((1UL<<8) - 59) * t;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		hsh += mixer * (1UL<<5) + term_hash(ho, bound_vars, quotation);
+		hsh += mixer * (hsh<<5) + term_hash(ho, bound_vars, quotation);
 	}
 	hsh %= (1UL<<63) - 471;
 
