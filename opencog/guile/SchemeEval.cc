@@ -639,7 +639,7 @@ foo = gettid();
 	_rc = rc;
 	_rc = scm_gc_protect_object(_rc);
 if (spillit and foo == gettid()) {
-splillit = false;
+spillit = false;
 if(eval_str != SCM_EOL){
 char * str = scm_to_utf8_string(eval_str);
 logger().info("duuuude other one is evaling >>>%s<<<\n", str);
