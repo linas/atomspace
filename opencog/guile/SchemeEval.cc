@@ -76,6 +76,7 @@ void SchemeEval::init(void)
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
 foo = 0;
+spillit = false;
 inuse = true;
 
 	_gc_ctr = 0;
@@ -559,7 +560,7 @@ void SchemeEval::do_eval(const std::string &expr)
 	                      (void *) eval_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
-	save_rc(rc);
+	save_rc(rc, eval_str);
 	restore_output();
 
 	if (saved_as)
@@ -619,17 +620,33 @@ pid_t gettid()
 return syscall(SYS_gettid);
 }
 
-void SchemeEval::save_rc(SCM rc)
+void SchemeEval::save_rc(SCM rc, SCM eval_str)
 {
 if (0 != foo) {
+spillit = true;
 logger().info("evaldone=%d poldone=%d iseol=%d inuse=%d\n", _eval_done,
 _poll_done, rc==SCM_EOL, inuse);
-logger().error("oh noooooooooo! foo=%d  tid=%d\n", foo, gettid());
+if(eval_str != SCM_EOL){
+char * str = scm_to_utf8_string(eval_str);
+logger().info("duuuude I am evaling >>>%s<<<\n", str);
+free(str);
+} else logger().info("duuude huh wtf I am evaling EOL");
+logger().error("oh noooooooooo! othertid=%d  mytid=%d\n", foo, gettid());
 }
+else
 foo = gettid();
 	scm_gc_unprotect_object(_rc);
 	_rc = rc;
 	_rc = scm_gc_protect_object(_rc);
+if (spillit and foo == gettid()) {
+splillit = false;
+if(eval_str != SCM_EOL){
+char * str = scm_to_utf8_string(eval_str);
+logger().info("duuuude other one is evaling >>>%s<<<\n", str);
+free(str);
+} else logger().info("duuude like what other one is evaling EOL");
+logger().error(" duuude I am the other one:! mytid=%d\n", gettid());
+}
 foo = 0;
 }
 
@@ -685,7 +702,7 @@ std::string SchemeEval::do_poll_result()
 	// typically set in a different thread.  We want it cleared before
 	// we ever get here again, on later evals.
 	SCM tmp_rc = _rc;
-	save_rc(SCM_EOL);
+	save_rc(SCM_EOL, SCM_EOL);
 
 	// If we are here, then evaluation is done. Check the various
 	// evalution result flags, etc.
