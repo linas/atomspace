@@ -78,6 +78,7 @@ class SchemeEval : public GenericEval
 
 pid_t foo;
 bool spillit;
+bool _nest;
 public:
 bool inuse;
 private:

@@ -78,6 +78,7 @@ void SchemeEval::init(void)
 foo = 0;
 spillit = false;
 inuse = true;
+_nest = false;
 
 	_gc_ctr = 0;
 }
@@ -555,6 +556,7 @@ void SchemeEval::do_eval(const std::string &expr)
 	_error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
 	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
+_nest = false;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_eval_string,
 	                      (void *) eval_str,
@@ -624,8 +626,7 @@ void SchemeEval::save_rc(SCM rc, SCM eval_str)
 {
 if (0 != foo) {
 spillit = true;
-logger().info("evaldone=%d poldone=%d iseol=%d inuse=%d\n", _eval_done,
-_poll_done, rc==SCM_EOL, inuse);
+logger().info("evaldone=%d poldone=%d iseol=%d inuse=%d nest=%d\n", _eval_done, _poll_done, rc==SCM_EOL, inuse, _nest);
 if(eval_str != SCM_EOL){
 char * str = scm_to_utf8_string(eval_str);
 logger().info("duuuude I am evaling >>>%s<<<\n", str);
@@ -645,6 +646,9 @@ char * str = scm_to_utf8_string(eval_str);
 logger().info("duuuude other one is evaling >>>%s<<<\n", str);
 free(str);
 } else logger().info("duuude like what other one is evaling EOL");
+
+logger().info(" other one input line is %s<<<", _input_line.c_str());
+logger().info("otherone is evaldone=%d poldone=%d iseol=%d inuse=%d nest=%d\n", _eval_done, _poll_done, rc==SCM_EOL, inuse, _nest);
 logger().error(" duuude I am the other one:! mytid=%d\n", gettid());
 }
 foo = 0;
@@ -787,7 +791,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
-	_eval_done = true;
+_nest = true;
+	_eval_done = true; // XXX this is the cause of evilness!!!
 
 	// Restore the outport
 	if (_in_shell)
