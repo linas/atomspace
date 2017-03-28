@@ -88,8 +88,8 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# This will someday be fiaxable by moving the factories out
 		# of the atomtable, and into the class server. But for now,
 		# we use -flto as a work-around.
-		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
-		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
+		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
 		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto=8")
 		LINK_LIBRARIES(pthread)
 

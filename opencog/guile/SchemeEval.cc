@@ -792,8 +792,6 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
 _nest = true;
-	_eval_done = true; // XXX this is the cause of evilness!!!
-
 	// Restore the outport
 	if (_in_shell)
 		restore_output();
