@@ -13,6 +13,10 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+#include <sys/syscall.h>
+#include <sys/types.h>
+
+
 #include <cstddef>
 #include <libguile.h>
 #include <libguile/backtrace.h>
@@ -71,6 +75,10 @@ void SchemeEval::init(void)
 
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
+foo = 0;
+spillit = false;
+inuse = true;
+_nest = false;
 
 	_gc_ctr = 0;
 }
@@ -565,12 +573,13 @@ void SchemeEval::do_eval(const std::string &expr)
 	_error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
 	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
+_nest = false;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_eval_string,
 	                      (void *) eval_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
-	save_rc(rc);
+	save_rc(rc, eval_str);
 	restore_output();
 
 	if (saved_as)
@@ -624,11 +633,42 @@ std::string SchemeEval::poll_port()
 /// you witness a crash in this code, then there is a bug in the code
 /// that is using this instance!  There have been bugs in the past, in
 /// the cogserver SchemeShell.
-void SchemeEval::save_rc(SCM rc)
+
+pid_t gettid()
 {
+return syscall(SYS_gettid);
+}
+
+void SchemeEval::save_rc(SCM rc, SCM eval_str)
+{
+if (0 != foo) {
+spillit = true;
+logger().info("evaldone=%d poldone=%d iseol=%d inuse=%d nest=%d\n", _eval_done, _poll_done, rc==SCM_EOL, inuse, _nest);
+if(eval_str != SCM_EOL){
+char * str = scm_to_utf8_string(eval_str);
+logger().info("duuuude I am evaling >>>%s<<<\n", str);
+free(str);
+} else logger().info("duuude huh wtf I am evaling EOL");
+logger().error("oh noooooooooo! othertid=%d  mytid=%d\n", foo, gettid());
+}
+else
+foo = gettid();
 	scm_gc_unprotect_object(_rc);
 	_rc = rc;
 	_rc = scm_gc_protect_object(_rc);
+if (spillit and foo == gettid()) {
+spillit = false;
+if(eval_str != SCM_EOL){
+char * str = scm_to_utf8_string(eval_str);
+logger().info("duuuude other one is evaling >>>%s<<<\n", str);
+free(str);
+} else logger().info("duuude like what other one is evaling EOL");
+
+logger().info(" other one input line is %s<<<", _input_line.c_str());
+logger().info("otherone is evaldone=%d poldone=%d iseol=%d inuse=%d nest=%d\n", _eval_done, _poll_done, rc==SCM_EOL, inuse, _nest);
+logger().error(" duuude I am the other one:! mytid=%d\n", gettid());
+}
+foo = 0;
 }
 
 /// Get output from evaluator, if any; block otherwise.
@@ -683,7 +723,7 @@ std::string SchemeEval::do_poll_result()
 	// typically set in a different thread.  We want it cleared before
 	// we ever get here again, on later evals.
 	SCM tmp_rc = _rc;
-	save_rc(SCM_EOL);
+	save_rc(SCM_EOL, SCM_EOL);
 
 	// If we are here, then evaluation is done. Check the various
 	// evalution result flags, etc.
@@ -768,6 +808,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
+_nest = true;
 	// Restore the outport
 	if (_in_shell)
 		restore_output();
@@ -1080,13 +1121,21 @@ static SchemeEval* get_from_pool(void)
 {
 	std::lock_guard<std::mutex> lock(pool_mtx);
 	SchemeEval* ev = NULL;
-	if (pool.try_pop(ev)) return ev;
+	if (pool.try_pop(ev)) {
+if (ev->inuse) {
+logger().error("ohhhh nooooo! pool ev was in use!!!!!!!!!"); }
+ev->inuse = true;
+return ev;
+}
 	return new SchemeEval();
 }
 
 static void return_to_pool(SchemeEval* ev)
 {
 	ev->clear_pending();
+if (not ev->inuse) {
+logger().error("ohhhh nooooo! was not in use!"); }
+ev->inuse = false;
 	std::lock_guard<std::mutex> lock(pool_mtx);
 	pool.push(ev);
 }
