@@ -98,47 +98,6 @@ Atom::~Atom()
 }
 
 // ==============================================================
-// Whole lotta truthiness going on here.  Does it really need to be
-// this complicated!?
-
-static const Handle& truth_key(void)
-{
-	static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
-	return tk;
-}
-
-void Atom::setTruthValue(const TruthValuePtr& newTV)
-{
-    if (nullptr == newTV) return;
-
-    // We need to guarantee that the signal goes out with the
-    // correct truth value.  That is, another setter could be changing
-    // this, even as we are.  So make a copy, first.
-    TruthValuePtr oldTV(getTruthValue());
-
-    // If both old and new are e.g. DEFAULT_TV, then do nothing.
-    if (oldTV.get() == newTV.get()) return;
-
-    // ... and we still need to make sure that only one thread is
-    // writing this at a time. std:shared_ptr is NOT thread-safe against
-    // multiple writers: see "Example 5" in
-    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    setValue (truth_key(), ProtoAtomCast(newTV));
-
-    if (_atom_space != nullptr) {
-        TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
-        tvch(get_handle(), oldTV, newTV);
-    }
-}
-
-TruthValuePtr Atom::getTruthValue() const
-{
-    ProtoAtomPtr pap(getValue(truth_key()));
-    if (nullptr == pap) return TruthValue::DEFAULT_TV();
-    return TruthValueCast(pap);
-}
-
-// ==============================================================
 /// Setting values associated with this atom.
 /// If the value is a null pointer, then the key is removed.
 void Atom::setValue(const Handle& key, const ProtoAtomPtr& value)

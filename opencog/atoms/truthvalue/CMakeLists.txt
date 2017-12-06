@@ -1,4 +1,5 @@
 ADD_LIBRARY (truthvalue
+	AtomTruth.cc
 	AttentionValue.cc
 	CountTruthValue.cc
 	EvidenceCountTruthValue.cc
