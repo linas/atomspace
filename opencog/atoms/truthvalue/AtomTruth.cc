@@ -30,6 +30,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>  // for TVChSigl
 
 using namespace opencog;
@@ -76,4 +77,36 @@ TruthValuePtr Atom::getTruthValue() const
     ProtoAtomPtr pap(getValue(truth_key()));
     if (nullptr == pap) return TruthValue::DEFAULT_TV();
     return TruthValueCast(pap);
+}
+
+// ==============================================================
+
+std::string Node::to_short_string(const std::string& indent) const
+{
+    std::string answer = indent;
+    answer += "(" + classserver().getTypeName(_type);
+    answer += " \"" + _name + "\"";
+
+    // Print the TV only if its not the default.
+    if (not getTruthValue()->isDefaultTV())
+        answer += " " + getTruthValue()->to_string();
+
+    answer += ")\n";
+
+    return answer;
+}
+
+std::string Node::to_string(const std::string& indent) const
+{
+    std::string answer = indent;
+    answer += "(" + classserver().getTypeName(_type);
+    answer += " \"" + _name + "\"";
+
+    // Print the TV only if its not the default.
+    if (not getTruthValue()->isDefaultTV())
+        answer += " " + getTruthValue()->to_string();
+
+    answer += ") ; " + id_to_string() + "\n";
+
+    return answer;
 }

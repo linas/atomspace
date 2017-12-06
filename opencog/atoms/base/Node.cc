@@ -43,36 +43,6 @@ void Node::init(const std::string& cname)
     _name = cname;
 }
 
-std::string Node::to_short_string(const std::string& indent) const
-{
-    std::string answer = indent;
-    answer += "(" + classserver().getTypeName(_type);
-    answer += " \"" + _name + "\"";
-
-    // Print the TV only if its not the default.
-    if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->to_string();
-
-    answer += ")\n";
-
-    return answer;
-}
-
-std::string Node::to_string(const std::string& indent) const
-{
-    std::string answer = indent;
-    answer += "(" + classserver().getTypeName(_type);
-    answer += " \"" + _name + "\"";
-
-    // Print the TV only if its not the default.
-    if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->to_string();
-
-    answer += ") ; " + id_to_string() + "\n";
-
-    return answer;
-}
-
 bool Node::operator==(const Atom& other) const
 {
     // If other points to this, then have equality.
