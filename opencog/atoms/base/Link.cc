@@ -55,49 +55,6 @@ Link::~Link()
     DPRINTF("Deleting link:\n%s\n", this->to_string().c_str());
 }
 
-std::string Link::to_short_string(const std::string& indent) const
-{
-    std::stringstream answer;
-    std::string more_indent = indent + "  ";
-
-    answer << indent << "(" << classserver().getTypeName(_type);
-
-    if (not getTruthValue()->isDefaultTV())
-        answer << " " << getTruthValue()->to_string();
-    answer << "\n";
-
-    // Here the target string is made. If a target is a node, its name is
-    // concatenated. If it's a link, all its properties are concatenated.
-    for (const Handle& h : _outgoing)
-        answer << h->to_short_string(more_indent);
-
-    answer << indent << ")\n";
-
-    return answer.str();
-}
-
-std::string Link::to_string(const std::string& indent) const
-{
-    std::string answer = indent;
-    std::string more_indent = indent + "  ";
-
-    answer += "(" + classserver().getTypeName(_type);
-
-    // Print the TV only if its not the default.
-    if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->to_string();
-
-    answer += "\n";
-    // Here, the outset string is made. If a target is a node,
-    // its name is concatenated. If it's a link, then recurse.
-    for (const Handle& h : _outgoing)
-        answer += h->to_string(more_indent);
-
-    answer += indent + ") ; " + id_to_string() + "\n";
-
-    return answer;
-}
-
 // Content-based comparison.
 bool Link::operator==(const Atom& other) const
 {
