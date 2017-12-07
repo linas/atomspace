@@ -2,6 +2,7 @@ LINK_LIBRARIES(
 	atomutils
 	atomspace
 	clearbox
+	unify
 )
 IF (HAVE_GUILE)
 	LINK_LIBRARIES(smob)
