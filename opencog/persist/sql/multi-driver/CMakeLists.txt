@@ -52,6 +52,7 @@ TARGET_LINK_LIBRARIES(sniff
 	persist-sql
 	atomspace
 	execution
+	query
 	clearbox
 	atomcore
 	atomutils

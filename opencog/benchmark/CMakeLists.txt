@@ -28,10 +28,11 @@ TARGET_LINK_LIBRARIES (atomspace_bm m
 	atomspaceutils
 	atomspace
 	execution
+	query
 	clearbox
-	${COGUTIL_LIBRARY}
 	atomutils
 	atomcore
+	${COGUTIL_LIBRARY}
 )
 
 IF (HAVE_GUILE)
