@@ -2,9 +2,13 @@
 ;; created from scheme.
 
 ; Hack to get rule-engine to load in the unit-test environment.
+;
 ; XXX This isn't working. I think the reason this is not working
 ; is because libquery has unresolved symbols in it, and both
-; liblogger and librule-engine depend on it.
+; liblogger and librule-engine depend on it. Or something like that.
+; This is very confusing, this works in all the other unit tests,
+; but it doesn't work here. I don't know why.
+;
 (define path "/usr/local/lib/opencog:/usr/local/lib64/opencog")
 (define path "./opencog/rule-engine:./opencog/guile")
 (setenv "LTDL_LIBRARY_PATH"
@@ -16,6 +20,12 @@
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 (use-modules (opencog rule-engine))
+
+; Hack to re-load the logger module, again.
+; Its been previously loaded by the C++ code, but the symbols created
+; there aren't visible here, for some reason I don't understand.
+; So we load them again.
+(load "../../opencog/scm/opencog/logger.scm")
 
 ;; Create a new atomspace to not by-pass the problem (due to
 ;; WORK_AROUND_GUILE_20_GC_BUG in SchemeSmobAS.cc)

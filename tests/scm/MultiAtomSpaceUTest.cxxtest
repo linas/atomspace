@@ -75,6 +75,11 @@ void MultiAtomSpace::setUp(void)
 	evaluator = new SchemeEval(main_as);
 	evaluator->eval("(add-to-load-path \"..\")");
 	evaluator->eval("(add-to-load-path \"../../..\")");
+
+	// Try to get `pm.scm` to compile. It doesn't I don't know why.
+	evaluator->eval("(use-modules (opencog))");
+	evaluator->eval("(use-modules (opencog logger))");
+	evaluator->eval("(use-modules (opencog rule-engine))");
 }
 
 void MultiAtomSpace::tearDown(void)
