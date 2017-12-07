@@ -5,7 +5,7 @@ ADD_LIBRARY (truthvalue
 	FuzzyTruthValue.cc
 	IndefiniteTruthValue.cc
 	ProbabilisticTruthValue.cc
-	SimpleTruthValue.cc
+	TruthFactory.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -15,6 +15,7 @@ ADD_DEPENDENCIES(truthvalue opencog_atom_types)
 # way to avoid a circular dependency (unresolved symbols) between
 # this and the atombase shared library.
 ADD_LIBRARY (truthvalue-part
+	SimpleTruthValue.cc
 	TruthValue.cc
 )
 
