@@ -34,10 +34,10 @@ TARGET_LINK_LIBRARIES(smob
 )
 
 TARGET_LINK_LIBRARIES(logger
+	ruleengine # for cog-ure-logge
 	smob
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
-    ruleengine # for cog-ure-logger
 )
 
 TARGET_LINK_LIBRARIES(randgen
