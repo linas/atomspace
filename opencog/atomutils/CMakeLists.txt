@@ -6,12 +6,24 @@ ADD_LIBRARY (atomutils
 	FuzzyMatchBasic
 	Neighbors
 	TypeUtils
-	Unify
 )
 
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomutils
+	atomcore
+	atombase
+	${COGUTIL_LIBRARY}
+)
+
+# Unify is handled seperately, to avoid circular dependencies and
+# unresolved symbols between the libraries.
+ADD_LIBRARY (unify
+	Unify
+)
+
+TARGET_LINK_LIBRARIES(unify
+	lambda
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
