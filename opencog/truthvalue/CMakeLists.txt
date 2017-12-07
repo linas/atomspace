@@ -1,4 +1,4 @@
-ADD_LIBRARY (truthvalue
+ADD_LIBRARY (truthvalue-part
 	AttentionValue.cc
 	CountTruthValue.cc
 	EvidenceCountTruthValue.cc
@@ -6,13 +6,21 @@ ADD_LIBRARY (truthvalue
 	IndefiniteTruthValue.cc
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
-	TruthValue.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(truthvalue opencog_atom_types)
+ADD_DEPENDENCIES(truthvalue-part opencog_atom_types)
+
+# The truthvalue-part and truthvalue shared libs are split up this
+# way to avoid a circular dependency (unresolved symbols) between
+# this and the atombase shared library.
+ADD_LIBRARY (truthvalue
+	TruthValue.cc
+)
 
 TARGET_LINK_LIBRARIES(truthvalue
+	truthvalue-part
+	atombase
 	${COGUTIL_LIBRARY}
 )
 

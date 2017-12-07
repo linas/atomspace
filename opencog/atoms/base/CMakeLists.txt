@@ -10,24 +10,31 @@ ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-ADD_LIBRARY (atombase
+ADD_LIBRARY (atombase-part
 	atom_types_init.cc
-	Atom.cc
 	ClassServer.cc
 	FloatValue.cc
 	Handle.cc
-	Link.cc
 	LinkValue.cc
-	Node.cc
 	StringValue.cc
 	Valuation.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(atombase opencog_atom_types)
+ADD_DEPENDENCIES(atombase-part opencog_atom_types)
+
+# The atombase-part and atombase shared libs are split up this
+# way to avoid a circular dependency (unresolved symbols) between
+# this and the truthvalue shared library.
+ADD_LIBRARY (atombase
+	Atom.cc
+	Link.cc
+	Node.cc
+)
 
 TARGET_LINK_LIBRARIES(atombase
-	truthvalue  
+	atombase-part
+	truthvalue-part
 	${COGUTIL_LIBRARY}
 )
 
