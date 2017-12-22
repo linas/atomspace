@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/random.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 
@@ -195,11 +197,18 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	sater.max_results = max_results;
 	bl->satisfy(sater);
 
+	Handle anch(createNode(ANCHOR_NODE, randstr("pattern-")));
+	anch = as->add_atom(anch);
+
 	// Ugh. We used an std::set to avoid duplicates. But now, we need a
 	// vector.  Which means copying. Got a better idea?
+	// Yes, create an UnorderedLink ctor that accepts sets.
 	HandleSeq satvec;
 	for (const Handle& h : sater._satisfying_set)
+	{
 		satvec.push_back(h);
+		as->add_atom(createLink(HandleSeq({h, anch}), MEMBER_LINK));
+	}
 
 	// Create the satisfying set, and cache it.
 	Handle satset(createLink(satvec, SET_LINK));
@@ -211,9 +220,9 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	// could defer this indefinitely, until its really needed.
 	satset = as->add_atom(satset);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
-	bl->set_groundings(satset);
+	bl->set_groundings(anch);
 
-	return satset;
+	return anch;
 }
 
 /* ===================== END OF FILE ===================== */

@@ -21,7 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/random.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
 #include "BindLinkAPI.h"
@@ -76,6 +78,29 @@ void Implicator::insert_result(const Handle& h)
 namespace opencog
 {
 
+static Handle make_set(AtomSpace* as, const HandleSeq& result_list)
+{
+	// The result_list contains a list of the grounded expressions.
+	// (The order of the list has no significance, so it's really a set.)
+	// Put the set into a SetLink, cache it, and return that.
+	Handle rewr(createLink(result_list, SET_LINK));
+
+	Handle anch(createNode(ANCHOR_NODE, randstr("pattern-")));
+	anch = as->add_atom(anch);
+	for (const Handle& h: result_list)
+		as->add_atom(createLink(HandleSeq({h, anch}), MEMBER_LINK));
+
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+	rewr = as->add_atom(rewr);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
+
+	return anch;
+}
+
 /**
  * Simplified utility
  *
@@ -101,21 +126,9 @@ static Handle do_imply(AtomSpace* as,
 	// If we got a non-empty answer, just return it.
 	if (0 < impl.get_result_list().size())
 	{
-		// The result_list contains a list of the grounded expressions.
-		// (The order of the list has no significance, so it's really a set.)
-		// Put the set into a SetLink, cache it, and return that.
-		Handle rewr(createLink(impl.get_result_list(), SET_LINK));
-
-#define PLACE_RESULTS_IN_ATOMSPACE
-#ifdef PLACE_RESULTS_IN_ATOMSPACE
-		// Shoot. XXX FIXME. Most of the unit tests require that the atom
-		// that we return is in the atomspace. But it would be nice if we
-		// could defer this indefinitely, until its really needed.
-		rewr = as->add_atom(rewr);
-#endif /* PLACE_RESULTS_IN_ATOMSPACE */
-
-		bl->set_rewrite(rewr);
-		return rewr;
+		Handle anch(make_set(as, impl.get_result_list()));
+		bl->set_rewrite(anch);
+		return anch;
 	}
 
 	// If we are here, then there were zero matches.
@@ -141,18 +154,9 @@ static Handle do_imply(AtomSpace* as,
 		impl.insert_result(h);
 	}
 
-	// Create a set holding all results of the implication, and cache it.
-	Handle rewr(createLink(impl.get_result_list(), SET_LINK));
-
-#ifdef PLACE_RESULTS_IN_ATOMSPACE
-	// Shoot. XXX FIXME. Most of the unit tests require that the atom
-	// that we return is in the atomspace. But it would be nice if we
-	// could defer this indefinitely, until its really needed.
-	rewr = as->add_atom(rewr);
-#endif /* PLACE_RESULTS_IN_ATOMSPACE */
-	bl->set_rewrite(rewr);
-
-	return rewr;
+	Handle anch(make_set(as, impl.get_result_list()));
+	bl->set_rewrite(anch);
+	return anch;
 }
 
 /**
