@@ -28,6 +28,7 @@
 
 #include <opencog/util/random.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
@@ -321,13 +322,11 @@ Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 
 	Handle anch(createNode(ANCHOR_NODE, randstr("pattern-")));
 	anch = as->add_atom(anch);
-	HandleSeq hs;
 	for (const Handle& h : reco._rules)
 	{
 		as->add_atom(createLink(HandleSeq({h, anch}), MEMBER_LINK));
-		hs.push_back(h);
 	}
 
-	as->add_link(SET_LINK, hs);
+	as->add_atom(createUnorderedLink(reco._rules, SET_LINK));
 	return anch;
 }
