@@ -98,7 +98,7 @@ static Handle make_set(AtomSpace* as, const HandleSeq& result_list)
 	rewr = as->add_atom(rewr);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
 
-	return anch;
+	return rewr; // XXX backwards compat.
 }
 
 /**
