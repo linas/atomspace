@@ -327,6 +327,6 @@ Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 		as->add_atom(createLink(HandleSeq({h, anch}), MEMBER_LINK));
 	}
 
-	as->add_atom(createUnorderedLink(reco._rules, SET_LINK));
-	return anch;
+	Handle recoset(as->add_atom(createUnorderedLink(reco._rules, SET_LINK)));
+	return recoset; // XXX backwards compat
 }

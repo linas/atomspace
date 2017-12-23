@@ -216,9 +216,10 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	// could defer this indefinitely, until its really needed.
 	satset = as->add_atom(satset);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
-	bl->set_groundings(anch);
 
-	return anch;
+	bl->set_groundings(satset); // XXX backwards compat
+
+	return satset; // XXX backwards compat
 }
 
 /* ===================== END OF FILE ===================== */
