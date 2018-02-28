@@ -144,6 +144,24 @@ static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 		return TruthValue::FALSE_TV();
 }
 
+// Perform check for presence in the atomspace
+static TruthValuePtr absent(AtomSpace* as, const Handle& h,
+                            AtomSpace* scratch)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (1 != oset.size())
+		throw RuntimeException(TRACE_INFO,
+		     "AbsentLink expects only one argument!");
+
+	Instantiator inst(scratch);
+	Handle ephem(inst.execute(oset[0]));
+
+	if (as->get_atom(ephem))
+		return TruthValue::FALSE_TV();
+	else
+		return TruthValue::TRUE_TV();
+}
+
 /// Check for syntactic equality
 static TruthValuePtr identical(const Handle& h)
 {
@@ -289,6 +307,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	else if (GREATER_THAN_LINK == t)
 	{
 		return greater(scratch, evelnk);
+	}
+	else if (ABSENT_LINK == t)
+	{
+		return absent(as, evelnk, scratch);
 	}
 	else if (NOT_LINK == t)
 	{

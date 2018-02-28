@@ -131,6 +131,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
 	            or contains_atomtype(clause, IDENTICAL_LINK)
 	            or contains_atomtype(clause, EQUAL_LINK)
 	            or contains_atomtype(clause, GREATER_THAN_LINK)
+	            or contains_atomtype(clause, ABSENT_LINK)
 	            // If it is an EvaluatableLink then is is not a
 	            // constant, unless it is a closed EvaluationLink over
 	            // a PredicateNode.
