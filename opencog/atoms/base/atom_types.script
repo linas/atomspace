@@ -144,20 +144,8 @@ CHOICE_LINK <- ORDERED_LINK
 // terms are AND'ed together.  Since it does not make sense to ask if
 // the same atom is present more than once, or what order it was in, it
 // is an unordered link, and  duplicates are eliminated.
-//
+// See also AbsentLink, below.
 PRESENT_LINK <- SET_LINK,EVALUATABLE_LINK
-
-// The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
-// In 'intuitionist logic', the opposite of "true" is not "false",
-// the opposite is "don't know".  ABSENT_LINK is the effective
-// don't-know link.  Currently, it is used during pattern matching
-// to find clauses that may or may not be present: clauses that are
-// optionally present.
-//
-// Just like the PresentLink, it does not make sense to have duplicates
-// in the outgoing set, thus they are removed.  The mechanics of the
-// PresentLink is used to accomplish this.
-ABSENT_LINK <- PRESENT_LINK
 
 // Action scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
@@ -515,6 +503,22 @@ GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 // after execution, they evaluate to the same atom.
 IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
+// The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
+// In 'intuitionist logic', the opposite of "true" is not "false",
+// the opposite is "don't know".  ABSENT_LINK is the effective
+// don't-know link.  Currently, it is used during pattern matching
+// to find clauses that may or may not be present: clauses that are
+// optionally present.
+//
+// Just like the PresentLink, it does not make sense to have duplicates
+// in the outgoing set, thus they are removed.  The mechanics of the
+// PresentLink is used to accomplish this.
+//
+// It is a virtual link, because variables cannot be grounded through
+// it; any variables in an AbsentLink must be fully grounded before
+// the AbsentLink can be evaluated.
+ABSENT_LINK <- PRESENT_LINK,VIRTUAL_LINK
 
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
