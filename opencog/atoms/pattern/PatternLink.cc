@@ -391,7 +391,7 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 	for (const Handle& ho : nest)
 	{
 		Type ot = ho->get_type();
-		if (PRESENT_LINK == ot)
+		if (PRESENT_LINK == ot or ABSENT_LINK == ot)
 		{
 			const HandleSeq& pset = ho->getOutgoingSet();
 			for (const Handle& ph : pset)
@@ -492,8 +492,8 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 	// Split in positive and negative clauses
 	for (const Handle& h : component)
 	{
-		Type t = h->get_type();
 #if JUNK
+		Type t = h->get_type();
 		if (ABSENT_LINK == t)
 		{
 			// We insist on an arity of 1, because anything else is
@@ -692,7 +692,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 ///
 ///    (GetLink (GreaterThan (Number 42) (Variable $x)))
 ///
-/// The only clause here is the GreaterThan, and its virtual
+/// The only clause here is the GreaterThan, and it is virtual
 /// (evaluatable) so we know that in general it cannot be found in
 /// the atomspace.   Due to the pattern-matcher design, matching will
 /// fail unless there is at least one PresentLink/AbsentLink clause.
@@ -709,10 +709,10 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 ///
 /// where the ImplicationLink may itself contain more variables.
 /// If the ImplicationLink is suitably simple, it can be added
-/// added s a ordinary clause, and searched for as if it was "present".
+/// as an ordinary clause, and searched for as if it was "present".
 /// XXX FIXME: the code here assumes that the situation is indeed
 /// simple: more complex cases are not handled correctly.  Doing this
-/// correctly would require iteratating again, and examining the
+/// correctly would require iterating again, and examining the
 /// contents of the left and right side of the EqualLink... ugh.
 ///
 bool PatternLink::add_dummies()
@@ -730,8 +730,20 @@ bool PatternLink::add_dummies()
 	for (const Handle& t : _pat.evaluatable_terms)
 	{
 		Type tt = t->get_type();
-		if (ABSENT_LINK == tt or
-		    EQUAL_LINK == tt or
+		if (ABSENT_LINK == tt)
+		{
+			const Handle& left = t->getOutgoingAtom(0);
+			if (any_unquoted_in_tree(left, _varlist.varset))
+			{
+				_pat.clauses.emplace_back(left);
+				_pat.cnf_clauses.emplace_back(left);
+				_pat.mandatory.emplace_back(left);
+				_fixed.emplace_back(left);
+			}
+		}
+
+		else
+		if (EQUAL_LINK == tt or
 		    GREATER_THAN_LINK == tt or
 		    IDENTICAL_LINK == tt)
 		{
