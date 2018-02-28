@@ -106,9 +106,9 @@ SIMILARITY_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 
-// Boolean set operations, logical constants.
+// Boolean logic operations, logical constants.
 // These are used by the pattern matcher to compute crisp-logic
-// boolean combinations of predicates.
+// boolean combinations of predicates (viz. classical predicate logic).
 //
 // The ordered links SequentialAndLink, SequentialOrLink allow
 // behavior-tree Sequence and Fallback to be implemented: they guarantee
@@ -159,7 +159,7 @@ PRESENT_LINK <- SET_LINK,EVALUATABLE_LINK
 // PresentLink is used to accomplish this.
 ABSENT_LINK <- PRESENT_LINK
 
-// Performance scripting links.
+// Action scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
 // them to return.  JoinLink launches multiple threads, and waits for
 // all of them to return, and then returns the And of thier truth
