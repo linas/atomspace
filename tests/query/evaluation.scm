@@ -84,11 +84,14 @@
 	)
 )
 
+;;;; -----------------------------------------------------------------
+;;; Boolean logic connectives!
+
 ;; reject node three only; of the five, four remain
 (define (four-arcs)
 	(wrapper
 		(list one->x x->one
-			(AbsentLink
+			(NotLink
 				(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
 			)
 		)
@@ -99,21 +102,18 @@
 (define (two-arcs)
 	(wrapper
 		(list one->x x->one
-			(AbsentLink
+			(NotLink
 				(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
 			)
-			(AbsentLink
+			(NotLink
 				(IdenticalLink (VariableNode "$x") (ConceptNode "idea four"))
 			)
-			(AbsentLink
+			(NotLink
 				(IdenticalLink (VariableNode "$x") (ConceptNode "idea five"))
 			)
 		)
 	)
 )
-
-;;;; -----------------------------------------------------------------
-;;; Boolean logic connectives!
 
 ;; reject node one only; of the five, four remain
 (define (four-not)
