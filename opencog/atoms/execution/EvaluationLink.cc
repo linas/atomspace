@@ -31,6 +31,7 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
@@ -155,6 +156,13 @@ static TruthValuePtr absent(AtomSpace* as, const Handle& h,
 
 	Instantiator inst(scratch);
 	Handle ephem(inst.execute(oset[0]));
+
+	// If we are checking for the absence of a term, and that term
+	// has ungrounded free variables in it, then conclude that the
+	// term is mal-formed, and thus absent.  Perhaps should be throwing
+	// an exception here, for this case, since it is mal-formed.
+	if (0 < get_free_variables(ephem).size())
+		return TruthValue::TRUE_TV();
 
 	if (as->get_atom(ephem))
 		return TruthValue::FALSE_TV();

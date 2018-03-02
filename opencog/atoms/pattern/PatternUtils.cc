@@ -116,7 +116,7 @@ bool remove_constants(const HandleSet &vars,
 
 bool is_in_atomspace(const Handle& handle, const AtomSpace& atomspace)
 {
-	return (bool)atomspace.get_atom(handle);
+	return nullptr != atomspace.get_atom(handle);
 }
 
 bool is_constant(const HandleSet& vars, const Handle& clause)
