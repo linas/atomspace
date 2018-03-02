@@ -406,9 +406,8 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 				throw InvalidParamException(TRACE_INFO,
 					"AbsentLink can have an arity of one only!");
 
-			const Handle& inv(ho->getOutgoingAtom(0));
-			_pat.optionals.insert(inv);
-			_pat.cnf_clauses.emplace_back(inv);
+			_pat.cnf_clauses.emplace_back(ho);
+			_pat.optionals.insert(ho->getOutgoingAtom(0));
 		}
 		else if (connectives.find(ot) != connectives.end())
 		{
@@ -500,9 +499,8 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 				throw InvalidParamException(TRACE_INFO,
 					"AbsentLink can have an arity of one only!");
 
-			const Handle& inv(h->getOutgoingAtom(0));
-			_pat.optionals.insert(inv);
-			_pat.cnf_clauses.emplace_back(inv);
+			_pat.cnf_clauses.emplace_back(h);
+			_pat.optionals.insert(h->getOutgoingAtom(0));
 		}
 		else
 		{
@@ -731,8 +729,8 @@ bool PatternLink::add_dummies()
 			const Handle& left = t->getOutgoingAtom(0);
 			if (any_unquoted_in_tree(left, _varlist.varset))
 			{
+				_pat.cnf_clauses.emplace_back(t);
 				_pat.clauses.emplace_back(left);
-				_pat.cnf_clauses.emplace_back(left);
 				_pat.optionals.insert(left);
 				_fixed.emplace_back(left);
 			}
