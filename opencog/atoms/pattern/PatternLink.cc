@@ -391,13 +391,12 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 	for (const Handle& ho : nest)
 	{
 		Type ot = ho->get_type();
-		if (PRESENT_LINK == ot or ABSENT_LINK == ot)
+		if (PRESENT_LINK == ot)
 		{
 			const HandleSeq& pset = ho->getOutgoingSet();
 			for (const Handle& ph : pset)
 				_pat.clauses.emplace_back(ph);
 		}
-#if JUNK
 		else if (ABSENT_LINK == ot)
 		{
 			// We insist on an arity of 1, because anything else is
@@ -411,7 +410,6 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 			_pat.optionals.insert(inv);
 			_pat.cnf_clauses.emplace_back(inv);
 		}
-#endif
 		else if (connectives.find(ot) != connectives.end())
 		{
 			unbundle_clauses_rec(connectives, ho->getOutgoingSet());
@@ -492,7 +490,6 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 	// Split in positive and negative clauses
 	for (const Handle& h : component)
 	{
-#if JUNK
 		Type t = h->get_type();
 		if (ABSENT_LINK == t)
 		{
@@ -508,7 +505,6 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 			_pat.cnf_clauses.emplace_back(inv);
 		}
 		else
-#endif
 		{
 			_pat.mandatory.emplace_back(h);
 			_pat.cnf_clauses.emplace_back(h);
@@ -737,7 +733,7 @@ bool PatternLink::add_dummies()
 			{
 				_pat.clauses.emplace_back(left);
 				_pat.cnf_clauses.emplace_back(left);
-				_pat.mandatory.emplace_back(left);
+				_pat.optionals.insert(left);
 				_fixed.emplace_back(left);
 			}
 		}
