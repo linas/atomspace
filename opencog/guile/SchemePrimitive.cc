@@ -51,8 +51,8 @@ void PrimitiveEnviron::init_in_module(void*)
 
 PrimitiveEnviron::~PrimitiveEnviron() {}
 
-void PrimitiveEnviron::do_register(const char * module,
-                                   const char *name, int nargs)
+void PrimitiveEnviron::do_register(const char* module,
+                                   const char* name, int nargs)
 {
 	// Now enter guile mode, and do the actual work there.
 	tmp_module = module;
@@ -79,8 +79,8 @@ void *PrimitiveEnviron::c_wrap_register(void *p)
  * Note that this method must be called in "guile mode".
  */
 void
-PrimitiveEnviron::really_do_register(const char * module_name,
-                                     const char *name, int nargs)
+PrimitiveEnviron::really_do_register(const char* module_name,
+                                     const char* name, int nargs)
 {
 	init();
 
