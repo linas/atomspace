@@ -14,13 +14,26 @@
 // Special type designating that no atom type has been assigned.
 NOTYPE
 
+// --------------------------------------------------------------
+// Values are collections of data that can be associated with atoms.
+// Think of them as decorations that can be hung on an atom.
 VALUE
 FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE
 
-// All of the different flavors of truth values
+// TruthValues are the subobject classifiers for Atomese; they are used
+// to generalize the notion of a subset (in exactly the same way that
+// a subobject classifier does so in an arbitrary topos.) In some cases,
+// these will be probabilities; in other cases, these are probabilities
+// with additional evidence associated to them. In yet other cases,
+// these resemble the truth values of "fuzzy logic", and so on.
+//
+// Many atoms and operations on atoms explicitly require truth values
+// -- for example, Predicatenodes and EvaluationLinks -- and so these
+// are vital and centrally important for getting things to work.
+//
 TRUTH_VALUE <- FLOAT_VALUE
 SIMPLE_TRUTH_VALUE <- TRUTH_VALUE
 COUNT_TRUTH_VALUE <- TRUTH_VALUE
@@ -32,8 +45,12 @@ EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 // The AttentionValue
 ATTENTION_VALUE <- FLOAT_VALUE
 
-// Base of hierarchy - NOTE: ATOM will not have a corresponding Python
-// construction function to avoid identifier conflict with the Atom object.
+// --------------------------------------------------------------
+// Base of the atom hierarchy. Atoms are globally unique and persistent
+// and are immutable (unchangeable).
+//
+// NOTE: ATOM will not have a corresponding python constructor, to
+// avoid conflict with the python Atom object.
 ATOM <- VALUE
 NODE <- ATOM
 LINK <- ATOM
@@ -44,6 +61,11 @@ NUMBER_NODE <- NODE
 // Basic Links
 ORDERED_LINK <- LINK
 UNORDERED_LINK <- LINK
+
+// A PredicateNode is the primary subobject classifier of Atomese.
+// When a PredicateNode is evaluated in some setting, the result is
+// always a TruthValue.
+PREDICATE_NODE <- NODE
 
 // ===========================================================
 // Type-safety links.  These are used to enforce type safety
@@ -81,7 +103,8 @@ TYPE_LINK <- LINK
 TYPE_OUTPUT_LINK <- LINK
 
 // ===========================================================
-// Basic set-theory-inspired links
+// Basic boolean algebra and set-theory-inspired links.
+
 SET_LINK <- UNORDERED_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
@@ -91,24 +114,10 @@ MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 // the probability.
 CONTEXT_LINK <- ORDERED_LINK
 
-// Measure-theoritic (probabilisitic) versions of AND_LINK, OR_LINK
-// These use probabilistic formulas to compute truth values.
-// UNION_LINK <- OR_LINK
-// INTERSECTION_LINK <- AND_LINK
-
-// SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
-// Therefore the later has been removed.
-INHERITANCE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-SUBSET_LINK <- INHERITANCE_LINK
-INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
-
-SIMILARITY_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
-INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
-
-// Boolean logic operations, logical constants.
+// Boolean algebra operations, logical constants.
 // These are used by the pattern matcher to compute crisp-logic
-// boolean combinations of predicates (viz. classical predicate logic).
+// boolean algebra combinations of predicates (viz. classical
+// predicate logic).
 //
 // The ordered links SequentialAndLink, SequentialOrLink allow
 // behavior-tree Sequence and Fallback to be implemented: they guarantee
@@ -156,13 +165,16 @@ PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 JOIN_LINK <- PARALLEL_LINK
 
 // ====================================================================
-// Herbrand/First-order-logic/lambda-calc/model-theory style links
-// and nodes.  This are used to implement the pattern matcher, and
-// everything built from the pattern matcher, including the query
-// engine, the atomspace indexes, and the graph rewrite rules.
-
-// ---------------------------------------------------------
-// Variables, Lambdas and definitions.
+// Predicate-logic/lambda-calc/model-theory style links and nodes.
+// These embody some of the common and recurring themes from predicate
+// logic, model theory, term rewriting and lambda calculus. There is
+// no strict correspondance, however, as there is no formal unification
+// of these theories -- its just a leveraging of common themes.
+//
+// These are used to implement the pattern matcher, and everything built
+// from the pattern matcher, including the query system and the rule
+// engine. In that sense, thier definitions are "strict", else the
+// pattern matcher will fail.
 
 // A Variable.  Use Lambda's to hide these. Use types to type them.
 VARIABLE_NODE <- NODE
@@ -320,7 +332,8 @@ BIND_LINK <- SATISFYING_LINK       // Finds all groundings, substitutes.
 DUAL_LINK <- SATISFYING_LINK
 
 // ==============================================================
-// Types and type constructors.
+// Types and type constructors.  Variables and other atoms can be
+// given types.  The below describe the types.
 
 // A TypeNode can hold only core (in-built) type declarations, such
 // as that in this file. Viz it just holds an integer.
@@ -396,8 +409,21 @@ TYPED_ATOM_LINK <- UNIQUE_LINK
 ANCHOR_NODE <- NODE
 
 // ====================================================================
-// Relations.
+// Relations. A "relation" is a subset of a cartesian product, or more
+// generally, something that can have a subobject classifier. Examples
+// include "relations" from model theory, and "relations" from
+// "relational algebra" (e.g. SQL).
 //
+// Relations always have an associated subobject classifier. For naive
+// set theory, this is the indicator function, having values of
+// true/false, indicating set membership. For atomese, the subject
+// classifier is explicitly always a TRUTH_VALUE.
+//
+// EvaluationLinks record the result of evaluating a predicate.
+// That is, given some elements, they indicate wether the predicate is
+// true or false (or has some other truth value) on those elements.
+EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
+
 // A VirtualLink is a relation between a tuple of atoms, whose truth
 // value is computed "on demand". VirtualLinks are meant to describe
 // relations that are too big to fit into the atomspace (typically
@@ -445,10 +471,12 @@ EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 // the AbsentLink can be evaluated.
 ABSENT_LINK <- PRESENT_LINK,VIRTUAL_LINK
 
-
-// Logical quantifiers (adjoints to relations)
-// Should these inherit from EvaluatableLink ???
+// Logical quantifiers (adjoints to pullbacks of relations)
+// These are ill-defined, at the moment: do they return truth
+// values, or sets of atoms? Do they express a predicate, or a subset?
 // Should these inherit from ReWriteLink or PrenexLink instead ???
+// I think PLN uses these; otherwise they are not yet properly defined.
+//
 // Exists == left adjoint to the pullback functor of a relation.
 // ForAll == right adjoint to the pullback functor of a relation.
 // XXX Currently not implemented (viz don't work with virtual links).
@@ -528,6 +556,37 @@ CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
 CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
 SECTION <- ORDERED_LINK        // Sheaf section, connector set
 
+// ==============================================================
+// Procedure and schema nodes.
+//
+// These form the foundation for a different way of looking at
+// values and predicates: they generalize the notion of "predicate"
+// so that any value or atom can be the result of evaluation
+// (which is now renamed "execution", to make a distinction).
+//
+// Procedures are generic terms; when they are executed, they can
+// return any value, including Atoms, and not just TruthValues.
+PROCEDURE_NODE <- NODE
+
+// Grounded preoceedures/predicates/schemas are "jets", which replace
+// inefficient code with efficent implementations in an ad-hoc kind of
+// way. They accelerate code that would otherwise be impractical to
+// express or execute in Atomese. See for example
+// http://lambda-the-ultimate.org/node/5482 for discussion of jets.
+GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
+
+// SchemaNodes are similar to PredicateNodes, except they must
+// necessarily return an Atom when executed.
+SCHEMA_NODE <- PROCEDURE_NODE
+DEFINED_SCHEMA_NODE <- SCHEMA_NODE
+GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
+
+// Special cases of PredicateNodes.
+// DefinedPredicateNodes are used to make human-written atomese easier
+// to read by humans. They have no other fundamental usefulness...
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE
+GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
+
 // ====================================================================
 //
 // An arity-2 link, used for specifying numeric intervals, such
@@ -540,7 +599,31 @@ INTERVAL_LINK <- ORDERED_LINK
 QUANTITY_LINK <- ORDERED_LINK
 
 // ==============================================================
-// Assorted PLN link types.
+// Assorted PLN link types.  These are specific to the theory of PLN
+// and the rules it defines for knowledge representation and reasoning.
+// See the book on PLN by Goertzel etal. to understand what these are
+// all about.
+//
+// The concepts of extension and intension are needed, whenever one
+// has more truth values than simply true and false. These correspond
+// to the sigma and pi types of the Borel hierarchy of set theory.
+// More precisely, they are the left and right adjunctions to the
+// pullback functor of sets over an object -- that is, the pullback
+// functor on the slice category, where the slice is given by a
+// PredicateNode.
+//
+// Some of these have "scope" versions, but I don't understand what
+// these are or why they are needed. That might be a bug.
+//
+// SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
+// Therefore the later has been removed.
+INHERITANCE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+SUBSET_LINK <- INHERITANCE_LINK
+INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
+
+SIMILARITY_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
+INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 
 // Average links are not really useful since they are equivalent to a
 // predicate (which could be a PredicateNode or derived, or built with
@@ -553,8 +636,6 @@ SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
 
 // Convert predicate into concept
 SATISFYING_SET_LINK <- LINK
-
-// Basic first-order logic operations
 
 // Sugar forms of implication and equivalence links. See
 // http://wiki.opencog.org/wikihome/index.php/ImplicationLink
@@ -579,31 +660,8 @@ EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 // Generic association
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
-// Mystery link.  Lexical attraction???
-// Can we nuke this ??
+// Mystery link.  Lexical attraction???  Can we nuke this ??
 ATTRACTION_LINK <- ORDERED_LINK
 
-// To be used with PredicateNode
-EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
-
+// Mysetery link. What does this do ??? Can we get rid of it?
 EXECUTION_LINK <- ORDERED_LINK
-
-// Procedure, schema and predicate nodes.
-// These are used to define functions and predicates (relations)
-// Procedures are generic terms; they can return any value, for example,
-// either Atoms or TruthValues (or values in general). This is narrowed
-// down, below.
-PROCEDURE_NODE <- NODE
-GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
-
-// SchemaNodes are atom-valued.  The must return something deriving
-// from Atom.
-SCHEMA_NODE <- PROCEDURE_NODE
-DEFINED_SCHEMA_NODE <- SCHEMA_NODE
-GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
-
-// PredicateNodes are TV-valued.  They must return a TV.
-PREDICATE_NODE <- PROCEDURE_NODE
-DEFINED_PREDICATE_NODE <- PREDICATE_NODE
-GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
-
