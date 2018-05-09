@@ -46,6 +46,14 @@ public:
         Type numClasses = classserver().getNumberOfClasses();
         for (Type t = 0; t < numClasses; t++) {
             TS_ASSERT(classserver().isA(t, t));
+if (t > ATOM)
+{
+if (classserver().isA(t, NODE)) printf("%d %s is a node\n", t,
+classserver().getTypeName(t).c_str());
+else if (classserver().isA(t, LINK)) printf("%d %s is a link\n", t,
+classserver().getTypeName(t).c_str());
+else printf("%d %s is failure\n", t, classserver().getTypeName(t).c_str());
+}
             if (t > ATOM) TS_ASSERT(classserver().isA(t, NODE)
                               or classserver().isA(t, LINK));
         }

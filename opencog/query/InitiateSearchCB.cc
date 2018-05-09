@@ -186,9 +186,11 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
+#if 0
 	// Ignore all dynamically-evaluatable links up front.
 	if (_dynamic->find(h) != _dynamic->end())
 		return Handle::UNDEFINED;
+#endif
 
 	// Iterate over all the handles in the outgoing set.
 	// Find the deepest one that contains a constant, and start
@@ -346,6 +348,16 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	size_t bestclause;
 	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
 	                                  _starter_term, bestclause);
+
+	if (nullptr == best_start)
+	{
+		best_start = find_thinnest(clauses, HandleSet(),
+	                              _starter_term, bestclause);
+	}
+	if (nullptr == best_start)
+	{
+printf("duuuuuuuude wtf still nul. %s\n", oc_to_string(clauses).c_str());
+}
 
 	// Cannot find a starting point! This can happen if:
 	// 1) all of the clauses contain nothing but variables,

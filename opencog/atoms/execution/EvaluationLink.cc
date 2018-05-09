@@ -159,10 +159,9 @@ static TruthValuePtr absent(AtomSpace* as, const Handle& h,
 
 	// If we are checking for the absence of a term, and that term
 	// has ungrounded free variables in it, then conclude that the
-	// term is mal-formed, and thus absent.  Perhaps should be throwing
-	// an exception here, for this case, since it is mal-formed.
+	// term is mal-formed.
 	if (0 < get_free_variables(ephem).size())
-		return TruthValue::TRUE_TV();
+		throw SilentException();
 
 	if (as->get_atom(ephem))
 		return TruthValue::FALSE_TV();

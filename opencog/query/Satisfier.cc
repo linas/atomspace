@@ -36,9 +36,14 @@ bool Satisfier::grounding(const HandleMap &var_soln,
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
 
+	if (0 == var_soln.size()) return true;
+
+try {
 	// Record the grounding; we cache this later.
 	if (1 == _varseq.size())
 	{
+printf("duuude varseq=%s\n", oc_to_string(_varseq).c_str());
+printf("duuude varsoln=%s\n", oc_to_string(var_soln).c_str());
 		_ground = var_soln.at(_varseq[0]);
 	}
 	else
@@ -52,6 +57,12 @@ bool Satisfier::grounding(const HandleMap &var_soln,
 		}
 		_ground = createLink(vargnds, LIST_LINK);
 	}
+}
+catch (...)
+{
+printf("duuude ohh noooo\n");
+_ground = Handle();
+}
 
 	// No need to look for more groundings as _result isn't going to change
 	// and opencog::satisfaction_link only needs the value of _result.
