@@ -35,6 +35,7 @@ const std::string UREConfig::top_rbs_name = "URE";
 // Parameters
 const std::string UREConfig::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfig::max_iter_name = "URE:maximum-iterations";
+const std::string UREConfig::fc_retry_sources_name = "URE:FC:retry-sources";
 const std::string UREConfig::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
 const std::string UREConfig::bc_max_bit_size_name = "URE:BC:maximum-bit-size";
 const std::string UREConfig::bc_mm_complexity_penalty_name = "URE:BC:MM:complexity-penalty";
@@ -71,6 +72,11 @@ int UREConfig::get_maximum_iterations() const
 	return _common_params.max_iter;
 }
 
+bool UREConfig::get_retry_sources() const
+{
+	return _fc_params.retry_sources;
+}
+
 double UREConfig::get_complexity_penalty() const
 {
 	return _bc_params.complexity_penalty;
@@ -91,6 +97,13 @@ double UREConfig::get_mm_compressiveness() const
 	return _bc_params.mm_compressiveness;
 }
 
+std::string UREConfig::get_maximum_iterations_str() const
+{
+	if (_common_params.max_iter < 0)
+		return "+inf";
+	return std::to_string(_common_params.max_iter);
+}
+
 void UREConfig::set_attention_allocation(bool aa)
 {
 	_common_params.attention_alloc = aa;
@@ -99,6 +112,11 @@ void UREConfig::set_attention_allocation(bool aa)
 void UREConfig::set_maximum_iterations(int mi)
 {
 	_common_params.max_iter = mi;
+}
+
+void UREConfig::set_retry_sources(bool rs)
+{
+	_fc_params.retry_sources = rs;
 }
 
 void UREConfig::set_complexity_penalty(double cp)
@@ -137,10 +155,18 @@ void UREConfig::fetch_common_parameters(const Handle& rbs)
 {
 	// Retrieve the rules (MemberLinks) and instantiate them
 	for (const Handle& rule_name : fetch_rule_names(rbs))
+    {
+        OC_ASSERT((rule_name->get_type() == DEFINED_SCHEMA_NODE),
+              "The rule: \n%s \n is not a DefinedSchemaNode."
+              "A rule needs an alias and to be defined a DefinedSchemaNode.\n"
+              "Please check rules in /atomspace/examples/rule-engine for example.\n\n",
+              rule_name->to_short_string().c_str());
+
 		_common_params.rules.emplace(rule_name, rbs);
+    }
 
 	// Fetch maximum number of iterations
-	_common_params.max_iter = fetch_num_param(max_iter_name, rbs);
+	_common_params.max_iter = fetch_num_param(max_iter_name, rbs, -1);
 
 	// Fetch attention allocation parameter
 	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
@@ -148,7 +174,9 @@ void UREConfig::fetch_common_parameters(const Handle& rbs)
 
 void UREConfig::fetch_fc_parameters(const Handle& rbs)
 {
-	// None yet
+	// Fetch retry sources parameter
+	_fc_params.retry_sources =
+		fetch_bool_param(fc_retry_sources_name, rbs, true);
 }
 
 void UREConfig::fetch_bc_parameters(const Handle& rbs)
@@ -207,38 +235,46 @@ double UREConfig::fetch_num_param(const string& schema_name,
 {
 	Handle param_schema = _as.add_node(SCHEMA_NODE, schema_name);
 	HandleSeq outputs = fetch_execution_outputs(param_schema, input, NUMBER_NODE);
-	{
-		string input_name = input->get_name();
-		Type input_type = input->get_type();
-		string input_str =
-			classserver().getTypeName(input_type) + " \"" + input_name + "\"";
-		if (outputs.size() == 0) {
-			logger().warn() << "Could not retrieve parameter " << schema_name
-			                << " for rule-based system " << input_name
-			                << ". Use default value " << default_value
-			                << " instead.";
-			return default_value;
-		} else {
-			OC_ASSERT(outputs.size() == 1,
-		          "Could not retrieve parameter %s for rule-based system %s. "
-		          "There should be only one output for\n"
-		          "ExecutionLink\n"
-		          "   SchemaNode \"%s\"\n"
-		          "   %s\n"
-		          "   <N>\n"
-		          "instead there are %u",
-		          schema_name.c_str(), input_name.c_str(),
-		          schema_name.c_str(), input_str.c_str(), outputs.size());
-			return NumberNodeCast(outputs.front())->get_value();
-		}
+
+	if (outputs.size() == 0) {
+		log_param_value(input, schema_name, default_value, true);
+		return default_value;
 	}
+
+	string input_name = input->get_name(),
+		input_type_str = classserver().getTypeName(input->get_type()),
+		input_str = input_type_str + " \"" + input_name + "\"";
+	OC_ASSERT(outputs.size() == 1,
+	          "Could not retrieve parameter %s for rule-based system %s. "
+	          "There should be only one output for\n"
+	          "ExecutionLink\n"
+	          "   SchemaNode \"%s\"\n"
+	          "   %s\n"
+	          "   <value>\n"
+	          "instead there are %u",
+	          schema_name.c_str(), input_name.c_str(),
+	          schema_name.c_str(), input_str.c_str(), outputs.size());
+
+	double value = NumberNodeCast(outputs.front())->get_value();
+	log_param_value(input, schema_name, value);
+	return value;
 }
 
 bool UREConfig::fetch_bool_param(const string& pred_name,
-                                 const Handle& input)
+                                 const Handle& input,
+                                 bool default_value)
 {
-	Handle pred = _as.add_node(PREDICATE_NODE, pred_name);
-	TruthValuePtr tv =
-		_as.add_link(EVALUATION_LINK, pred, input)->getTruthValue();
-	return tv->get_mean() > 0.5;
+	string input_name = input->get_name();
+	Handle pred = _as.get_node(PREDICATE_NODE, pred_name);
+	if (pred) {
+		Handle eval = _as.get_link(EVALUATION_LINK, pred, input);
+		if (eval) {
+			bool value = eval->getTruthValue()->get_mean() > 0.5;
+			log_param_value(input, pred_name, value);
+			return value;
+		}
+	}
+
+	log_param_value(input, pred_name, default_value, true);
+	return default_value;
 }

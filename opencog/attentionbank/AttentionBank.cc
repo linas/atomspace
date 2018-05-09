@@ -24,6 +24,7 @@
 
 #include <functional>
 #include <opencog/util/Config.h>
+#include <opencog/util/mt19937ar.h>
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -34,6 +35,9 @@ using namespace opencog;
 
 AttentionBank::AttentionBank(AtomSpace* asp)
 {
+    // XXX FIXME -- should not use config() to get these values;
+    // The user of this class should call config(), instead!
+
     startingFundsSTI = fundsSTI = config().get_double("STARTING_STI_FUNDS", 100000);
     startingFundsLTI = fundsLTI = config().get_double("STARTING_LTI_FUNDS", 100000);
     stiFundsBuffer = config().get_double("STI_FUNDS_BUFFER", 10000);
@@ -52,12 +56,21 @@ AttentionBank::AttentionBank(AtomSpace* asp)
 
 AttentionBank::~AttentionBank()
 {
-    //_remove_signal->disconnect(_remove_connection);
+    _remove_signal->disconnect(_remove_connection);
 }
 
 void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
 {
-    _importanceIndex.removeAtom(Handle(atom));
+    AFMutex.lock();
+    auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+                [atom](std::pair<Handle, AttentionValuePtr> p)
+                { return p.first == Handle(atom);});
+
+    if (it != attentionalFocus.end())
+        attentionalFocus.erase(it);
+    AFMutex.unlock();
+
+   _importanceIndex.removeAtom(Handle(atom));
 }
 
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
@@ -311,21 +324,19 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
 
 Handle AttentionBank::getRandomAtomNotInAF(void)
 {
-    std::lock_guard<std::mutex> lock(AFMutex);
-    auto find_in_af = [this](const Handle& h){
-       auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
-                [h](std::pair<Handle, AttentionValuePtr> hsp) { return hsp.first == h; });
-       return it;
-    };
+    UnorderedHandleSet atoms_not_in_af = _importanceIndex.getHandleSet(0);
 
-    int count = 50; // We might get stuck in the while loop if there are no atoms outside the AF
-    Handle h = Handle::UNDEFINED;
-    while(find_in_af(h) != attentionalFocus.end() and --count > 0){
-        h = _importanceIndex.getRandomAtom();
+    {
+        std::lock_guard<std::mutex> lock(AFMutex);
+        for (const auto& hsp : attentionalFocus) {
+            atoms_not_in_af.erase(hsp.first);
+        }
     }
-    // Make sure the last selection did not select from the AF.
-    if(find_in_af(h) != attentionalFocus.end())
+
+    if (atoms_not_in_af.empty())
         return Handle::UNDEFINED;
 
-    return h;
+    auto it = atoms_not_in_af.cbegin();
+    std::advance(it, randGen().randint(atoms_not_in_af.size()));
+    return *it;
 }

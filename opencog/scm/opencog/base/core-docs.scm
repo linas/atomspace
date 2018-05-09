@@ -15,8 +15,7 @@
  cog-new-node NODE-TYPE NODE-NAME
     Create a new node of type NODE-TYPE and name NODE-NAME.
 
-    Optionally, a truth value and/or an attention value can follow
-    the node name.
+    Optionally, a truth value can follow the node name.
 
     Throws errors if node-type is not a valid atom type for a node,
     and if node-name is not a string.
@@ -38,9 +37,8 @@
     Returns the node of type NODE-TYPE and name NODE-NAME, if it exists,
     else returns null.
 
-    Optionally, a truth value and/or attention value can follow the
-    node name. If the node exists, then the truth value and/or
-    attention value is modified.
+    Optionally, a truth value can follow the node name. If the node
+    exists, then the truth value is modified.
 
     Throws errors if node-type is not a valid atom type for a node,
     and if node-name is not a string.
@@ -70,12 +68,11 @@
  cog-new-link LINK-TYPE ATOM-1 ... ATOM-N
     Create a new link, of type LINK-TYPE, with the given atoms in the link.
 
-    Optionally, a truth value or an attention value can be included
-    in the list of atoms.
+    Optionally, a truth value can be included in the list of atoms.
 
     Throws errors if the link type is not a valid opencog link type,
-    or if any of the arguments after the link type are not atoms,
-    truth values, attention values, or null.
+    or if any of the arguments after the link type are not atoms or
+    truth values.
 
     Example:
         ; Creates two nodes, and a new link:
@@ -101,13 +98,12 @@
     Returns the link of the given type LINK-TYPE and list of atoms,
     if it exists, else returns null.
 
-    Optionally, a truth value or attention value can be included
-    in the list of atoms. If the link exists, then the truth value
-    and/or attention value is modified.
+    Optionally, a truth value can be included in the list of atoms.
+    If the link exists, then the truth value is modified.
 
     Throws errors if the link type is not a valid opencog link type,
-    or if any of the arguments after the link type are not atoms,
-    truth values, attention values, or null.
+    or if any of the arguments after the link type are not atoms or
+    truth values.
 
     Example:
         ; Create two nodes:
@@ -685,74 +681,6 @@
        #f
 ")
 
-(set-procedure-property! cog-av 'documentation
-"
- cog-av ATOM
-    Return the attention value of ATOM.
-
-    Example:
-       ; Define a node
-       guile> (define x
-                 (cog-new-node 'ConceptNode \"abc\"
-                    (cog-new-av 11 21 0)))
-       guile> (cog-av x)
-       (av 11 21 0)
-       guile> (cog-av? (cog-av x))
-       #t
-")
-
-(set-procedure-property! cog-set-av! 'documentation
-"
- cog-set-av! ATOM AV
-    Set the attention value of ATOM to AV.
-
-    Example:
-       ; Define a node
-       guile> (define x (cog-new-node 'ConceptNode \"def\"))
-       guile> (cog-av x)
-       (av 0 0 0)
-       guile> (cog-set-av! x (cog-new-av 44 55 1))
-       (ConceptNode \"def\" (av 44 55 1))
-       guile> (cog-av x)
-       (av 44 55 1)
-")
-
-(set-procedure-property! cog-inc-vlti! 'documentation
-"
- cog-inc-vlti! ATOM
-    Increase the vlti of ATOM by 1.
-
-    Example:
-       ; Define a node
-       guile> (define x
-                 (cog-new-node 'ConceptNode \"abc\"
-                    (cog-new-av 11 21 0)))
-       guile> (cog-inc-vlti! x)
-       (ConceptNode \"abc\" (av 11 21 1))
-       guile> (cog-av x)
-       (av 11 21 1)
-       guile> (cog-inc-vlti! x)
-       (ConceptNode \"abc\" (av 11 21 2))
-       guile> (cog-av x)
-       (av 11 21 2)
-")
-
-(set-procedure-property! cog-dec-vlti! 'documentation
-"
- cog-dec-vlti! ATOM
-    Decrease the vlti of ATOM by 1.
-
-    Example:
-       ; Define a node
-       guile> (define x
-                 (cog-new-node 'ConceptNode \"abc\"
-                    (cog-new-av 11 21 1)))
-       guile> (cog-dec-vlti! x)
-       (ConceptNode \"abc\" (av 11 21 0))
-       guile> (cog-av x)
-       (av 11 21 0)
-")
-
 (set-procedure-property! cog-av->alist 'documentation
 "
  cog-av->alist AV
@@ -879,43 +807,6 @@
  cog-as ATOM
     Return the atomspace of the ATOM.  If the ATOM does not belong to
     any atomspace, null is returned.
-")
-
-
-
-(set-procedure-property! cog-af 'documentation
-"
- cog-af
-    Return the list of atoms in the AttentionalFocus.
-
-    Example:
-    guile> (cog-af)
-    (ConceptNode \"ArtificialIntelligence\" (av 15752 0 0))
-    (ConceptNode \"Databases\" (av 15752 0 0))
-")
-
-(set-procedure-property! cog-af-size 'documentation
-"
- cog-af-size
-    Return the AttentionalFocus size of the AtomSpace (which is
-    an integer value).
-
-    Example:
-
-    guile> (cog-af-size)
-    100
-")
-
-(set-procedure-property! cog-set-af-size! 'documentation
-"
- cog-set-af-size! AF Size
-    Set the AttentionalFocus Size of the AtomSpace (which is an
-    integer value). Returns the new AttentionalFocus size
-    (which is an integer value).
-
-    Example:
-    guile> (cog-set-af-size! 200)
-    200
 ")
 
 (set-procedure-property! cog-get-types 'documentation

@@ -5,6 +5,7 @@
  *
  * Authors: Misgana Bayetta <misgana.bayetta@gmail.com>  2015
  *          Nil Geisweiller 2015-2016
+ *          Shujing Ke 2018
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -106,6 +107,16 @@ public:
 	void init(const Handle& rule_member);
 	void init(const Handle& rule_alias, const Handle& rbs);
 	void init(const Handle& rule_alias, const Handle& rule, const Handle& rbs);
+
+    /**
+     * Verify if this rule is defined in the required format.
+     * The main purpose is to give user the corresponding warnings and info.
+     * Only verify a normal rule, do not use this function to verify a meta rule.
+     * Current verify items:
+     * 1.If there are multiple conslusions, they also need to be wrapped with one
+     *   single ExecutionOutPutLink, otherwise it won't work for bc.
+     */
+    bool verify_rule();
 	
 	// Comparison
 	bool operator==(const Rule& r) const;
@@ -226,7 +237,8 @@ public:
 	 * now we return both.
 	 */
 	RuleTypedSubstitutionMap unify_source(const Handle& source,
-	                                      const Handle& vardecl=Handle::UNDEFINED) const;
+	                                      const Handle& vardecl=Handle::UNDEFINED,
+	                                      const AtomSpace* queried_as=nullptr) const;
 
 	/**
 	 * Used by the backward chainer. Given a target, generate all rule
@@ -240,7 +252,8 @@ public:
 	 * typed substitutions.
 	 */
 	 RuleTypedSubstitutionMap unify_target(const Handle& target,
-	                                       const Handle& vardecl=Handle::UNDEFINED) const;
+	                                       const Handle& vardecl=Handle::UNDEFINED,
+	                                       const AtomSpace* queried_as=nullptr) const;
 
 	/**
 	 * Remove the typed substitutions from the rule typed substitution map.
@@ -300,7 +313,8 @@ private:
 
 	// Given a typed substitution obtained from typed_substitutions
 	// unify function, generate a new partially substituted rule.
-	Rule substituted(const Unify::TypedSubstitution& ts) const;
+	Rule substituted(const Unify::TypedSubstitution& ts,
+	                 const AtomSpace* queried_as=nullptr) const;
 };
 
 // Debugging helpers see

@@ -92,7 +92,7 @@ protected:
 
 	size_t _num_comps;
 	HandleSeqSeq _components;
-	std::vector<HandleSet> _component_vars;
+	HandleSetSeq _component_vars;
 	HandleSeq _component_patterns;
 
 	void unbundle_clauses(const Handle& body);
@@ -124,7 +124,7 @@ protected:
 	void make_map_recursive(const Handle&, const Handle&);
 	void check_connectivity(const HandleSeqSeq&);
 	void check_satisfiability(const HandleSet&,
-	                          const std::vector<HandleSet>&);
+	                          const HandleSetSeq&);
 
 	void make_term_trees();
 	void make_term_tree_recursive(const Handle&, Handle,
@@ -173,6 +173,10 @@ public:
 	// Return the list of fixed and virtual clauses we are holding.
 	const HandleSeq& get_fixed(void) const { return _fixed; }
 	const HandleSeq& get_virtual(void) const { return _virtual; }
+
+	// Given the queried atomspace, only remove constants if present
+	// in queried_as.
+	void remove_constant_clauses(const AtomSpace& queried_as);
 
 	bool satisfy(PatternMatchCallback&) const;
 

@@ -1,15 +1,19 @@
 
-
 ADD_LIBRARY (attentionbank
+	AFImplicator.cc
 	AtomBins.cc
+	AttentionalFocusCB.cc
 	AttentionBank.cc
+	AttentionSCM.cc
 	AVUtils.cc
 	ImportanceIndex.cc
 	StochasticImportanceDiffusion.cc
 )
 
 TARGET_LINK_LIBRARIES(attentionbank
-	${NO_AS_NEEDED}
+#	${NO_AS_NEEDED}
+	query
+	smob
 	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}

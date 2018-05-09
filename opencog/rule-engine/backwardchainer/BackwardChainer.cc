@@ -85,7 +85,7 @@ void BackwardChainer::do_step()
 	_iteration++;
 
 	ure_logger().debug() << "Iteration " << _iteration
-	                     << "/" << _configReader.get_maximum_iterations();
+	                     << "/" << _configReader.get_maximum_iterations_str();
 
 	expand_bit();
 	fulfill_bit();
@@ -94,7 +94,22 @@ void BackwardChainer::do_step()
 
 bool BackwardChainer::termination()
 {
-	return _configReader.get_maximum_iterations() <= _iteration;
+	bool terminate = false;
+	std::string msg;            // Cause of the termination
+
+	if (_configReader.get_maximum_iterations() == _iteration) {
+		msg = "reached the maximum number of iterations";
+		terminate = true;
+	}
+	else if (not _bit.empty() and _bit.andbits_exhausted()) {
+		msg = "all AndBITS are exhausted";
+		terminate = true;
+	}
+
+	if (terminate)
+		ure_logger().debug() << "Terminate: " << msg;
+
+	return terminate;
 }
 
 Handle BackwardChainer::get_results() const
@@ -255,7 +270,7 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	catch (...) {}
 }
 
-std::vector<double> BackwardChainer::expansion_anbit_weights()
+std::vector<double> BackwardChainer::expansion_andbit_weights()
 {
 	std::vector<double> weights;
 	for (const AndBIT& andbit : _bit.andbits)
@@ -265,7 +280,7 @@ std::vector<double> BackwardChainer::expansion_anbit_weights()
 
 AndBIT* BackwardChainer::select_expansion_andbit()
 {
-	std::vector<double> weights = expansion_anbit_weights();
+	std::vector<double> weights = expansion_andbit_weights();
 
 	// Debug log
 	if (ure_logger().is_debug_enabled()) {
@@ -306,7 +321,7 @@ void BackwardChainer::reduce_bit()
 
 void BackwardChainer::remove_unlikely_expandable_andbit()
 {
-	std::vector<double> weights = expansion_anbit_weights();
+	std::vector<double> weights = expansion_andbit_weights();
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
 	std::vector<double> never_expand_probs;
 
@@ -352,7 +367,7 @@ double BackwardChainer::complexity_factor(const AndBIT& andbit) const
 
 double BackwardChainer::operator()(const AndBIT& andbit) const
 {
-	return (andbit.exhausted ? 0.0 : 1.0)
-		* _andbit_fitness(andbit)
-		* complexity_factor(andbit);
+	if (andbit.exhausted)
+		return 0.0;
+	return _andbit_fitness(andbit) * complexity_factor(andbit);
 }

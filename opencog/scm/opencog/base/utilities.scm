@@ -47,10 +47,11 @@
 ; -- min-element-by-key -- Get maximum element in a list
 ; -- cog-push-atomspace -- Create a temporary atomspace.
 ; -- cog-pop-atomspace -- Delete a temporary atomspace.
-; -- check-name? -- Check if a there is a node with the given name.
 ; -- random-string -- Generate a random string of given length.
 ; -- random-node-name  -- Generate a random name for a node of given type.
-; -- choose-var-name -- Generate a random name for a variable.
+; -- choose-var-name -- Generate a random variable name.
+; -- random-node  -- Generate a random node of given type.
+; -- random-variable -- Generate a random variable.
 ; -- cog-new-flattened-link -- Create flattened link
 ; -- cog-cp -- Copy list of atoms from one atomspace to another
 ; -- cog-cp-all -- Copy all atoms from one atomspace to another
@@ -113,36 +114,6 @@
 	(if (eq? pos-cnt #f) 0 pos-cnt)
 )
 
-; -----------------------------------------------------------------------
-(define-public (cog-set-sti! atom sti)
-"
-  Returns the atom after setting its sti to the given value.
-"
-    (let ((av-alist (cog-av->alist (cog-av atom))))
-        (cog-set-av! atom
-            (av sti (assoc-ref av-alist 'lti) (assoc-ref av-alist 'vlti)))
-    )
-)
-
-(define-public (cog-set-lti! atom lti)
-"
-  Returns the atom after setting its lti to the given value.
-"
-    (let ((av-alist (cog-av->alist (cog-av atom))))
-        (cog-set-av! atom
-            (av (assoc-ref av-alist 'sti) lti (assoc-ref av-alist 'vlti)))
-    )
-)
-
-(define-public (cog-set-vlti! atom vlti)
-"
-  Returns the atom after setting its vlti to the given value.
-"
-    (let ((av-alist (cog-av->alist (cog-av atom))))
-        (cog-set-av! atom
-            (av (assoc-ref av-alist 'sti) (assoc-ref av-alist 'lti) vlti))
-    )
-)
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
 ; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
@@ -283,23 +254,35 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-get-atoms atom-type)
+(define-public (cog-get-atoms atom-type . subtypes)
 "
-  cog-get-atoms -- Return a list of all atoms of type 'atom-type'
 
-  cog-get-atoms atom-type
-  Return a list of all atoms in the atomspace that are of type 'atom-type'
+  cog-get-atoms -- Return a list of all atoms of type 'atom-type', optionally
+                   if its subtypes as well.
 
-  Example usage:
+  Usage: (cog-get-atoms atom-type [subtypes])
+
+  Return a list of all atoms in the atomspace that are of type
+  'atom-type'. If the optional argument 'subtypes' is provided and set
+  to #t, then all atoms of subtypes of `atom-type` are returned as
+  well, otherwise only atoms of type `atom-type` are returned.
+
+  Examples:
+
   (display (cog-get-atoms 'ConceptNode))
   will return and display all atoms of type 'ConceptNode
+
+  (display (cog-get-atoms 'Atom #t))
+  will return and display all atoms, including outgoing duplicates.
 "
 	(let ((lst '()))
 		(define (mklist atom)
 			(set! lst (cons atom lst))
 			#f
 		)
-		(cog-map-type mklist atom-type)
+		(if (and (not (null? subtypes)) (eq? (car subtypes) #t))
+			(for-each (lambda (x) (cog-map-type mklist x)) (cog-get-all-subtypes atom-type))
+			(cog-map-type mklist atom-type))
 		lst
 	)
 )
@@ -1066,18 +1049,6 @@
 		; but I think it helps. Do it twice; once is sometimes not enough.
 		(gc) (gc)))
 
-
-; ---------------------------------------------------------------------
-
-; XXX The below should be removed from the geeneric opencog utilities,
-; and should be copied directly into the code that actually needs this.
-(define-public (check-name? node-name node-type)
-"
- Return #t if there is a node of type node-type with a name "node-name".
-"
-	(not (null? (cog-node node-type node-name)))
-)
-
 ; ---------------------------------------------------------------------
 
 (define-public (random-string str-length)
@@ -1095,34 +1066,58 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (random-node-name node-type random-length prepend-text)
+(define-public (random-node-name node-type random-length prefix)
 "
- Creates a possible name 'node-name' of length 'random-length' for a node
- of type 'node-type'. The 'node-name' is not used with any other node
- of type 'node-type'. Prepend 'prepend-text' to the front.
+  Creates a random node name of type `node-type`, with name `prefix` followed by
+  a random string of length `random-length`. It Makes sure the resulting node
+  did not previously exist in the current atomspace.
 "
+	(define (check-name? node-name node-type)
+	"
+	  Return #t if there is a node of type node-type with name
+      node-name in the current atomspace.
+	"
+		(not (null? (cog-node node-type node-name))))
+
 	(define node-name (random-string random-length))
-	(define prepend-length (string-length prepend-text))
-	(if (> prepend-length 0)
-		(set! node-name (string-append prepend-text node-name))
+	(define prefix-length (string-length prefix))
+	(if (> prefix-length 0)
+		(set! node-name (string-append prefix node-name))
 	)
 	(while (check-name? node-name node-type)
-		(if (> prepend-length 0)
-			(set! node-name (string-append prepend-text (random-string random-length)))
+		(if (> prefix-length 0)
+			(set! node-name (string-append prefix (random-string random-length)))
 			(set! node-name (random-string random-length))
 		)
 	)
 	node-name
 )
 
-; -----------------------------------------------------------------------
-
+;; TODO rename to random-variable-name
 (define-public (choose-var-name)
 "
- Creates name for VariableNodes after checking whether the name is being
- not used by other VariableNode.
+ Creates a new random VariableNode.
 "
     (random-node-name 'VariableNode 36 "$")
+)
+
+; -----------------------------------------------------------------------
+
+(define-public (random-node node-type random-length prefix)
+"
+  Creates a random node of type `node-type`, with name `prefix` followed by
+  a random string of length `random-length`. It Makes sure the resulting node
+  did not previously exist in the current atomspace.
+"
+	(cog-new-node node-type (random-node-name node-type random-length prefix)))
+
+; -----------------------------------------------------------------------
+
+(define-public (random-variable)
+"
+ Creates a new random VariableNode.
+"
+    (random-node 'VariableNode 36 "$")
 )
 
 ; -----------------------------------------------------------------------
@@ -1229,9 +1224,6 @@
 'tv-conf
 'tv-non-null-conf?
 'tv-count
-'cog-set-sti!
-'cog-set-lti!
-'cog-set-vlti!
 'gar
 'gdr
 'gadr
@@ -1275,10 +1267,11 @@
 'cog-atomspace-stack
 'cog-push-atomspace
 'cog-pop-atomspace
-'check-name?
 'random-string
 'random-node-name
 'choose-var-name
+'random-node
+'random-variable
 'cog-new-flattened-link
 'cog-cp
 'cog-cp-all

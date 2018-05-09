@@ -24,6 +24,7 @@
  */
 
 #include <dlfcn.h>
+#include <unistd.h>
 
 #include <boost/filesystem/operations.hpp>
 
@@ -212,7 +213,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // Add default OpenCog module directories to the Python interpreter's path.
     for (int i = 0; config_paths[i] != NULL; ++i)
     {
-        struct stat finfo;
+        struct stat finfo = {};
         stat(config_paths[i], &finfo);
 
         if (S_ISDIR(finfo.st_mode))
@@ -675,7 +676,7 @@ void PythonEval::execute_string(const char* command)
         Py_DECREF(pyResult);
 
     PyObject *f = PySys_GetObject((char *) "stdout");
-    if (f) PyFile_WriteString("\n", f);  // Force a flush
+    if (f) fsync(PyObject_AsFileDescriptor(f));  // Force a flush
 }
 
 int PythonEval::argument_count(PyObject* pyFunction)
