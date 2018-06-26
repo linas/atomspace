@@ -230,7 +230,9 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 		// If we are here, then the pattern contains globs. A glob can
 		// match one or more atoms in a row. Thus, we have a more
 		// complicated search ...
+		var_solutn_stack.push(var_grounding);
 		match = glob_compare(osp, osg);
+		POPSTK(var_solutn_stack, var_grounding);
 	}
 
 	depth --;
