@@ -509,6 +509,7 @@ void MultiUserUTest::do_test_multiuser(void)
 
     printf("Start creating %d user sessions\n", n_threads);
 
+    nstarted = 0;
     std::vector<std::thread> thread_pool;
     for (int i=0; i < n_threads; i++) {
         thread_pool.push_back(
