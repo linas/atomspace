@@ -101,7 +101,7 @@ class SQLAtomStorage::Response
 			_conn = nullptr;
 		}
 
-		void exec(const char * buff)
+		void exec(const char * buff, bool report_error=false)
 		{
 			if (rs) rs->release();
 
@@ -110,11 +110,11 @@ class SQLAtomStorage::Response
 			// Thus, the size of the pool regulates how many outstanding
 			// SQL requests can be pending in parallel.
 			if (nullptr == _conn) _conn = _pool.pop();
-			rs = _conn->exec(buff);
+			rs = _conn->exec(buff, report_error);
 		}
-		void exec(const std::string& str)
+		void exec(const std::string& str, bool report_error=false)
 		{
-			exec(str.c_str());
+			exec(str.c_str(), report_error);
 		}
 
 		// Fetching of atoms -----------------------------------------

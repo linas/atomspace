@@ -247,7 +247,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	std::string qry = cols + vals + coda;
 	{
 		Response rp(conn_pool);
-		rp.exec(qry.c_str());
+		rp.exec(qry, false);
 		if (NULL == rp.rs) try_again = true;
 	}
 
@@ -257,7 +257,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		if (at) store_atomtable_id(*at);
 
 		Response rp(conn_pool);
-		rp.exec(qry.c_str());
+		rp.exec(qry, false);
 	}
 
 	_store_count ++;

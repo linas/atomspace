@@ -93,7 +93,7 @@ LLPGRecordSet * LLPGConnection::get_record_set(void)
 /* =========================================================== */
 
 LLRecordSet *
-LLPGConnection::exec(const char * buff)
+LLPGConnection::exec(const char * buff, bool report_error)
 {
 	if (!is_connected) return NULL;
 
@@ -102,7 +102,8 @@ LLPGConnection::exec(const char * buff)
 	rs->_result = PQexec(_pgconn, buff);
 
 	ExecStatusType rest = PQresultStatus(rs->_result);
-	if (rest != PGRES_COMMAND_OK and
+	if (report_error and
+	    rest != PGRES_COMMAND_OK and
 	    rest != PGRES_EMPTY_QUERY and
 	    rest != PGRES_TUPLES_OK)
 	{

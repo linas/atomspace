@@ -271,7 +271,7 @@ void ODBCConnection::extract_error(const char *msg)
 /* =========================================================== */
 
 LLRecordSet *
-ODBCConnection::exec(const char * buff)
+ODBCConnection::exec(const char * buff, bool report_error)
 {
     if (!is_connected) return NULL;
     ODBCRecordSet* rs = get_record_set();
@@ -331,7 +331,7 @@ ODBCConnection::exec(const char * buff)
         return NULL;
     }
 
-    if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
+    if (report_error and (SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
         PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
         rs->release();
