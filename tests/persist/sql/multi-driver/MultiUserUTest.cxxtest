@@ -98,7 +98,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
         Handle *hl3;
 
         int n_threads;
-        bool spinwait;
+        bool clobber;
 
     public:
 
@@ -138,7 +138,9 @@ class MultiUserUTest :  public CxxTest::TestSuite
         void connect_to_db(int);
         void add_atoms(int);
 
+        void do_test_multiuser(void);
         void test_multiuser(void);
+        void test_clobber(void);
 };
 
 MultiUserUTest:: MultiUserUTest(void)
@@ -291,13 +293,30 @@ void MultiUserUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
         TSM_ASSERT("Missing truth value", tb);
         if (ta and tb)
         {
-            TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
-
-            if (not ((*ta) == (*tb)))
+            if (not clobber)
             {
-                fprintf(stderr, "Error, truth value miscompare, "
-                    "ma=%f mb=%f ca=%f cb=%f\n",
-                    ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
+                TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
+
+                if (not ((*ta) == (*tb)))
+                {
+                    fprintf(stderr, "Error, truth value miscompare, "
+                        "ma=%f mb=%f ca=%f cb=%f\n",
+                        ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
+                }
+            }
+            else
+            {
+                // If clobbering, the counts will surely misconpare!
+                double diff = fabs(ta->get_mean() - tb->get_mean());
+                bool is_ok = (diff < 1.0e-6);
+                TSM_ASSERT("Truth value miscompare", is_ok);
+
+                if (not is_ok)
+                {
+                    fprintf(stderr, "Error, truth value miscompare, "
+                        "ma=%f mb=%f\n",
+                        ta->get_mean(), tb->get_mean());
+                }
             }
         }
     }
@@ -307,7 +326,7 @@ void MultiUserUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 void MultiUserUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
-    id += std::to_string(idx);
+    if (not clobber) id += std::to_string(idx);
 
     // Create an atom ...
     TruthValuePtr stv(CountTruthValue::createTV(0.11, 0.0, 100+idx));
@@ -484,10 +503,8 @@ void MultiUserUTest::run_user_test(int thread_id)
 // ============================================================
 // Perform one repetition of the unit test.
 
-void MultiUserUTest::test_multiuser(void)
+void MultiUserUTest::do_test_multiuser(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
     TSM_ASSERT("Persist Module not loaded", _pm);
 
     printf("Start creating %d user sessions\n", n_threads);
@@ -514,7 +531,21 @@ void MultiUserUTest::test_multiuser(void)
     pm->do_close();
     delete pm;
     delete aspace;
+}
 
+void MultiUserUTest::test_multiuser(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    clobber = false;
+    do_test_multiuser();
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MultiUserUTest::test_clobber(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    clobber = true;
+    do_test_multiuser();
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
