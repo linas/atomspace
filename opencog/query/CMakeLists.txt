@@ -18,7 +18,7 @@ ADD_DEPENDENCIES(query
 
 TARGET_LINK_LIBRARIES(query
 #	lambda
-#	execution
+	execution
 	atomspace
 )
 
