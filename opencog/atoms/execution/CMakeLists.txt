@@ -9,7 +9,6 @@ ENDIF (HAVE_CYTHON)
 ADD_LIBRARY (execution
 	DLScheme.cc
 	Force.cc
-	EvaluatableLink.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc

@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (lambda
 	BindLink.cc
 	DualLink.cc
+	GetLink.cc
 	PatternLink.cc
 	PatternTerm.cc
 	PatternUtils.cc

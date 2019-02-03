@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/pattern/SatisfactionLink.h
+ * opencog/atoms/pattern/GetLink.h
  *
- * Copyright (C) 2015, 2016 Linas Vepstas
+ * Copyright (C) 2019 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,38 +19,40 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _OPENCOG_SATISFACTION_LINK_H
-#define _OPENCOG_SATISFACTION_LINK_H
+#ifndef _OPENCOG_GET_LINK_H
+#define _OPENCOG_GET_LINK_H
 
+#include <opencog/atoms/execution/ExecutableLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/execution/EvaluatableLink.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class SatisfactionLink : public PatternLink, public EvaluatableLink
+class GetLink : public PatternLink, public ExecutableLink
 {
 protected:
 	void init(void);
-public:
-	SatisfactionLink(const HandleSeq&, Type=SATISFACTION_LINK);
-	SatisfactionLink(const Link &l);
 
-	virtual TruthValuePtr evaluate(AtomSpace*) const;
+public:
+	GetLink(const HandleSeq&, Type=GET_LINK);
+	explicit GetLink(const Link &l);
+
+	virtual Handle execute(AtomSpace*, bool silent=false) const;
+
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<SatisfactionLink> SatisfactionLinkPtr;
-static inline SatisfactionLinkPtr SatisfactionLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<SatisfactionLink>(a); }
-static inline SatisfactionLinkPtr SatisfactionLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<SatisfactionLink>(a); }
+typedef std::shared_ptr<GetLink> GetLinkPtr;
+static inline GetLinkPtr GetLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<GetLink>(a); }
+static inline GetLinkPtr GetLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<GetLink>(a); }
 
-#define createSatisfactionLink std::make_shared<SatisfactionLink>
+#define createGetLink std::make_shared<GetLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_SATISFACTION_LINK_H
+#endif // _OPENCOG_GET_LINK_H

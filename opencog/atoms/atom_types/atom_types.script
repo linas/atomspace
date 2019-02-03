@@ -90,6 +90,13 @@ UNORDERED_LINK <- LINK
 // when they are evaluated.
 EVALUATABLE_LINK <- LINK
 
+// Execuatable link. Any link type which might be exectued, resulting
+// in a some atoms, should inherit from this type.  This is a
+// mixin-type, it does nothing by itself, but is used to identify
+// link types that are executable - that is, they return atoms
+// when they are evaluated.
+EXECUTABLE_LINK <- LINK
+
 // Boolean-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be EvaluatableLinks.
 BOOLEAN_LINK <- LINK

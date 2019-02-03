@@ -22,6 +22,7 @@
 #ifndef _OPENCOG_BIND_LINK_H
 #define _OPENCOG_BIND_LINK_H
 
+#include <opencog/atoms/execution/ExecutableLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 
 namespace opencog
@@ -29,7 +30,7 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class BindLink : public PatternLink
+class BindLink : public PatternLink, public ExecutableLink
 {
 protected:
 	void init(void);
@@ -58,6 +59,8 @@ public:
 
 	// Return the cached implication results
 	Handle get_rewrite() const;
+
+	virtual Handle execute(AtomSpace*, bool silent=false) const;
 
 	static Handle factory(const Handle&);
 };

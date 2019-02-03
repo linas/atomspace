@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_EVALUTATABLE_LINK_H
-#define _OPENCOG_EVALUTATABLE_LINK_H
+#ifndef _OPENCOG_EVALUATABLE_LINK_H
+#define _OPENCOG_EVALUATABLE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
 
@@ -37,7 +37,7 @@ class EvaluatableLink
 {
 public:
 	EvaluatableLink() {}
-	virtual TruthValuePtr evaluate(AtomSpace*) = 0;
+	virtual TruthValuePtr evaluate(AtomSpace*) const = 0;
 };
 
 typedef EvaluatableLink* EvaluatableLinkPtr;
@@ -49,4 +49,4 @@ static inline EvaluatableLinkPtr EvaluatableLinkCast(AtomPtr a)
 /** @}*/
 }
 
-#endif // _OPENCOG_EVALUTATABLE_LINK_H
+#endif // _OPENCOG_EVALUATABLE_LINK_H

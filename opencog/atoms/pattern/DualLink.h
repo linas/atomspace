@@ -23,13 +23,14 @@
 #define _OPENCOG_DUAL_LINK_H
 
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/execution/ExecutableLink.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class DualLink : public PatternLink
+class DualLink : public PatternLink, public ExecutableLink
 {
 protected:
 	void init(void);
@@ -37,6 +38,7 @@ public:
 	DualLink(const HandleSeq&, Type=DUAL_LINK);
 	DualLink(const Link &l);
 
+	virtual Handle execute(AtomSpace*, bool silent=false) const;
 	static Handle factory(const Handle&);
 };
 

@@ -24,11 +24,11 @@
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/execution/ExecutableLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/MapLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
-#include <opencog/query/BindLinkAPI.h>
 
 #include "Instantiator.h"
 
@@ -473,7 +473,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
-		return satisfying_set(_as, expr);
+		ExecutableLinkPtr elp(ExecutableLinkCast(expr));
+		return elp->execute(_as);
 	}
 
 	// Ideally, we should not evaluate any EvaluatableLinks.

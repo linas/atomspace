@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/execution/EvaluatableLink.cc
+ * opencog/atoms/execution/ExecutableLink.h
  *
- * Copyright (C) 2009, 2013, 2014, 2015 Linas Vepstas
+ * Copyright (C) 2013,2014,2015,2019 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,18 +20,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/atom_types/atom_types.h>
+#ifndef _OPENCOG_EXECUTABLE_LINK_H
+#define _OPENCOG_EXECUTABLE_LINK_H
 
-#include "EvaluatableLink.h"
+#include <opencog/atoms/base/Link.h>
 
-using namespace opencog;
-
-#if 0
-EvaluatableLink::EvaluatableLink(const Link& l)
+namespace opencog
 {
-	Type tscope = l.get_type();
-	if (not nameserver().isA (EVALUATABLE_LINK, tscope))
-		throw RuntimeException(TRACE_INFO,
-		    "Expecting an EvaluatableLink");
+/** \addtogroup grp_atomspace
+ *  @{
+ */
+
+class AtomSpace;
+
+class ExecutableLink
+{
+public:
+	ExecutableLink() {}
+	virtual Handle execute(AtomSpace*, bool silent=false) const = 0;
+};
+
+typedef ExecutableLink* ExecutableLinkPtr;
+static inline ExecutableLinkPtr ExecutableLinkCast(const Handle& h)
+   { return reinterpret_cast<ExecutableLink*>(h.get()); }
+static inline ExecutableLinkPtr ExecutableLinkCast(AtomPtr a)
+   { return reinterpret_cast<ExecutableLink*>(a.get()); }
+
+/** @}*/
 }
-#endif
+
+#endif // _OPENCOG_EXECUTABLE_LINK_H

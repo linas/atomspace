@@ -51,7 +51,7 @@ SatisfactionLink::SatisfactionLink(const Link &l)
 	init();
 }
 
-TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as)
+TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as) const
 {
 	// Temporary hack alert - fixme. Move the code from libquery to here
 	return satisfaction_link(as, get_handle());
