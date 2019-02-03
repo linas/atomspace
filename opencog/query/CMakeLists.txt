@@ -1,30 +1,40 @@
 
-# Build the query shlib
-ADD_LIBRARY(query
+# Build the query-engine library
+ADD_LIBRARY(query-engine
 	DefaultPatternMatchCB.cc
 	Implicator.cc
 	DefaultImplicator.cc
 	InitiateSearchCB.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
-	PatternSCM.cc
 	Recognizer.cc
 	Satisfier.cc
 )
+ADD_LIBRARY(query
+	PatternSCM.cc
+)
 
-ADD_DEPENDENCIES(query
+ADD_DEPENDENCIES(query-engine
 	opencog_atom_types
 )
 
-TARGET_LINK_LIBRARIES(query
-#	lambda
-	execution
+TARGET_LINK_LIBRARIES(query-engine
 	atomspace
+	execution
 )
 
-INSTALL (TARGETS query 
-    EXPORT AtomSpaceTargets 
-    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+TARGET_LINK_LIBRARIES(query
+	query-engine
+	smob
+)
+
+INSTALL (TARGETS query-engine
+	EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
+INSTALL (TARGETS query
+	EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	BindLinkAPI.h
