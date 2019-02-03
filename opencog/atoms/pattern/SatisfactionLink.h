@@ -30,7 +30,7 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class SatisfactionLink : public PatternLink
+class SatisfactionLink : public PatternLink, public EvaluatableLink
 {
 protected:
 	void init(void);

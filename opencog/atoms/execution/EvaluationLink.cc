@@ -31,7 +31,6 @@
 #include <opencog/atoms/core/TruthValueOfLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/pattern/SatisfactionLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -555,7 +554,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		if (not is_evaluatable_sat(evelnk))
 		{
-			SatisfactionLinkPtr slp(SatisfactionLinkCast(evelnk));
+			EvaluatableLinkPtr slp(EvaluatableLinkCast(evelnk));
 			return slp->evaluate(as);
 		}
 
