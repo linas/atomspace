@@ -42,12 +42,9 @@ public:
 
 typedef EvaluatableLink* EvaluatableLinkPtr;
 static inline EvaluatableLinkPtr EvaluatableLinkCast(const Handle& h)
-   { return (EvaluatableLink*) h.get(); }
-   // { return std::dynamic_cast<EvaluatableLink*>(h.get()); }
-   // { return std::dynamic_pointer_cast<EvaluatableLink>(h); }
+   { return reinterpret_cast<EvaluatableLink*>(h.get()); }
 static inline EvaluatableLinkPtr EvaluatableLinkCast(AtomPtr a)
-   { return (EvaluatableLink*) a.get(); }
-   // { return std::dynamic_cast<EvaluatableLink*>(a.get()); }
+   { return reinterpret_cast<EvaluatableLink*>(a.get()); }
 
 /** @}*/
 }

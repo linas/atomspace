@@ -31,12 +31,12 @@
 #include <opencog/atoms/core/TruthValueOfLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/pattern/SatisfactionLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/BindLinkAPI.h>
 
 #include "DLScheme.h"
 #include "Force.h"
@@ -554,7 +554,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	else if (SATISFACTION_LINK == t)
 	{
 		if (not is_evaluatable_sat(evelnk))
-			return satisfaction_link(as, evelnk);
+		{
+			SatisfactionLinkPtr slp(SatisfactionLinkCast(evelnk));
+			return slp->evaluate(as);
+		}
 
 		// If we are here, the we can optimize: we can evaluate
 		// directly, instead of going through the pattern matcher.

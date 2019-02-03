@@ -9,6 +9,7 @@ ADD_LIBRARY (lambda
 	PatternTerm.cc
 	PatternUtils.cc
 	Pattern.cc
+	SatisfactionLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.

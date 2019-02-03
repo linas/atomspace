@@ -90,6 +90,7 @@ void PatternSCM::init(void)
 	                   "cog-bind-first-n", "query"));
 
 	// A bindlink that returns a TV
+	// Deprecated! Just use cog-evaluate! instead
 	_binders.push_back(new FunctionWrap(do_satlink,
 	                   "cog-satisfy", "query"));
 
