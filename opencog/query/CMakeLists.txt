@@ -17,14 +17,10 @@ ADD_DEPENDENCIES(query
 )
 
 TARGET_LINK_LIBRARIES(query
-	lambda
+#	lambda
+#	execution
 	atomspace
-#	execution # disabled to avoid cyclic dependency
 )
-
-IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(query smob)
-ENDIF (HAVE_GUILE)
 
 INSTALL (TARGETS query 
     EXPORT AtomSpaceTargets 

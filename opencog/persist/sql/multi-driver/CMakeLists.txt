@@ -54,6 +54,7 @@ ADD_EXECUTABLE(sniff
 
 TARGET_LINK_LIBRARIES(sniff
 	persist-sql
+	execution
 )
 IF (ODBC_FOUND)
 	TARGET_LINK_LIBRARIES(sniff persist-odbc)

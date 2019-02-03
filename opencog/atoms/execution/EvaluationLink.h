@@ -24,6 +24,7 @@
 #define _OPENCOG_EVALUTATION_LINK_H
 
 #include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/execution/EvaluatableLink.h>
 
 namespace opencog
 {
@@ -33,7 +34,7 @@ namespace opencog
 
 class AtomSpace;
 
-class EvaluationLink : public FreeLink
+class EvaluationLink : public FreeLink, public EvaluatableLink
 {
 public:
 	EvaluationLink(const HandleSeq&, Type=EVALUATION_LINK);

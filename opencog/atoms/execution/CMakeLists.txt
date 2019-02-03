@@ -8,6 +8,7 @@ ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (execution
 	Force.cc
+	EvaluatableLink.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
@@ -26,10 +27,6 @@ TARGET_LINK_LIBRARIES(execution
 	clearbox
 	${Boost_SYSTEM_LIBRARY}
 )
-
-IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(execution smob)
-ENDIF (HAVE_GUILE)
 
 IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES(execution PythonEval)

@@ -15,6 +15,7 @@ ADD_LIBRARY (lambda
 ADD_DEPENDENCIES(lambda opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(lambda
+	query
 	atomspace
 	atomcore
 	atombase
