@@ -51,9 +51,20 @@ std::string SchemeSmob::to_string(const Handle& h)
 	return handle_to_string(h, 0);
 }
 
+static int doshow=0;
+static std::string last="";
 std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 {
 	if (nullptr == h) return "#<Invalid handle>";
+
+if (0 == indent)
+{
+TruthValuePtr tvp(TruthValue::DEFAULT_TV());
+printf("duuuude start print deftv-cnt=%ld\n", tvp.use_count());
+if (1 == tvp.use_count()) {
+printf("aiee last=%s\n", last.c_str());
+doshow=1; }
+} 
 
 	// Print a scheme expression, so that the output can be saved
 	// to file, and then restored, as needed.
@@ -69,11 +80,22 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 
 		// Print the truth value only after the node name
 		TruthValuePtr tv(h->getTruthValue());
+// printf("duuude node tv=%p use=%ld\n", tv.get(), tv.use_count());
 		if (not tv->isDefaultTV()) {
 			ret += " ";
 			ret += tv_to_string (tv);
 		}
+		tv.reset();
 		ret += ")";
+// if (0 == indent) printf("duuuude its: %s\n", ret.c_str());
+if (0 == indent)
+{
+if (doshow) printf("Aiiieeee last=%s this=%s\n", last.c_str(), ret.c_str());
+TruthValuePtr tvp(TruthValue::DEFAULT_TV());
+printf("duuuude final node print deftv-cnt=%ld\n", tvp.use_count());
+last = ret;
+assert(0==doshow);
+} 
 		return ret;
 	}
 
@@ -84,10 +106,12 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 
 		// If there's a truth value, print it before the other atoms
 		TruthValuePtr tv(h->getTruthValue());
+// printf("duuude link tv=%p use=%ld\n", tv.get(), tv.use_count());
 		if (not tv->isDefaultTV()) {
 			ret += " ";
 			ret += tv_to_string(tv);
 		}
+		tv.reset();
 
 		// Print the outgoing link set.
 		ret += "\n";
@@ -102,6 +126,15 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 		}
 		for (int i=0; i < indent; i++) ret += "   ";
 		ret += ")";
+// if (0 == indent) printf("duuuude its: %s\n", ret.c_str());
+if (0 == indent)
+{
+if (doshow) printf("Aiiieeee last=%s this=%s\n", last.c_str(), ret.c_str());
+TruthValuePtr tvp(TruthValue::DEFAULT_TV());
+printf("duuuude final link print deftv-cnt=%ld\n", tvp.use_count());
+last = ret;
+assert(0==doshow);
+} 
 		return ret;
 	}
 

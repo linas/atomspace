@@ -24,7 +24,9 @@
  */
 
 #include <sstream>
+#include <thread>
 
+#include <assert.h>
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
@@ -45,12 +47,31 @@ std::string TruthValue::to_short_string(const std::string& indent) const
 	return to_string(indent);
 }
 
+static const void* dflt = nullptr;
+
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
 	// True, but no confidence.
 	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
+dflt = (void*) (((long) instance.get()) - 0x10);
+long tid = std::hash<std::thread::id>{}(std::this_thread::get_id());
+printf("duuude get DEFAULT_TV %p static count=%ld tid=%lx\n", dflt, instance.use_count(), tid);
+fflush(stdout);
+// assert (0 < instance.use_count());
 	return instance;
 }
+
+} namespace std {
+void grbstk(void* p, long cnt)
+{
+if (p != opencog::dflt) return;
+long tid = std::hash<std::thread::id>{}(std::this_thread::get_id());
+// printf("duuuude ---> %p %p %ld\n", opencog::dflt, p, cnt);
+printf("duuuude ---> dtor cnt=%ld tid=%lx\n", cnt, tid);
+fflush(stdout);
+assert(2 < cnt);
+}
+} namespace opencog {
 
 TruthValuePtr TruthValue::TRUE_TV()
 {
@@ -76,7 +97,14 @@ TruthValuePtr TruthValue::TRIVIAL_TV()
 bool TruthValue::isDefaultTV() const
 {
 	static TruthValuePtr dtv(DEFAULT_TV());
+if (dtv.get() == this) 
+printf("duuude TV=default use=%ld\n", dtv.use_count());
 	if (dtv.get() == this) return true;
+	if (get_type() == dtv->get_type()) {
+printf("duuude same type. sooo... dtvuse=%ld\n", dtv.use_count());
+printf("defa mean=%f\n", dtv->get_mean());
+printf("this mean=%f\n", get_mean());
+}
 	if (get_type() == dtv->get_type() and
 	    get_mean() == dtv->get_mean() and
 	    get_confidence() == dtv->get_confidence())

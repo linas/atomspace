@@ -45,10 +45,6 @@
 //! Atom flag
 #define FETCHED_RECENTLY        1  //BIT0
 #define MARKED_FOR_REMOVAL      2  //BIT1
-// #define MULTIPLE_TRUTH_VALUES   4  //BIT2
-// #define FIRED_ACTIVATION        8  //BIT3
-// #define HYPOTETHICAL_FLAG       16 //BIT4
-// #define REMOVED_BY_DECAY        32 //BIT5
 #define CHECKED                 64  //BIT6
 
 //#define DPRINTF printf
@@ -123,6 +119,11 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
     TruthValuePtr oldTV(getTruthValue());
 
     // If both old and new are e.g. DEFAULT_TV, then do nothing.
+if (oldTV.get() == newTV.get()) {
+if (oldTV.use_count() != newTV.use_count())
+printf("duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu!! %p\n", oldTV.get());
+}
+
     if (oldTV.get() == newTV.get()) return;
 
     // ... and we still need to make sure that only one thread is
