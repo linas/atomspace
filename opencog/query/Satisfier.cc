@@ -125,6 +125,7 @@ bool SatisfyingSet::grounding(const HandleMap &var_soln,
 		}
 		catch (...)
 		{
+printf("duuuuude oohhh noooo! wtf! %s\n", _varseq[0]->to_string().c_str());
 			throw AssertionException(TRACE_INFO,
 				"Internal error: ungrounded variable %s\n",
 				_varseq[0]->to_string().c_str());

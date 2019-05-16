@@ -86,10 +86,9 @@ private:
 	// var_grounding map accumulates variable groundings for this
 	// clause, and all previous clauses so far.
 
-	// Map of current groundings of variables to their grounds
-	// Also contains grounds of subclauses (not sure why, this seems
-	// to be needed)
-	HandleMap var_grounding;
+	// Map of current groundings of variables (and terms containing
+	// variables) to their grounds.
+	GroundMap _var_grounding;
 	// Map of clauses to their current groundings
 	HandleMap clause_grounding;
 
@@ -178,9 +177,9 @@ private:
 	void solution_drop(void);
 
 	// Stacks containing partial groundings.
+	std::stack<GroundMap> _var_solutn_stack;
 	typedef HandleMap SolnMap;
-	std::stack<SolnMap> var_solutn_stack;
-	std::stack<SolnMap> term_solutn_stack;
+	std::stack<SolnMap> _clause_solutn_stack;
 
 	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;
@@ -211,9 +210,9 @@ private:
 
 	bool tree_compare(const PatternTermPtr&, const Handle&, Caller);
 
-	bool variable_compare(const Handle&, const Handle&);
+	bool variable_compare(const PatternTermPtr&, const Handle&);
 	bool self_compare(const PatternTermPtr&);
-	bool node_compare(const Handle&, const Handle&);
+	bool node_compare(const PatternTermPtr&, const Handle&);
 	bool choice_compare(const PatternTermPtr&, const Handle&);
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);

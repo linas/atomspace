@@ -350,7 +350,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 /// nested ChoiceLinks. So, sadly, this code is fairly complex. :-(
 bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
-                                           const HandleMap& term_gnds,
+                                           const GroundMap& term_gnds,
                                            const HandleSet& varset,
                                            Quotation quotation)
 {
@@ -466,7 +466,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
                                          const Handle& grnd,
-                                         const HandleMap& term_gnds)
+                                         const GroundMap& term_gnds)
 {
 	// Is the pattern same as the ground?
 	// if (ptrn == grnd) return false;
@@ -523,7 +523,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd,
-                                                  const HandleMap& term_gnds)
+                                                  const GroundMap& term_gnds)
 {
 	if (nullptr == grnd) return true; // XXX can this ever happen?
 	if (not is_self_ground(ptrn, grnd, term_gnds, _vars->varset))
@@ -541,7 +541,7 @@ IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
 /* ======================================================== */
 
 bool DefaultPatternMatchCB::eval_term(const Handle& virt,
-                                      const HandleMap& gnds)
+                                      const GroundMap& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
 	// of some sort, so that the atoms can be communicated to scheme or

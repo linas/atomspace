@@ -35,6 +35,8 @@
 namespace opencog {
 class PatternMatchEngine;
 
+typedef std::map<PatternTermPtr, Handle> GroundMap;
+
 /**
  * Callback interface, used to implement specifics of hypergraph
  * matching, and also, to report solutions when found.
@@ -210,7 +212,7 @@ class PatternMatchCallback
 		 * grounding, and forces a backtrack.
 		 */
 		virtual bool evaluate_sentence(const Handle& eval,
-		                               const HandleMap& gnds) = 0;
+		                               const GroundMap& gnds) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.
@@ -230,7 +232,7 @@ class PatternMatchCallback
 		 */
 		virtual bool clause_match(const Handle& pattrn_link_h,
 		                          const Handle& grnd_link_h,
-		                          const HandleMap& term_gnds)
+		                          const GroundMap& term_gnds)
 		{
 			// Reject templates grounded by themselves.
 			if (pattrn_link_h == grnd_link_h) return false;
@@ -253,7 +255,7 @@ class PatternMatchCallback
 		 */
 		virtual bool optional_clause_match(const Handle& pattrn,
 		                                   const Handle& grnd,
-		                                   const HandleMap& term_gnds) = 0;
+		                                   const GroundMap& term_gnds) = 0;
 
 		/**
 		 * Called when a complete grounding for all clauses is found.
@@ -268,8 +270,8 @@ class PatternMatchCallback
 		 * the same result.  This can happen, for example, if there are
 		 * mutiple ways for the pattern to match up to the result.
 		 */
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln) = 0;
+		virtual bool grounding(const GroundMap &var_soln,
+		                       const GroundMap &term_soln) = 0;
 
 		/**
 		 * Called whenever the incoming set of an atom is to be explored.

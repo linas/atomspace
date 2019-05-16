@@ -104,18 +104,19 @@ static inline void log(const Handle& h) {}
 /// which get handled at a higher layer, which has access to the
 /// entire clause. (The clause_match() callback, to be specific).
 ///
-bool PatternMatchEngine::variable_compare(const Handle& hp,
+bool PatternMatchEngine::variable_compare(const PatternTermPtr& ptm,
                                           const Handle& hg)
 {
 	// If we already have a grounding for this variable, the new
 	// proposed grounding must match the existing one. Such multiple
 	// groundings can occur when traversing graphs with loops in them.
-	auto gnd = var_grounding.find(hp);
-	if (var_grounding.end() != gnd)
-		return (gnd->second == hg);
+	auto gnd = _var_grounding.find(ptm);
+	if (_var_grounding.end() != gnd)
+		return (gnd->second->getHandle() == hg);
 
 	// VariableNode had better be an actual node!
 	// If it's not then we are very very confused ...
+	Handle hp(ptm->getHandle());
 	OC_ASSERT (hp->is_node(),
 	           "Expected variable to be a node, got this: %s\n",
 	           hp->to_short_string().c_str());
@@ -133,7 +134,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 		DO_LOG({LAZY_LOG_FINE << "Found grounding of variable:";})
 		logmsg("$$ variable:", hp);
 		logmsg("$$ ground term:", hg);
-		var_grounding[hp] = hg;
+		_var_grounding[ptm] = hg;
 	}
 	return true;
 }
@@ -149,7 +150,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 {
 	const Handle& hp = ptm->getHandle();
-	if (not ptm->isQuoted()) var_grounding[hp] = hp;
+	if (not ptm->isQuoted()) _var_grounding[ptm] = hp;
 
 	logmsg("Compare atom to itself:", hp);
 	return true;
@@ -158,17 +159,18 @@ bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 /* ======================================================== */
 
 /// Compare two nodes, one in the pattern, one proposed grounding.
-bool PatternMatchEngine::node_compare(const Handle& hp,
+bool PatternMatchEngine::node_compare(const PatternTermPtr& ptm,
                                       const Handle& hg)
 {
 	// Call the callback to make the final determination.
+	Handle hp(ptm->getHandle());
 	bool match = _pmc.node_match(hp, hg);
 	if (match)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Found matching nodes";})
 		logmsg("# pattern:", hp);
 		logmsg("# match:", hg);
-		if (hp != hg) var_grounding[hp] = hg;
+		if (hp != hg) _var_grounding[ptm] = hg;
 	}
 	return match;
 }
@@ -200,6 +202,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	//
 	depth ++;
 
+printf("duuuuuuuuuuuuude enter  ordered compare\n");
 	// If the pattern contains no globs, then the pattern and ground
 	// must match exactly, term by term. If the pattern has globs,
 	// perform glob-matching (which can be thought of as a well-defined
@@ -227,6 +230,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 	else
 	{
+printf("duuuuuuuuuuuuude ordered gonna glob compare\n");
 		// If we are here, then the pattern contains globs. A glob can
 		// match one or more atoms in a row. Thus, we have a more
 		// complicated search ...
@@ -698,6 +702,12 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	size_t ip = 0;
 	size_t jg = 0;
 
+printf ("duuuude enter glob compare ospsz=%lu osgsz=%lu\n", osp_size,
+osg_size);
+for (unsigned int i=0; i< osg_size; i++) {
+logger().fine() << "osp = " << osp[i]->getHandle()->to_string();
+logger().fine() << "osg = " << osg[i]->to_string();
+}
 	GlobGrd glob_grd;
 	GlobPosStack glob_pos_stack;
 
@@ -745,7 +755,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		_glob_state[gp] = {glob_grd, glob_pos_stack};
 
 		Handle glp(createLink(glob_seq, LIST_LINK));
-		var_grounding[glob->getHandle()] = glp;
+		_var_grounding[glob] = glp;
 
 		DO_LOG({LAZY_LOG_FINE << "Found grounding of glob:";})
 		logmsg("$$ glob:", glob->getHandle());
@@ -767,6 +777,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	auto r = _glob_state.find(gp);
 	if (r != _glob_state.end())
 	{
+printf("duuude start backtrack\n");
+// return true;
 		backtracking = true;
 
 		solution_pop();
@@ -797,10 +809,13 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			// so check if that's the case. If we have already
 			// grounded it previously, make sure the grounding
 			// here is consistent with the earlier grounding.
-			auto vg = var_grounding.find(ohp);
+			auto vg = _var_grounding.find(glob);
 			if (not backtracking and vg != var_grounding.end())
 			{
 				bool no_match = false;
+logger().fine() << "duuude OK, trying a globber " << ohp->to_string() << "\n";
+logger().fine() << " compare grounding thing " << vg->first  << "\n";
+logger().fine() << " compare grounding value " << vg->second  << "\n";
 
 				// The grounding of a glob is wrapped in a ListLink,
 				// so compare the outgoing set of it.
@@ -1035,19 +1050,18 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
                                       const Handle& hg,
                                       Caller caller)
 {
-	const Handle& hp = ptm->getHandle();
-
 	// Do we already have a grounding for this? If we do, and the
 	// proposed grounding is the same as before, then there is
 	// nothing more to do.
-	auto gnd = var_grounding.find(hp);
-	if (gnd != var_grounding.end()) return (gnd->second == hg);
+	auto gnd = _var_grounding.find(ptm);
+	if (gnd != _var_grounding.end()) return (gnd->second->getHandle() == hg);
 
 	// If the pattern link is executable, then we should execute, and
 	// use the result of that execution. (This isn't implemented yet,
 	// because all variables in an executable link need to be grounded,
 	// before the execution can occur... thus, this needs to be handled
 	// a lot like a VirtualLink.)
+	const Handle& hp = ptm->getHandle();
 	if (is_executable(hp))
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
@@ -1063,7 +1077,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (not ptm->isQuoted())
 	{
 		if (_varlist->varset.end() != _varlist->varset.find(hp))
-			return variable_compare(hp, hg);
+			return variable_compare(ptm, hg);
 
 		// Report other variables that might be found.
 		if (VARIABLE_NODE == tp)
@@ -1084,7 +1098,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If both are nodes, compare them as such.
 	if (hp->is_node() and hg->is_node())
-		return node_compare(hp, hg);
+		return node_compare(ptm, hg);
 
 	// CHOICE_LINK's are multiple-choice links. As long as we can
 	// can match one of the sub-expressions of the ChoiceLink, then
@@ -1203,9 +1217,12 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
+logger().fine() << "duuude Looking upward of term=" << ptm->getHandle()->to_string();
+logger().fine() << "duuude upward of ground=" << hg->to_string();
 	DO_LOG({LAZY_LOG_FINE << "Looking upward for term=" << ptm->to_string()
 	              << " have " << sz << " branches";})
 
+// duude bug is here ........................
 	// Check if the pattern has globs in it.
 	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
 	size_t gstate_size = SIZE_MAX;
@@ -1462,6 +1479,11 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	              << " of clause UUID = " << clause_root.value()
 	              << " has ground, move upwards";})
 
+LAZY_LOG_FINE << "duudue Term = " << ptm->getHandle()->to_string()
+<< " of clause = " << clause_root->to_string()
+<< " has ground, move upwards";
+LAZY_LOG_FINE << "duudue the ground is="<<hg->to_string();
+
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
 		// If we are here, there are four possibilities:
@@ -1512,7 +1534,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 			// the evaluation for the callback.
 // XXX TODO count the number of ungrounded vars !!! (make sure its zero)
 
-			bool found = _pmc.evaluate_sentence(clause_root, var_grounding);
+			bool found = _pmc.evaluate_sentence(clause_root, _var_grounding);
 			DO_LOG({logger().fine("After evaluating clause, found = %d", found);})
 			if (found)
 				return clause_accept(clause_root, hg);
@@ -1575,12 +1597,12 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	if (is_optional(clause_root))
 	{
 		clause_accepted = true;
-		match = _pmc.optional_clause_match(clause_root, hg, var_grounding);
+		match = _pmc.optional_clause_match(clause_root, hg, _var_grounding);
 		DO_LOG({logger().fine("optional clause match callback match=%d", match);})
 	}
 	else
 	{
-		match = _pmc.clause_match(clause_root, hg, var_grounding);
+		match = _pmc.clause_match(clause_root, hg, _var_grounding);
 		DO_LOG({logger().fine("clause match callback match=%d", match);})
 	}
 	if (not match) return false;
@@ -1610,9 +1632,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	bool found = false;
 	if (nullptr == curr_root)
 	{
-		found = _pmc.grounding(var_grounding, clause_grounding);
+		found = _pmc.grounding(_var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
-		DO_LOG(log_solution(var_grounding, clause_grounding);)
+		DO_LOG(log_solution(_var_grounding, clause_grounding);)
 	}
 	else
 	{
@@ -1623,7 +1645,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		              << (is_evaluatable(curr_root)?
 		                  "dynamically evaluatable" : "non-dynamic");
 		logmsg("Joining variable is", joiner);
-		logmsg("Joining grounding is", var_grounding[joiner]); })
+		logmsg("Joining grounding is", _var_grounding[joiner]->getHandle()); })
 
 		// Start solving the next unsolved clause. Note: this is a
 		// recursive call, and not a loop. Recursion is halted when
@@ -1634,7 +1656,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		// and this clause.
 
 		clause_accepted = false;
-		Handle hgnd(var_grounding[joiner]);
+		Handle hgnd(_var_grounding[joiner]->getHandle());
 		OC_ASSERT(nullptr != hgnd, "Error: joining handle has not been grounded yet!");
 		found = explore_clause(joiner, hgnd, curr_root);
 
@@ -1654,7 +1676,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		       (is_optional(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc.optional_clause_match(joiner, undef, var_grounding);
+			bool match = _pmc.optional_clause_match(joiner, undef, _var_grounding);
 			DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
 			if (not match) {
 				clause_stacks_pop();
@@ -1671,8 +1693,8 @@ bool PatternMatchEngine::do_next_clause(void)
 			if (nullptr == curr_root)
 			{
 				DO_LOG({logger().fine("==================== FINITO BANDITO!");
-				log_solution(var_grounding, clause_grounding);})
-				found = _pmc.grounding(var_grounding, clause_grounding);
+				log_solution(_var_grounding, clause_grounding);})
+				found = _pmc.grounding(_var_grounding, clause_grounding);
 			}
 			else
 			{
@@ -1681,6 +1703,7 @@ bool PatternMatchEngine::do_next_clause(void)
 				// we'll loop around back to here again.
 				clause_accepted = false;
 				Handle hgnd = var_grounding[joiner];
+xxxxxxxxxx
 				found = explore_term_branches(joiner, hgnd, curr_root);
 			}
 		}
@@ -1831,8 +1854,13 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	for (const Handle &v : _varlist->varset)
 	{
 		auto gnd = var_grounding.find(v);
+xxxxxxxxxx
 		if (gnd != var_grounding.end())
 		{
+			if (GLOB_NODE == v->get_type())
+			{
+printf("duuude joining var is a glob.\n");
+			}
 			std::size_t incoming_set_size = gnd->second->getIncomingSetSize();
 			thick_vars.insert(std::make_pair(incoming_set_size, v));
 		}
@@ -1916,8 +1944,8 @@ void PatternMatchEngine::clause_stacks_push(void)
 	DO_LOG({logger().fine("--- That's it, now push to stack depth=%d",
 	              _clause_stack_depth);})
 
-	var_solutn_stack.push(var_grounding);
-	term_solutn_stack.push(clause_grounding);
+	_var_solutn_stack.push(_var_grounding);
+	_clause_solutn_stack.push(clause_grounding);
 
 	issued_stack.push(issued);
 	choice_stack.push(_choice_state);
@@ -1938,8 +1966,8 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	_pmc.pop();
 
 	// The grounding stacks are handled differently.
-	POPSTK(term_solutn_stack, clause_grounding);
-	POPSTK(var_solutn_stack, var_grounding);
+	POPSTK(_clause_solutn_stack, clause_grounding);
+	POPSTK(_var_solutn_stack, _var_grounding);
 	POPSTK(issued_stack, issued);
 
 	POPSTK(choice_stack, _choice_state);
@@ -1962,14 +1990,14 @@ void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
 #if 0
-	OC_ASSERT(0 == term_solutn_stack.size());
-	OC_ASSERT(0 == var_solutn_stack.size());
+	OC_ASSERT(0 == _clause_solutn_stack.size());
+	OC_ASSERT(0 == _var_solutn_stack.size());
 	OC_ASSERT(0 == issued_stack.size());
 	OC_ASSERT(0 == choice_stack.size());
 	OC_ASSERT(0 == perm_stack.size());
 #else
-	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
-	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
+	while (!_clause_solutn_stack.empty()) _clause_solutn_stack.pop();
+	while (!_var_solutn_stack.empty()) _var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
 	while (!perm_stack.empty()) perm_stack.pop();
@@ -1978,20 +2006,20 @@ void PatternMatchEngine::clause_stacks_clear(void)
 
 void PatternMatchEngine::solution_push(void)
 {
-	var_solutn_stack.push(var_grounding);
-	term_solutn_stack.push(clause_grounding);
+	_var_solutn_stack.push(_var_grounding);
+	_clause_solutn_stack.push(clause_grounding);
 }
 
 void PatternMatchEngine::solution_pop(void)
 {
-	POPSTK(var_solutn_stack, var_grounding);
-	POPSTK(term_solutn_stack, clause_grounding);
+	POPSTK(_var_solutn_stack, _var_grounding);
+	POPSTK(_clause_solutn_stack, clause_grounding);
 }
 
 void PatternMatchEngine::solution_drop(void)
 {
-	var_solutn_stack.pop();
-	term_solutn_stack.pop();
+	_var_solutn_stack.pop();
+	_clause_solutn_stack.pop();
 }
 
 /* ======================================================== */
@@ -2071,9 +2099,13 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		// Do this *before* exploring the term.
 		bool has_glob = (0 < _pat->globby_holders.count(term));
 		size_t gstate_size = _glob_state.size();
+printf("duuude start work on next clause,this term=%s has_glob=%d globstatesize=%lu\n", 
+term->to_string().c_str(),
+has_glob, gstate_size);
 
 		bool found = explore_term_branches(term, grnd, clause);
 
+printf("duude was clause grounded!? %d\n", found);
 		// If no solution was found, and there are globs, then there may
 		// still be another way to ground the glob differently, to this
 		// same candidate caluse. So try that, and do it until exhausted.
@@ -2098,7 +2130,9 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	if (term->get_type() == VARIABLE_NODE)
 		var_grounding[term] = grnd;
 
-	bool found = _pmc.evaluate_sentence(clause, var_grounding);
+xxxxxxxxxxx
+
+	bool found = _pmc.evaluate_sentence(clause, _var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
 	if (found)
 		return clause_accept(clause, grnd);
@@ -2111,19 +2145,15 @@ void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
 {
 	const Handle& hp = ptm->getHandle();
 
+printf("duuude record grounding %s for %s\n",
+hg->to_string().c_str(),
+hp->to_string().c_str());
 	// If this is a closed pattern, not containing any variables,
 	// then there is no need to save it.
 	if (hp == hg)
 		return;
 
-	// Only record if the pattern is not quoted, otherwise the pattern
-	// is not completely self-contained.
-	if (not ptm->isQuoted())
-		var_grounding[hp] = hg;
-	// If quoted, try one last chance by checking if the quote is
-	// hidden in ptm.
-	else if (const Handle& quote = ptm->getQuote())
-		var_grounding[quote] = hg;
+	_var_grounding[ptm] = hg;
 }
 
 /**
@@ -2133,7 +2163,7 @@ void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
 void PatternMatchEngine::clear_current_state(void)
 {
 	// Clear all state.
-	var_grounding.clear();
+	_var_grounding.clear();
 	clause_grounding.clear();
 
 	depth = 0;
