@@ -1,9 +1,7 @@
 /*
  * AbsentLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
- *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
+ * Copyright (C) 2015, 2019 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -43,39 +41,13 @@ void AbsentLink::setAtomSpace(AtomSpace * as)
 		return;
 	}
 
-	const HandleSeq& oset = _outgoing;
-	for (const Handle& h : oset)
-	{
-		Type t = h->get_type();
-		if (VARIABLE_NODE != t)
-			as->extract_atom(h, true);
-	}
-
-	// The AtomSpace code seems to want this exception, so that
-	// the atom gets deleted from the backingstore too.  But we could
-	// just as easily call `as->delete_atom()` above!?
-	// throw AbsentException();
+	throw InvalidParamException(TRACE_INFO,
+		"Fully grounded AbsentLinks cannot be placed in an AtomSpace! Got %s",
+		to_string().c_str());
 }
 
-#if 0
-/*****
-Hmm. This seems not to be needed, right now.
-****/
-Handle AbsentLink::execute(AtomSpace * as) const
-{
-	const HandleSeq& oset = _outgoing;
-	for (const Handle& h : oset)
-	{
-		Type t = h->get_type();
-		if (VARIABLE_NODE != t)
-			as->removeAtom(h, true);
-	}
-	return Handle::UNDEFINED;
-}
-#endif
-
-AbsentLink::AbsentLink(const HandleSeq& oset)
-	: FreeLink(oset, DELETE_LINK)
+AbsentLink::AbsentLink(const HandleSeq& oset, Type type)
+	: FreeLink(oset, type)
 {
 	init();
 }
@@ -85,7 +57,7 @@ AbsentLink::AbsentLink(const Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, DELETE_LINK))
+	if (not nameserver().isA(tscope, ABSENT_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
@@ -94,5 +66,12 @@ AbsentLink::AbsentLink(const Link &l)
 
 	init();
 }
+
+TruthValuePtr AbsentLink::evaluate(AtomSpace* as, bool uh)
+{
+	return TruthValue::TRUE_TV();
+}
+
+DEFINE_LINK_FACTORY(AbsentLink, ABSENT_LINK)
 
 /* ===================== END OF FILE ===================== */

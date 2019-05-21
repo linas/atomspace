@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore
+	AbsentLink.cc
 	ArityLink.cc
 	Checkers.cc
 	CondLink.cc

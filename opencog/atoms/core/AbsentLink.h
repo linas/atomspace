@@ -51,9 +51,12 @@ protected:
 	void init(void);
 	void setAtomSpace(AtomSpace *);
 public:
-	AbsentLink(const HandleSeq&);
+	AbsentLink(const HandleSeq&, Type=ABSENT_LINK);
 
 	AbsentLink(const Link&);
+
+	virtual TruthValuePtr evaluate(AtomSpace*, bool);
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<AbsentLink> AbsentLinkPtr;

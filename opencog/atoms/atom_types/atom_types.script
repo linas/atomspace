@@ -184,18 +184,6 @@ CHOICE_LINK <- ORDERED_LINK
 //
 PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_LINK
 
-// The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
-// In 'intuitionist logic', the opposite of "true" is not "false",
-// the opposite is "don't know".  ABSENT_LINK is the effective
-// don't-know link.  Currently, it is used during pattern matching
-// to find clauses that may or may not be present: clauses that are
-// optionally present.
-//
-// Just like the PresentLink, it does not make sense to have duplicates
-// in the outgoing set, thus they are removed.  The mechanics of the
-// PresentLink is used to accomplish this.
-ABSENT_LINK <- PRESENT_LINK
-
 // Performance scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
 // them to return.  JoinLink launches multiple threads, and waits for
@@ -283,6 +271,18 @@ FREE_LINK <- ORDERED_LINK
 // a closed sentence; thus it inherits from FreeLink.
 //
 DELETE_LINK <- FREE_LINK
+
+// The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
+// In 'intuitionist logic', the opposite of "true" is not "false",
+// the opposite is "don't know".  ABSENT_LINK is the effective
+// don't-know link.  Currently, it is used during pattern matching
+// to find clauses that may or may not be present: clauses that are
+// optionally present.
+//
+// Semantically, it is more-or-less the same thing as
+// NotLink PresentLink.  Some future day, maybe we should enhance
+// PresentLink to work in just this way.
+ABSENT_LINK <- FREE_LINK,CRISP_OUTPUT_LINK
 
 // Only one "closed" UniqueLink may exist (in the AtomSpace), for a
 // fixed first atom of the link.  Useful for defining state.  Additional
