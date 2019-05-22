@@ -10,6 +10,7 @@
 ;;               (ConceptNode "anything")))
 ;;
 
+(use-modules (opencog) (opencog exec))
 ; ------------------------------------------------------
 
 ; Unit test makes the PresentLink true

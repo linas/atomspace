@@ -69,6 +69,7 @@ AbsentLink::AbsentLink(const Link &l)
 
 TruthValuePtr AbsentLink::evaluate(AtomSpace* as, bool uh)
 {
+printf("duuuuuuude Absent link evaluate!!!\n");
 	return TruthValue::TRUE_TV();
 }
 

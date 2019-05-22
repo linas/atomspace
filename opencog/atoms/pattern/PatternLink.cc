@@ -218,7 +218,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 		auto it = boost::find_if(opts, h_is_in);
 		if (it != opts.end())
 		{
-			_pat.optionals.emplace_back(*it);
+			// _pat.optionals.emplace_back(*it);
 		}
 		else
 		{
@@ -333,6 +333,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		return true;
 	}
 
+return false;
 	// Pull clauses out of an AbsentLink
 	if ((not reverse and ABSENT_LINK == typ) or
 	    (reverse and PRESENT_LINK == typ))
@@ -748,8 +749,8 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 {
 	for (const Handle& h : _pat.mandatory)
 		make_map_recursive(h, h);
-	for (const Handle& h : _pat.optionals)
-		make_map_recursive(h, h);
+//	for (const Handle& h : _pat.optionals)
+//		make_map_recursive(h, h);
 
 	// Save some minor amount of space by erasing those atoms that
 	// participate in only one clause. These atoms cannot be used
@@ -809,11 +810,12 @@ void PatternLink::make_term_trees()
 		PatternTermPtr root_term(std::make_shared<PatternTerm>());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
-	for (const Handle& clause : _pat.optionals)
-	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
-		make_term_tree_recursive(clause, clause, root_term);
-	}
+//	for (const Handle& clause : _pat.optionals)
+//	{
+//		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+//		make_term_tree_recursive(clause, clause, root_term);
+//	}
+
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
