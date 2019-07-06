@@ -99,6 +99,11 @@ if (_environ) printf(" child of %lu", _environ->_uuid);
 printf("\n");
 }
 
+std::atomic<uint64_t> dope(0);
+std::atomic<uint64_t> done(0);
+std::atomic<uint64_t> dall(0);
+std::atomic<uint64_t> glo(0);
+
 AtomTable::~AtomTable()
 {
 printf("duuude dtor atomtable %lu \n", _uuid);
@@ -115,6 +120,8 @@ printf("duuude dtor atomtable %lu \n", _uuid);
            _uuid);
 printf("duuude done dtor atomtable %lu atoms=%lu ina=%lu eva=%lu tev=%lu\n", _uuid,
 Atom::tot.load(), Atom::ina.load(), Atom::eva.load(), Atom::tev.load());
+printf("duuude ----->dup=%lu done=%lu dall=%lu glo=%lu\n", dope.load(),
+done.load(), dall.load(), glo.load());
 }
 
 void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)

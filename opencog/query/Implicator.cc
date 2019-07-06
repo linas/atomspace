@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <atomic>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
@@ -28,6 +29,7 @@
 
 using namespace opencog;
 
+extern std::atomic<uint64_t> dall;
 /**
  * This callback takes the reported grounding, runs it through the
  * instantiator, to create the implicand, and then records the result
@@ -56,11 +58,15 @@ bool Implicator::grounding(const HandleMap &var_soln,
 	try {
 		ValuePtr v(inst.instantiate(implicand, var_soln, true));
 		insert_result(v);
+dall++;
 	} catch (const SilentException& ex) {}
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_set.size() >= max_results);
 }
+
+extern std::atomic<uint64_t> dope;
+extern std::atomic<uint64_t> done;
 
 void Implicator::insert_result(const ValuePtr& v)
 {
@@ -70,6 +76,7 @@ void Implicator::insert_result(const ValuePtr& v)
 		// it becomes visible in other threads.
 		if (v->is_atom())
 		{
+if (_as->get_atom(HandleCast(v))) done++;
 			_result_set.insert(_as->add_atom(HandleCast(v)));
 		}
 		else
@@ -77,6 +84,7 @@ void Implicator::insert_result(const ValuePtr& v)
 			_result_set.insert(v);
 		}
 	}
+else dope++;
 }
 
 /* ===================== END OF FILE ===================== */

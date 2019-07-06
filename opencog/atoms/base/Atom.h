@@ -126,6 +126,7 @@ protected:
     // Byte of bitflags (each bit is a flag).
     // Place this first, so that is shares a word with Type.
     mutable char _flags;
+bool touched;
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
@@ -152,6 +153,7 @@ protected:
     Atom(Type t)
       : Value(t),
         _flags(0),
+touched(false),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
     { eva++; tot++; }

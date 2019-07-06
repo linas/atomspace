@@ -107,6 +107,12 @@ if(_atom_space) ina--;
              nameserver().getTypeName(_type).c_str(), get_hash());
     }
     drop_incoming_set();
+
+int cnt = eva.load();
+int sam=666000;
+if (false and not touched and sam< cnt and cnt < sam+30)
+{ logger().error("not touched: %s",
+nameserver().getTypeName(_type).c_str());}
 }
 
 // ==============================================================
@@ -269,7 +275,7 @@ void Atom::setAtomSpace(AtomSpace *tb)
     _atom_space = tb;
 
 if (nullptr==tb) ina--;
-else { ina++; tev++; }
+else { ina++; tev++; touched = true;}
 }
 
 AtomTable* Atom::getAtomTable() const

@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <atomic>
+
 #include <opencog/util/algorithm.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
@@ -685,6 +687,8 @@ void PatternMatchEngine::perm_pop(void)
 
 /* ======================================================== */
 
+extern std::atomic<uint64_t> glo;
+
 /// Compare the outgoing sets of two trees side-by-side, where
 /// the pattern contains at least one GlobNode.
 bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
@@ -746,6 +750,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 		Handle glp(createLink(glob_seq, LIST_LINK));
 		var_grounding[glob->getHandle()] = glp;
+glo++;
 
 		DO_LOG({LAZY_LOG_FINE << "Found grounding of glob:";})
 		logmsg("$$ glob:", glob->getHandle());
