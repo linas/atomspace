@@ -27,6 +27,7 @@
 #ifndef _OPENCOG_ATOM_H
 #define _OPENCOG_ATOM_H
 
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -109,6 +110,12 @@ class Atom
     friend class SQLAtomStorage;  // Needs to call getAtomTable()
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
+public:
+
+static std::atomic<uint64_t> eva;
+static std::atomic<uint64_t> tev;
+static std::atomic<uint64_t> tot;
+static std::atomic<uint64_t> ina;
 protected:
     //! Sets the AtomSpace in which this Atom is inserted.
     virtual void setAtomSpace(AtomSpace *);
@@ -141,16 +148,13 @@ protected:
      * directly.  Only derived classes (Node, Link) can call this.
      *
      * @param The type of the atom.
-     * @param Outgoing set of the atom, that is, the set of atoms this
-     * atom references. It must be an empty vector if the atom is a node.
-     * @param The truthValue of the atom.
      */
     Atom(Type t)
       : Value(t),
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
-    {}
+    { eva++; tot++; }
 
     // The incoming set is not tracked by the garbage collector;
     // this is required, in order to avoid cyclic references.

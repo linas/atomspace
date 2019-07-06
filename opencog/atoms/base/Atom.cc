@@ -88,8 +88,14 @@ ostream& operator<<(ostream& out, const opencog::IncomingSet& iset)
 
 namespace opencog {
 
+std::atomic<uint64_t> Atom::eva(0);
+std::atomic<uint64_t> Atom::tev(0);
+std::atomic<uint64_t> Atom::tot(0);
+std::atomic<uint64_t> Atom::ina(0);
 Atom::~Atom()
 {
+tot--;
+if(_atom_space) ina--;
     _atom_space = nullptr;
     if (0 < getIncomingSetSize()) {
         // This can't ever possibly happen. If it does, then there is
@@ -261,6 +267,9 @@ void Atom::setAtomSpace(AtomSpace *tb)
     OC_ASSERT (nullptr == _atom_space or tb == nullptr,
                "Atom table is not null!");
     _atom_space = tb;
+
+if (nullptr==tb) ina--;
+else { ina++; tev++; }
 }
 
 AtomTable* Atom::getAtomTable() const

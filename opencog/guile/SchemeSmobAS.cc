@@ -65,10 +65,14 @@ SCM SchemeSmob::make_as(AtomSpace *as)
  */
 void SchemeSmob::release_as (AtomSpace *as)
 {
+printf("duuude gc asked to delete as=%lu\n", as->get_uuid());
 	std::unique_lock<std::mutex> lck(as_mtx);
 	auto has = deleteable_as.find(as);
+if (deleteable_as.end() == has) printf("duuude not tracking as=%lu\n", as->get_uuid());
 	if (deleteable_as.end() == has) return;
 
+printf("duuude delete cand as=%lu use=%d\n", as->get_uuid(),
+deleteable_as[as]);
 	if (0 == deleteable_as[as])
 	{
 		AtomSpace* env = as->get_environ();
@@ -88,6 +92,14 @@ void SchemeSmob::release_as (AtomSpace *as)
 			env = env->get_environ();
 		}
 	}
+printf("duuude post-delete as report\n");
+for (auto pdas: deleteable_as) {
+AtomSpace* das=pdas.first;
+int par = -1;
+if (das->get_environ()) par = das->get_environ()->get_uuid();
+printf("     as=%lu (par=%d) has cnt %d (size=%lu)\n",
+das->get_uuid(), par, pdas.second, das->get_size()); }
+printf("duuude end of as report\n");
 }
 
 /* ============================================================== */
@@ -117,6 +129,14 @@ SCM SchemeSmob::ss_new_as (SCM s)
 		parent = parent->get_environ();
 	}
 
+printf("duuude create as report\n");
+for (auto pdas: deleteable_as) {
+AtomSpace* das=pdas.first;
+int par = -1;
+if (das->get_environ()) par = das->get_environ()->get_uuid();
+printf("     as=%lu (par=%d) has cnt %d (size=%lu)\n",
+das->get_uuid(), par, pdas.second, das->get_size()); }
+printf("duuude end of as report\n");
 	return make_as(as);
 }
 
@@ -353,6 +373,14 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 
 	scm_fluid_set_x(atomspace_fluid, new_as);
 
+printf("duuude set as report\n");
+for (auto pdas: deleteable_as) {
+AtomSpace* das=pdas.first;
+int par = -1;
+if (das->get_environ()) par = das->get_environ()->get_uuid();
+printf("     as=%lu (par=%d) has cnt %d (size=%lu)\n",
+das->get_uuid(), par, pdas.second, das->get_size()); }
+printf("duuude end of as report\n");
 	return old_as;
 }
 

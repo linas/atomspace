@@ -94,10 +94,14 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
     addedTypeConnection =
         _nameserver.typeAddedSignal().connect(
             std::bind(&AtomTable::typeAdded, this, std::placeholders::_1));
+printf("duuude created atomtable %lu", _uuid);
+if (_environ) printf(" child of %lu", _environ->_uuid);
+printf("\n");
 }
 
 AtomTable::~AtomTable()
 {
+printf("duuude dtor atomtable %lu \n", _uuid);
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
     if (_environ) _environ->_num_nested--;
@@ -109,6 +113,8 @@ AtomTable::~AtomTable()
         throw opencog::RuntimeException(TRACE_INFO,
            "AtomTable - deleteing atomtable %lu which has subtables!",
            _uuid);
+printf("duuude done dtor atomtable %lu atoms=%lu ina=%lu eva=%lu tev=%lu\n", _uuid,
+Atom::tot.load(), Atom::ina.load(), Atom::eva.load(), Atom::tev.load());
 }
 
 void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
@@ -134,6 +140,10 @@ void AtomTable::clear_transient()
     // Clear all the atoms
     clear_all_atoms();
 
+int par=-1;
+if (_environ) par = _environ->_uuid;
+printf("duuude clear transient --- %lu par=%d  ===== atoms=%lu ina=%lu eva=%lu tev=%lu\n",
+_uuid, par, Atom::tot.load(), Atom::ina.load(), Atom::eva.load(), Atom::tev.load());
     // Clear the  parent environment and holder atomspace.
     if (_environ) _environ->_num_nested--;
     _environ = NULL;
@@ -158,6 +168,7 @@ void AtomTable::clear_all_atoms()
     // Clear the atoms in the set.
     for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
+Atom::ina--;
         atom_to_clear->_atom_space = nullptr;
 
         // We installed the incoming set; we remove it too.
