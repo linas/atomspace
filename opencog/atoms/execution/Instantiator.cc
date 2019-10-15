@@ -614,6 +614,14 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
 	}
 
+	// Execute any DefinedPredicateNodes
+	// if (nameserver().isA(t, PREDICATE_NODE))
+	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
+	{
+		// return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
+		return expr->execute(_as, silent);
+	}
+
 	// Instantiate.
 	Handle grounded(walk_tree(expr, silent));
 
