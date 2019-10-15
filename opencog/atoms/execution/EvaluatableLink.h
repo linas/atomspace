@@ -9,7 +9,7 @@
 #define _OPENCOG_EVALUATABLE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/exec/EvaluationLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 
 namespace opencog
 {
@@ -27,7 +27,8 @@ public:
 
 	bool is_executable() { return true; }
 	ValuePtr execute(AtomSpace* as, bool silent) {
-	    return EvaluationLink::do_evaluate(as, this->getHandle(), silent);
+		return
+			CastToValue(EvaluationLink::do_evaluate(as, this->get_handle(), silent));
 	}
 
 	static Handle factory(const Handle&);
