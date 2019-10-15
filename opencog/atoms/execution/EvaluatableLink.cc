@@ -10,7 +10,7 @@
 using namespace opencog;
 
 EvaluatableLink::EvaluatableLink(const HandleSeq& oset, Type t)
-    : Link(oset, t)
+	: Link(oset, t)
 {
 	if (not nameserver().isA(t, EVALUATABLE_LINK))
 		throw RuntimeException(TRACE_INFO,
@@ -18,7 +18,7 @@ EvaluatableLink::EvaluatableLink(const HandleSeq& oset, Type t)
 }
 
 EvaluatableLink::EvaluatableLink(const Link& l)
-    : Link(l)
+	: Link(l)
 {
 	Type tscope = l.get_type();
 	if (EVALUATABLE_LINK != tscope)

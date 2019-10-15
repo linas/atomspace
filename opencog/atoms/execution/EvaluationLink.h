@@ -41,7 +41,7 @@ public:
 	EvaluationLink(const Link& l);
 
 	TruthValuePtr evaluate(AtomSpace* as, bool silent) {
-	    return do_evaluate(as, get_handle());
+		return do_evaluate(as, get_handle());
 	}
 
 	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&,
@@ -56,9 +56,9 @@ public:
 
 typedef std::shared_ptr<EvaluationLink> EvaluationLinkPtr;
 static inline EvaluationLinkPtr EvaluationLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<EvaluationLink>(a); }
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<EvaluationLink>(a); }
 static inline EvaluationLinkPtr EvaluationLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<EvaluationLink>(a); }
+	{ return std::dynamic_pointer_cast<EvaluationLink>(a); }
 
 #define createEvaluationLink std::make_shared<EvaluationLink>
 
