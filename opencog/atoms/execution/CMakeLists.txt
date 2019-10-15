@@ -8,9 +8,10 @@ ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (execution
 	DLScheme.cc
-	Force.cc
+	EvaluatableLink.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
+	Force.cc
 	Instantiator.cc
 	MapLink.cc
 	LibraryManager.cc
@@ -35,7 +36,7 @@ INSTALL (TARGETS execution
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
-	Force.h
+	EvaluatableLink.h
 	EvaluationLink.h
 	ExecutionOutputLink.h
 	Instantiator.h

@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_EVALUTATION_LINK_H
-#define _OPENCOG_EVALUTATION_LINK_H
+#ifndef _OPENCOG_EVALUATION_LINK_H
+#define _OPENCOG_EVALUATION_LINK_H
 
 #include <opencog/atoms/core/FreeLink.h>
 
@@ -65,4 +65,4 @@ static inline EvaluationLinkPtr EvaluationLinkCast(AtomPtr a)
 /** @}*/
 }
 
-#endif // _OPENCOG_EVALUTATION_LINK_H
+#endif // _OPENCOG_EVALUATION_LINK_H
