@@ -13,6 +13,7 @@ ADD_LIBRARY (execution
 	ExecutionOutputLink.cc
 	Force.cc
 	Instantiator.cc
+	PredicateNode.cc
 	MapLink.cc
 	LibraryManager.cc
 )
@@ -40,6 +41,7 @@ INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
 	Instantiator.h
+	PredicateNode.h
 	DESTINATION "include/opencog/atoms/execution"
 )
 
