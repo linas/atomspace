@@ -172,6 +172,39 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 
 /* ======================================================== */
 
+bool PatternMatchEngine::sequence_compare(size_t i, size_t sz,
+                                          const PatternTermSeq& osp,
+                                          const HandleSeq& osg)
+{
+	// Perform side-by-side comparison of two sequences.
+	// If LOOPER is defined, then its just a for-loop.
+	// Otherwise, its a recusrive version of the same loop.
+	// ... ongoing experiments ...
+#define LOOPER 1
+#ifdef LOOPER
+	bool match = true;
+	for (; i<sz; i++)
+	{
+		if (not tree_compare(osp[i], osg[i], CALL_ORDER))
+		{
+			match = false;
+			break;
+		}
+	}
+	return match;
+#else
+	// perm_push();
+	bool match = tree_compare(osp[i], osg[i], CALL_ORDER);
+	i++;
+	// If there's more, and we've matched so far,
+	// then explore the rest.
+	if (match and i < sz)
+		match = sequence_compare(i, sz, osp, osg);
+	// perm_pop();
+	return match;
+#endif
+}
+
 /// If the two links are both ordered, its enough to compare them
 /// "side-by-side". Return true if they match, else return false.
 /// See `tree_compare` for a general explanation.
@@ -209,14 +242,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 		else
 		{
 			// Side-by-side recursive compare.
-			for (size_t i=0; i<osp_size; i++)
-			{
-				if (not tree_compare(osp[i], osg[i], CALL_ORDER))
-				{
-					match = false;
-					break;
-				}
-			}
+			match = sequence_compare(0, osp_size, osp, osg);
 		}
 	}
 

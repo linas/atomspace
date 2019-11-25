@@ -241,6 +241,8 @@ private:
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
+	bool sequence_compare(size_t i, size_t sz,
+	                      const PatternTermSeq&, const HandleSeq&);
 
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
