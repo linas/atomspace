@@ -183,7 +183,7 @@ bool PatternMatchEngine::sequence_compare(size_t i, size_t sz,
 #define LOOPER 1
 #ifdef LOOPER
 	bool match = true;
-	for (; i<osp_size; i++)
+	for (; i<sz; i++)
 	{
 		if (not tree_compare(osp[i], osg[i], CALL_ORDER))
 		{
