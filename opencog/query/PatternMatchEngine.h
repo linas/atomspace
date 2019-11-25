@@ -241,6 +241,7 @@ private:
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermPtr&, const Handle&);
+	bool fuzzy_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare_seq(const PatternTermSeq&, const HandleSeq&);
 	bool sequence_compare(size_t i, size_t sz,
 	                      const PatternTermSeq&, const HandleSeq&);

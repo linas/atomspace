@@ -172,22 +172,6 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 
 /* ======================================================== */
 
-bool PatternMatchEngine::sequence_compare(size_t i, size_t sz,
-                                          const PatternTermSeq& osp,
-                                          const HandleSeq& osg)
-{
-	// Perform side-by-side comparison of two sequences.
-	// perm_push();
-	bool match = tree_compare(osp[i], osg[i], CALL_ORDER);
-	i++;
-	// If there's more, and we've matched so far,
-	// then explore the rest.
-	if (match and i < sz)
-		match = sequence_compare(i, sz, osp, osg);
-	// perm_pop();
-	return match;
-}
-
 /// If the term has globs, then more complex matching is needed;
 /// a glob can match one or more atoms in a row.
 /// Return true if they match, else return false.
@@ -197,9 +181,9 @@ bool PatternMatchEngine::glob_compare(const PatternTermPtr& ptm,
 {
 	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	const HandleSeq& osg = hg->getOutgoingSet();
+	const Handle &hp = ptm->getHandle();
 
 	depth ++;
-	const Handle &hp = ptm->getHandle();
 	bool match = glob_compare_seq(osp, osg);
 	depth --;
 
@@ -220,6 +204,48 @@ bool PatternMatchEngine::glob_compare(const PatternTermPtr& ptm,
 	return true;
 }
 
+bool PatternMatchEngine::fuzzy_compare(const PatternTermPtr& ptm,
+                                       const Handle& hg)
+{
+	depth ++;
+	const Handle &hp = ptm->getHandle();
+	bool match = _pmc.fuzzy_match(hp, hg);
+	depth --;
+
+	DO_LOG({LAZY_LOG_FINE << "fuzzy_compare match?=" << match;})
+	if (not match)
+	{
+		_pmc.post_link_mismatch(hp, hg);
+		return false;
+	}
+
+	// If we've found a grounding, lets see if the
+	// post-match callback likes this grounding.
+	match = _pmc.post_link_match(hp, hg);
+	if (not match) return false;
+
+	// If we've found a grounding, record it.
+	record_grounding(ptm, hg);
+
+	return true;
+}
+
+bool PatternMatchEngine::sequence_compare(size_t i, size_t sz,
+                                          const PatternTermSeq& osp,
+                                          const HandleSeq& osg)
+{
+	// Perform side-by-side comparison of two sequences.
+	// perm_push();
+	bool match = tree_compare(osp[i], osg[i], CALL_ORDER);
+	i++;
+	// If there's more, and we've matched so far,
+	// then explore the rest.
+	if (match and i < sz)
+		match = sequence_compare(i, sz, osp, osg);
+	// perm_pop();
+	return match;
+}
+
 /// If the two links are both ordered, its enough to compare them
 /// "side-by-side". Return true if they match, else return false.
 /// See `tree_compare` for a general explanation.
@@ -228,30 +254,10 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 {
 	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	const HandleSeq& osg = hg->getOutgoingSet();
-
-	// The recursion step: traverse down the tree.
-	depth ++;
-
-	// If the pattern contains no globs, then the pattern and ground
-	// must match exactly, with atoms in the outgoing sets pairing up.
-	// If the arity is mis-matched, then perform fuzzy matching.
-
-	bool match = true;
 	const Handle &hp = ptm->getHandle();
-	size_t osg_size = osg.size();
-	size_t osp_size = osp.size();
 
-	// If the arities are mis-matched, do a fuzzy compare instead.
-	if (osp_size != osg_size)
-	{
-		match = _pmc.fuzzy_match(hp, hg);
-	}
-	else
-	{
-		// Side-by-side recursive compare.
-		match = sequence_compare(0, osp_size, osp, osg);
-	}
-
+	depth ++;
+	bool match = sequence_compare(0, osp.size(), osp, osg);
 	depth --;
 	DO_LOG({LAZY_LOG_FINE << "ordered_compare match?=" << match;})
 
@@ -1165,13 +1171,22 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (0 < _pat->globby_terms.count(hp))
 		return glob_compare(ptm, hg);
 
-	// If the two links are both ordered, its enough to compare
-	// them "side-by-side".
-	if (2 > hp->get_arity() or not _nameserver.isA(tp, UNORDERED_LINK))
-		return ordered_compare(ptm, hg);
+	size_t osg_size = hg->get_arity();
+	size_t osp_size = hp->get_arity();
 
-	// If we are here, we are dealing with an unordered link.
-	return unorder_compare(ptm, hg);
+	// If its NOT a glob node, and still the sizes don't match,
+	// then it must be a fuzzy compare.
+	if (osg_size != osp_size)
+		return fuzzy_compare(ptm, hg);
+
+	// If it's an unordered link, and permutations are possible,
+	// then handle them.
+	if (1 < osp_size and _nameserver.isA(tp, UNORDERED_LINK))
+		return unorder_compare(ptm, hg);
+
+	// If we are here, we do a size-by-side compare of ordered links
+	// of matching arity.
+	return ordered_compare(ptm, hg);
 }
 
 /* ======================================================== */
