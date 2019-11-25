@@ -701,14 +701,16 @@ bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm,
 
 void PatternMatchEngine::perm_push(void)
 {
-	perm_stack.push(_perm_state);
+	_perm_state_stack.push(_perm_state);
+	_perm_more_stack.push(_perm_have_more);
 	if (logger().is_fine_enabled())
 		_perm_count_stack.push(_perm_count);
 }
 
 void PatternMatchEngine::perm_pop(void)
 {
-	POPSTK(perm_stack, _perm_state);
+	POPSTK(_perm_state_stack, _perm_state);
+	POPSTK(_perm_more_stack, _perm_have_more);
 	if (logger().is_fine_enabled())
 		POPSTK(_perm_count_stack, _perm_count);
 }
@@ -1561,6 +1563,7 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	DO_LOG({LAZY_LOG_FINE << "Checking term=" << ptm->to_string()
 	              << " for soln by " << hg.value();})
 
+	// perm_push();
 	bool match = tree_compare(ptm, hg, CALL_SOLN);
 
 	if (not match)
@@ -1568,6 +1571,7 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "NO solution for term="
 		              << ptm->to_string()
 		              << " its NOT solved by " << hg.value();})
+		// perm_pop();
 		solution_pop();
 		return false;
 	}
@@ -1579,6 +1583,7 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	// Continue onwards to the rest of the pattern.
 	bool found = do_term_up(ptm, hg, clause_root);
 
+	// perm_pop();
 	solution_pop();
 	return found;
 }
@@ -2235,13 +2240,17 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	OC_ASSERT(0 == var_solutn_stack.size());
 	OC_ASSERT(0 == issued_stack.size());
 	OC_ASSERT(0 == choice_stack.size());
-	OC_ASSERT(0 == perm_stack.size());
+	OC_ASSERT(0 == _perm_state_stack.size());
+	OC_ASSERT(0 == _perm_count_stack.size());
+	OC_ASSERT(0 == _perm_more_stack.size());
 #else
 	while (!_clause_solutn_stack.empty()) _clause_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
-	while (!perm_stack.empty()) perm_stack.pop();
+	while (!_perm_state_stack.empty()) _perm_state_stack.pop();
+	while (!_perm_count_stack.empty()) _perm_count_stack.pop();
+	while (!_perm_more_stack.empty()) _perm_more_stack.pop();
 #endif
 }
 

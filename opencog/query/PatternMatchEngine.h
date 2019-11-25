@@ -128,6 +128,7 @@ private:
 	typedef std::pair<PatternTermPtr, Handle> Unorder; // alt: GndChoice
 	typedef PatternTermSeq Permutation;
 	typedef std::map<Unorder, Permutation> PermState; // alt: ChoiceState
+	typedef std::map<Unorder, int> PermCount;
 
 	PermState _perm_state;
 	Permutation curr_perm(const PatternTermPtr&, const Handle&);
@@ -142,8 +143,13 @@ private:
 	PatternTermPtr _perm_first_term;
 	PatternTermPtr _perm_latest_term;
 	PatternTermPtr _perm_latest_wrap;
-	std::map<Unorder, int> _perm_count;
-	std::stack<std::map<Unorder, int>> _perm_count_stack;
+	PermCount _perm_count;
+
+	std::stack<PermState> _perm_state_stack;
+	std::stack<PermCount> _perm_count_stack;
+	std::stack<bool> _perm_more_stack;
+	void perm_push(void);
+	void perm_pop(void);
 
 	// --------------------------------------------
 	// Glob state management
@@ -193,10 +199,6 @@ private:
 
 	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;
-
-	std::stack<PermState> perm_stack;
-	void perm_push(void);
-	void perm_pop(void);
 
 	// push, pop and clear these states.
 	void clause_stacks_push(void);
