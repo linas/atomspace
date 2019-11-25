@@ -487,7 +487,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	bool has_glob = (0 < _pat->globby_holders.count(hp));
 
 	// They've got to be the same size, at the least!
-	// unless there are globs in the pattern
+	// Unless there are globs in the pattern
 	if (osg.size() != arity and not has_glob)
 		return _pmc.fuzzy_match(hp, hg);
 
@@ -1369,6 +1369,9 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
                                           const Handle& hg,
                                           const Handle& clause_root)
 {
+	DO_LOG({LAZY_LOG_FINE << "Enter odo: "
+	                      << ptm->to_string();})
+
 	if (explore_type_branches(ptm, hg, clause_root))
 		return true;
 
