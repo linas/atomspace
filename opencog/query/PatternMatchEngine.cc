@@ -177,22 +177,6 @@ bool PatternMatchEngine::sequence_compare(size_t i, size_t sz,
                                           const HandleSeq& osg)
 {
 	// Perform side-by-side comparison of two sequences.
-	// If LOOPER is defined, then its just a for-loop.
-	// Otherwise, its a recusrive version of the same loop.
-	// ... ongoing experiments ...
-#define LOOPER 1
-#ifdef LOOPER
-	bool match = true;
-	for (; i<sz; i++)
-	{
-		if (not tree_compare(osp[i], osg[i], CALL_ORDER))
-		{
-			match = false;
-			break;
-		}
-	}
-	return match;
-#else
 	// perm_push();
 	bool match = tree_compare(osp[i], osg[i], CALL_ORDER);
 	i++;
@@ -202,7 +186,38 @@ bool PatternMatchEngine::sequence_compare(size_t i, size_t sz,
 		match = sequence_compare(i, sz, osp, osg);
 	// perm_pop();
 	return match;
-#endif
+}
+
+/// If the term has globs, then more complex matching is needed;
+/// a glob can match one or more atoms in a row.
+/// Return true if they match, else return false.
+/// See `tree_compare` for a general explanation.
+bool PatternMatchEngine::glob_compare(const PatternTermPtr& ptm,
+                                      const Handle& hg)
+{
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
+	const HandleSeq& osg = hg->getOutgoingSet();
+
+	depth ++;
+	const Handle &hp = ptm->getHandle();
+	bool match = glob_compare_seq(osp, osg);
+	depth --;
+
+	DO_LOG({LAZY_LOG_FINE << "glob_compare match?=" << match;})
+	if (not match)
+	{
+		_pmc.post_link_mismatch(hp, hg);
+		return false;
+	}
+
+	// If we've found a grounding, lets see if the
+	// post-match callback likes this grounding.
+	match = _pmc.post_link_match(hp, hg);
+	if (not match) return false;
+
+	// If we've found a grounding, record it.
+	record_grounding(ptm, hg);
+	return true;
 }
 
 /// If the two links are both ordered, its enough to compare them
@@ -219,31 +234,22 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 	// If the pattern contains no globs, then the pattern and ground
 	// must match exactly, with atoms in the outgoing sets pairing up.
-	// If the pattern has globs, then more complex matching is needed;
-	// a glob can match one or more atoms in a row. If there are no
-	// globs, and the arity is mis-matched, then perform fuzzy matching.
+	// If the arity is mis-matched, then perform fuzzy matching.
 
 	bool match = true;
 	const Handle &hp = ptm->getHandle();
-	if (0 < _pat->globby_terms.count(hp))
+	size_t osg_size = osg.size();
+	size_t osp_size = osp.size();
+
+	// If the arities are mis-matched, do a fuzzy compare instead.
+	if (osp_size != osg_size)
 	{
-		match = glob_compare(osp, osg);
+		match = _pmc.fuzzy_match(hp, hg);
 	}
 	else
 	{
-		size_t osg_size = osg.size();
-		size_t osp_size = osp.size();
-
-		// If the arities are mis-matched, do a fuzzy compare instead.
-		if (osp_size != osg_size)
-		{
-			match = _pmc.fuzzy_match(hp, hg);
-		}
-		else
-		{
-			// Side-by-side recursive compare.
-			match = sequence_compare(0, osp_size, osp, osg);
-		}
+		// Side-by-side recursive compare.
+		match = sequence_compare(0, osp_size, osp, osg);
 	}
 
 	depth --;
@@ -563,7 +569,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			// Each different permutation has to start with the
 			// same glob state as before. So save and restore state.
 			std::map<GlobPair, GlobState> saved_glob_state = _glob_state;
-			match = glob_compare(mutation, osg);
+			match = glob_compare_seq(mutation, osg);
 			_glob_state = saved_glob_state;
 		}
 		else
@@ -745,8 +751,8 @@ void PatternMatchEngine::perm_pop(void)
 
 /// Compare the outgoing sets of two trees side-by-side, where
 /// the pattern contains at least one GlobNode.
-bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
-                                      const HandleSeq& osg)
+bool PatternMatchEngine::glob_compare_seq(const PatternTermSeq& osp,
+                                          const HandleSeq& osg)
 {
 	bool match = true;
 	GlobPair gp = {osp, osg};
@@ -1154,6 +1160,10 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	DO_LOG({LAZY_LOG_FINE << "depth=" << depth;})
 	logmsg("tree_compare:", hp);
 	logmsg("to:", hg);
+
+	// Glob compare. Assumes OrderedLink, for now...
+	if (0 < _pat->globby_terms.count(hp))
+		return glob_compare(ptm, hg);
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
