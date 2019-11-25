@@ -172,6 +172,19 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 
 /* ======================================================== */
 
+bool PatternMatchEngine::sequence_compare(size_t i, size_t sz,
+                                          const PatternTermSeq& osp,
+                                          const HandleSeq& osg)
+{
+	bool match = tree_compare(osp[i], osg[i], CALL_ORDER);
+	i++;
+	// If there's more, and we've matched so far,
+	// then explore the rest.
+	if (match and i < sz)
+		return sequence_compare(i, sz, osp, osg);
+	return match;
+}
+
 /// If the two links are both ordered, its enough to compare them
 /// "side-by-side". Return true if they match, else return false.
 /// See `tree_compare` for a general explanation.
@@ -204,19 +217,12 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 		// If the arities are mis-matched, do a fuzzy compare instead.
 		if (osp_size != osg_size)
 		{
-			match = _pmc.fuzzy_match(ptm->getHandle(), hg);
+			match = _pmc.fuzzy_match(hp, hg);
 		}
 		else
 		{
 			// Side-by-side recursive compare.
-			for (size_t i=0; i<osp_size; i++)
-			{
-				if (not tree_compare(osp[i], osg[i], CALL_ORDER))
-				{
-					match = false;
-					break;
-				}
-			}
+			match = sequence_compare(0, osp_size, osp, osg);
 		}
 	}
 
@@ -1437,7 +1443,9 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 {
 	DO_LOG({logger().fine() << "Begin unordered explore of "
 	                        << ptm->to_string();})
-	perm_push();
+
+	// Seems like a push is needed here, but seems to have no effect ...
+	// perm_push();
 	do
 	{
 		// If the pattern was satisfied, then we are done for good.
@@ -1456,7 +1464,7 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 
 	_perm_take_step = false;
 	_perm_have_more = false;
-	perm_pop();
+	// perm_pop();
 	DO_LOG({logger().fine() << "No more permutations of "
 	                        << ptm->to_string();})
 
