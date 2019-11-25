@@ -1435,13 +1435,17 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
+	DO_LOG({logger().fine() << "Begin unordered explore of "
+	                        << ptm->to_string();})
+	perm_push();
 	do
 	{
 		// If the pattern was satisfied, then we are done for good.
 		if (explore_single_branch(ptm, hg, clause_root))
 			return true;
 
-		DO_LOG({logger().fine("Step to next permutation");})
+		DO_LOG({logger().fine() << "Explore next permutation of "
+		                        << ptm->to_string();})
 
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
@@ -1452,7 +1456,9 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 
 	_perm_take_step = false;
 	_perm_have_more = false;
-	DO_LOG({logger().fine("No more unordered permutations");})
+	perm_pop();
+	DO_LOG({logger().fine() << "No more permutations of "
+	                        << ptm->to_string();})
 
 	return false;
 }
@@ -1563,7 +1569,6 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	DO_LOG({LAZY_LOG_FINE << "Checking term=" << ptm->to_string()
 	              << " for soln by " << hg.value();})
 
-	// perm_push();
 	bool match = tree_compare(ptm, hg, CALL_SOLN);
 
 	if (not match)
@@ -1571,7 +1576,6 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "NO solution for term="
 		              << ptm->to_string()
 		              << " its NOT solved by " << hg.value();})
-		// perm_pop();
 		solution_pop();
 		return false;
 	}
@@ -1583,7 +1587,6 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	// Continue onwards to the rest of the pattern.
 	bool found = do_term_up(ptm, hg, clause_root);
 
-	// perm_pop();
 	solution_pop();
 	return found;
 }
