@@ -565,11 +565,18 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		// same results as last time (i.e. a match or eval) and so
 		// neither a `post_link_match()` nor a `post_link_mismatch()`
 		// should be reported.
-		if (nullptr != _perm_take_step and nullptr == _perm_have_more)
+		if (ptm == _perm_take_step and nullptr == _perm_have_more)
 		{
 			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
 			          "Impossible: should have matched!");
 			goto take_next_step;
+		}
+
+		if (ptm != _perm_take_step and nullptr == _perm_have_more)
+		{
+			// OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
+			//          "Impossible: should have matched!");
+			return match;
 		}
 
 		// If we are here, then _take_step is false, because
@@ -599,6 +606,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				              << " of " << num_perms
 				              << " for term=" << ptm->to_string();})
 				_perm_state[Unorder(ptm, hg)] = mutation;
+				_perm_take_step = nullptr;
 				_perm_have_more = ptm;
 				_perm_reset = false;
 				return true;
