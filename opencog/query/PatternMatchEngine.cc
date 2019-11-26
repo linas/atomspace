@@ -572,7 +572,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			goto take_next_step;
 		}
 
-		if (ptm != _perm_take_step and nullptr == _perm_have_more)
+		if (ptm != _perm_take_step and nullptr != _perm_take_step)
 		{
 			// OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
 			//          "Impossible: should have matched!");
@@ -607,7 +607,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				              << " for term=" << ptm->to_string();})
 				_perm_state[Unorder(ptm, hg)] = mutation;
 				_perm_take_step = nullptr;
-				_perm_have_more = ptm;
+				if (nullptr == _perm_have_more or
+					(nullptr != save_have_more and
+					   save_have_more == _perm_have_more))
+				{
+					_perm_have_more = ptm;
+				}
 				_perm_reset = false;
 				return true;
 			}
@@ -639,7 +644,7 @@ take_next_step:
 	_perm_state.erase(Unorder(ptm, hg));
 	_perm_count.erase(Unorder(ptm, hg));
 	// _perm_take_step = nullptr;
-	_perm_have_more = nullptr;
+	_perm_have_more = save_have_more;
 	_perm_reset = false;
 	_perm_latest_term = ptm;
 
@@ -1454,7 +1459,7 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
-		_perm_take_step = ptm;
+		_perm_take_step = _perm_have_more;
 		_perm_have_more = nullptr;
 	}
 	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm);
