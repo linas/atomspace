@@ -238,7 +238,11 @@ bool PatternMatchEngine::sequence_compare(const PatternTermPtr& ptm,
 {
 	// Perform side-by-side comparison of two sequences.
 	DO_LOG({LAZY_LOG_FINE << "Start seq_compare i=" << i << " of " << sz;})
-	// perm_push();
+
+	Type tp = osp[i]->getHandle()->get_type();
+	if (_nameserver.isA(tp, UNORDERED_LINK))
+		perm_push();
+
 	bool match = tree_compare(osp[i], osg[i], CALL_ORDER);
 	DO_LOG({LAZY_LOG_FINE << "Result seq_compare i=" << i << " of " << sz
 	                      << " match?=" << match;})
@@ -544,6 +548,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 	if (nullptr == _perm_first_term) _perm_first_term = ptm;
 
+#if 0
 	// If we are coming up from below, through this particular
 	// ptm, we must not take any steps, or reset it.
 	if (_perm_reset)
@@ -552,6 +557,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		_perm_state.erase(Unorder(ptm, hg));
 		_perm_count.erase(Unorder(ptm, hg));
 	}
+#endif
 
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
@@ -682,7 +688,9 @@ take_next_step:
 	_perm_have_more = false;
 	_perm_reset = false;
 	_perm_latest_term = ptm;
+perm_pop();
 
+#if 0
 	// Implement an "odometer", for iterating on other unordered
 	// links that might occur in series with this one. That is,
 	// wrap around the permutation set for this link, while also
@@ -697,6 +705,7 @@ take_next_step:
 		_perm_take_step = true;
 		return true;
 	}
+#endif
 	return false;
 }
 
