@@ -230,20 +230,42 @@ bool PatternMatchEngine::fuzzy_compare(const PatternTermPtr& ptm,
 	return true;
 }
 
-bool PatternMatchEngine::sequence_compare(size_t i, size_t sz,
+bool PatternMatchEngine::sequence_compare(const PatternTermPtr& ptm,
+                                          const Handle& hg,
+                                          size_t i, size_t sz,
                                           const PatternTermSeq& osp,
                                           const HandleSeq& osg)
 {
 	// Perform side-by-side comparison of two sequences.
 	// perm_push();
 	bool match = tree_compare(osp[i], osg[i], CALL_ORDER);
+	// perm_pop();
 	i++;
+
 	// If there's more, and we've matched so far,
 	// then explore the rest.
 	if (match and i < sz)
-		match = sequence_compare(i, sz, osp, osg);
-	// perm_pop();
-	return match;
+		match = sequence_compare(ptm, hg, i, sz, osp, osg);
+
+	if (not match)
+	{
+		_pmc.post_link_mismatch(ptm->getHandle(), hg);
+		return false;
+	}
+
+	// If we've found a grounding, lets see if the
+	// post-match callback likes this grounding.
+	if (i == sz)
+	{
+		DO_LOG({LAZY_LOG_FINE << "ordered_compare match?=" << match;})
+
+		match = _pmc.post_link_match(ptm->getHandle(), hg);
+		if (not match) return false;
+
+		// We've found a grounding, record it.
+		record_grounding(ptm, hg);
+	}
+	return true;
 }
 
 /// If the two links are both ordered, its enough to compare them
@@ -254,28 +276,12 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 {
 	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	const HandleSeq& osg = hg->getOutgoingSet();
-	const Handle &hp = ptm->getHandle();
 
 	depth ++;
-	bool match = sequence_compare(0, osp.size(), osp, osg);
+	bool match = sequence_compare(ptm, hg, 0, osp.size(), osp, osg);
 	depth --;
-	DO_LOG({LAZY_LOG_FINE << "ordered_compare match?=" << match;})
 
-	if (not match)
-	{
-		_pmc.post_link_mismatch(hp, hg);
-		return false;
-	}
-
-	// If we've found a grounding, lets see if the
-	// post-match callback likes this grounding.
-	match = _pmc.post_link_match(hp, hg);
-	if (not match) return false;
-
-	// If we've found a grounding, record it.
-	record_grounding(ptm, hg);
-
-	return true;
+	return match;
 }
 
 /* ======================================================== */
