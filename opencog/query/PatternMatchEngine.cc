@@ -237,8 +237,11 @@ bool PatternMatchEngine::sequence_compare(const PatternTermPtr& ptm,
                                           const HandleSeq& osg)
 {
 	// Perform side-by-side comparison of two sequences.
+	DO_LOG({LAZY_LOG_FINE << "Start seq_compare i=" << i << " of " << sz;})
 	// perm_push();
 	bool match = tree_compare(osp[i], osg[i], CALL_ORDER);
+	DO_LOG({LAZY_LOG_FINE << "Result seq_compare i=" << i << " of " << sz
+	                      << " match?=" << match;})
 	// perm_pop();
 	i++;
 
