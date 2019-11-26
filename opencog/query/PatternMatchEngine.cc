@@ -493,6 +493,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 	if (nullptr == _perm_first_term) _perm_first_term = ptm;
 
+#if 0
 	// If we are coming up from below, through this particular
 	// ptm, we must not take any steps, or reset it.
 	if (_perm_reset)
@@ -501,6 +502,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		_perm_state.erase(Unorder(ptm, hg));
 		_perm_count.erase(Unorder(ptm, hg));
 	}
+#endif
 
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
@@ -595,7 +597,6 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			{
 				// Even the stack, *without* erasing the discovered grounding.
 				solution_drop();
-				_perm_latest_term = ptm;
 
 				// If the grounding is accepted, record it.
 				record_grounding(ptm, hg);
@@ -606,13 +607,15 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				              << " of " << num_perms
 				              << " for term=" << ptm->to_string();})
 				_perm_state[Unorder(ptm, hg)] = mutation;
-				_perm_take_step = nullptr;
+
 				if (nullptr == _perm_have_more or
 					(nullptr != save_have_more and
 					   save_have_more == _perm_have_more))
 				{
 					_perm_have_more = ptm;
 				}
+				_perm_take_step = nullptr;
+				_perm_latest_term = ptm;
 				_perm_reset = false;
 				return true;
 			}
@@ -648,6 +651,7 @@ take_next_step:
 	_perm_reset = false;
 	_perm_latest_term = ptm;
 
+#if 0
 	// Implement an "odometer", for iterating on other unordered
 	// links that might occur in series with this one. That is,
 	// wrap around the permutation set for this link, while also
@@ -662,6 +666,7 @@ take_next_step:
 		_perm_take_step = ptm;
 		return true;
 	}
+#endif
 	return false;
 }
 
@@ -1273,8 +1278,10 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " propose=" << iset[i]->to_string();})
 
 		PatternTermPtr save_more = _perm_have_more;
+		PatternTermPtr save_take = _perm_take_step;
 		found = explore_type_branches(ptm, Handle(iset[i]), clause_root);
 		_perm_have_more = save_more;
+		_perm_take_step = save_take;
 		if (found) break;
 	}
 
