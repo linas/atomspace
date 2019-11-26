@@ -1422,6 +1422,7 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 
 		DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
 		                      << ptm->to_string();})
+
 		if (explore_type_branches(ptm, hg, clause_root))
 		{
 			return true;
@@ -1466,8 +1467,11 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
-		_perm_take_step = _perm_have_more;
-		_perm_have_more = nullptr;
+		if (_perm_have_more)
+		{
+			_perm_take_step = _perm_have_more;
+			_perm_have_more = nullptr;
+		}
 	}
 	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm);
 
