@@ -488,7 +488,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		return _pmc.fuzzy_match(hp, hg);
 
 	// Test for case A, described above.
-	OC_ASSERT (not (_perm_take_step and _perm_have_more),
+	OC_ASSERT (nullptr == _perm_take_step or nullptr == _perm_have_more,
 	           "Impossible situation! BUG!");
 
 	if (nullptr == _perm_first_term) _perm_first_term = ptm;
@@ -504,7 +504,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
-	bool do_wrap = _perm_take_step;
+	bool do_wrap = (nullptr != _perm_take_step);
+	PatternTermPtr save_have_more = _perm_have_more;
 
 	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
@@ -516,7 +517,9 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		logger().fine("tree_comp RESUME unordered search at %d of %d of term=%s "
 		              "take_step=%d have_more=%d\n",
 		              _perm_count[Unorder(ptm, hg)] + 1, num_perms,
-		              ptm->to_string().c_str(), _perm_take_step, _perm_have_more);
+		              ptm->to_string().c_str(),
+		              nullptr != _perm_take_step,
+		              nullptr != _perm_have_more);
 	}
 #endif
 	do
@@ -551,7 +554,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		// Check for cases 1&2 of description above.
 		// These flags might have been (mis-)set in the
 		// call to `tree_compare()` immediately above.
-		OC_ASSERT(not (_perm_take_step and _perm_have_more),
+		OC_ASSERT(nullptr == _perm_take_step or nullptr ==_perm_have_more,
 		          "This shouldn't happen. Impossible situation! BUG!");
 
 		_perm_reset = false;
@@ -562,7 +565,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		// same results as last time (i.e. a match or eval) and so
 		// neither a `post_link_match()` nor a `post_link_mismatch()`
 		// should be reported.
-		if (_perm_take_step and not _perm_have_more)
+		if (nullptr != _perm_take_step and nullptr == _perm_have_more)
 		{
 			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
 			          "Impossible: should have matched!");
@@ -596,7 +599,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				              << " of " << num_perms
 				              << " for term=" << ptm->to_string();})
 				_perm_state[Unorder(ptm, hg)] = mutation;
-				_perm_have_more = true;
+				_perm_have_more = ptm;
 				_perm_reset = false;
 				return true;
 			}
@@ -613,8 +616,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		              << " for term=" << ptm->to_string();})
 
 take_next_step:
-		_perm_take_step = false; // we are taking the step, so clear the flag.
-		_perm_have_more = false; // start with a clean slate...
+		_perm_take_step = nullptr; // we are taking the step, so clear the flag.
+		_perm_have_more = nullptr; // start with a clean slate...
 		_perm_reset = true;      // reset perms on lower links, too.
 		solution_pop();
 		if (logger().is_fine_enabled())
@@ -627,7 +630,8 @@ take_next_step:
 	             << ptm->to_string() << " do_wrap=" << do_wrap;})
 	_perm_state.erase(Unorder(ptm, hg));
 	_perm_count.erase(Unorder(ptm, hg));
-	_perm_have_more = false;
+	// _perm_take_step = nullptr;
+	_perm_have_more = nullptr;
 	_perm_reset = false;
 	_perm_latest_term = ptm;
 
@@ -641,8 +645,8 @@ take_next_step:
 		bool match = unorder_compare(ptm, hg);
 		if (not match) return false;
 		_perm_latest_wrap = ptm;
-		_perm_have_more = false;
-		_perm_take_step = true;
+		_perm_have_more = nullptr;
+		_perm_take_step = ptm;
 		return true;
 	}
 	return false;
@@ -678,7 +682,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		// Sort into explict std::less<PatternTermPtr>() order, as
 		// otherwise std::next_permutation() will miss some perms.
 		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
-		_perm_take_step = false;
+		_perm_take_step = nullptr;
 		return perm;
 	}
 	return ps->second;
@@ -1255,7 +1259,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 
-		bool save_more = _perm_have_more;
+		PatternTermPtr save_more = _perm_have_more;
 		found = explore_type_branches(ptm, Handle(iset[i]), clause_root);
 		_perm_have_more = save_more;
 		if (found) break;
@@ -1391,10 +1395,10 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 		_perm_have_more = true;
 #endif
 
-	while (_perm_have_more)
+	while (nullptr != _perm_have_more)
 	{
-		_perm_have_more = false;
-		_perm_take_step = true;
+		_perm_take_step = _perm_have_more;
+		_perm_have_more = nullptr;
 
 		DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
 		                      << ptm->to_string();})
@@ -1442,13 +1446,13 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
-		_perm_take_step = true;
-		_perm_have_more = false;
+		_perm_take_step = ptm;
+		_perm_have_more = nullptr;
 	}
 	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm);
 
-	_perm_take_step = false;
-	_perm_have_more = false;
+	_perm_take_step = nullptr;
+	_perm_have_more = nullptr;
 	DO_LOG({logger().fine("No more unordered permutations");})
 
 	return false;
@@ -2468,8 +2472,8 @@ void PatternMatchEngine::clear_current_state(void)
 	_choose_next = true;
 
 	// UnorderedLink state
-	_perm_have_more = false;
-	_perm_take_step = false;
+	_perm_have_more = nullptr;
+	_perm_take_step = nullptr;
 	_perm_reset = false;
 	_perm_have_odometer = false;
 	_perm_first_term = nullptr;
@@ -2517,8 +2521,8 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_choose_next = true;
 
 	// unordered link state
-	_perm_have_more = false;
-	_perm_take_step = false;
+	_perm_have_more = nullptr;
+	_perm_take_step = nullptr;
 	_perm_reset = false;
 	_perm_have_odometer = false;
 	_perm_first_term = nullptr;
