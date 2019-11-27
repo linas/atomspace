@@ -508,6 +508,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	Permutation mutation = curr_perm(ptm, hg);
 	bool do_wrap = (nullptr != _perm_take_step);
 	PatternTermPtr save_have_more = _perm_have_more;
+	PatternTermPtr save_take_step = _perm_take_step;
+
+DO_LOG({LAZY_LOG_FINE << "duude upon entry takestep="
+ << ((_perm_take_step==nullptr) ? "nullptr" :_perm_take_step->to_string())
+ << " havemore="
+ << ((_perm_have_more==nullptr) ? "nullptr" :_perm_have_more->to_string());})
 
 	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
@@ -571,15 +577,27 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		{
 			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
 			          "Impossible: should have matched!");
+DO_LOG({LAZY_LOG_FINE << "duude take step ";})
 			goto take_next_step;
 		}
 
 		if (ptm != _perm_take_step and nullptr != _perm_take_step)
 		{
+DO_LOG({LAZY_LOG_FINE << "duude not take step because not term="
+              << ((_perm_take_step==nullptr) ? "nullptr" :_perm_take_step->to_string())
+              << " repeat "
+              << _perm_count[Unorder(ptm, hg)] + 1
+              << " of " << num_perms
+              << " for term=" << ptm->to_string();})
 			// OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
 			//          "Impossible: should have matched!");
 			return match;
 		}
+
+DO_LOG({LAZY_LOG_FINE << "duude neither takestep="
+      << ((_perm_take_step==nullptr) ? "nullptr" :_perm_take_step->to_string())
+      << " havemore="
+      << ((_perm_have_more==nullptr) ? "nullptr" :_perm_have_more->to_string());})
 
 		// If we are here, then _take_step is false, because
 		// cases 1,2,3,4 already handled above.
@@ -608,6 +626,10 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				              << " for term=" << ptm->to_string();})
 				_perm_state[Unorder(ptm, hg)] = mutation;
 
+DO_LOG({LAZY_LOG_FINE << "duude goodier takestep="
+ << ((_perm_take_step==nullptr) ? "nullptr" :_perm_take_step->to_string())
+ << " havemore="
+ << ((_perm_have_more==nullptr) ? "nullptr" :_perm_have_more->to_string());})
 				if (nullptr == _perm_have_more or
 					(nullptr != save_have_more and
 					   save_have_more == _perm_have_more))
@@ -646,8 +668,12 @@ take_next_step:
 	             << ptm->to_string() << " do_wrap=" << do_wrap;})
 	_perm_state.erase(Unorder(ptm, hg));
 	_perm_count.erase(Unorder(ptm, hg));
-	// _perm_take_step = nullptr;
+	// _perm_take_step = save_take_step;
 	_perm_have_more = save_have_more;
+DO_LOG({LAZY_LOG_FINE << "duude exhaust takestep="
+ << ((_perm_take_step==nullptr) ? "nullptr" :_perm_take_step->to_string())
+ << " havemore="
+ << ((_perm_have_more==nullptr) ? "nullptr" :_perm_have_more->to_string());})
 	_perm_reset = false;
 	_perm_latest_term = ptm;
 
@@ -1280,6 +1306,14 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		PatternTermPtr save_more = _perm_have_more;
 		PatternTermPtr save_take = _perm_take_step;
 		found = explore_type_branches(ptm, Handle(iset[i]), clause_root);
+DO_LOG({LAZY_LOG_FINE << "duude pops havemore from="
+  << ((_perm_have_more==nullptr) ? "nullptr" :_perm_have_more->to_string())
+  << " to="
+  << ((save_more==nullptr) ? "nullptr" :save_more->to_string());})
+DO_LOG({LAZY_LOG_FINE << "duude pops takestep from="
+  << ((_perm_take_step==nullptr) ? "nullptr" :_perm_take_step->to_string())
+  << " to="
+  << ((save_take==nullptr) ? "nullptr" :save_take->to_string());})
 		_perm_have_more = save_more;
 		_perm_take_step = save_take;
 		if (found) break;
@@ -1422,9 +1456,16 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 
 		DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
 		                      << ptm->to_string();})
+DO_LOG({LAZY_LOG_FINE << "duude at contnue time taker="
+ << ((_perm_take_step==nullptr) ? "nullptr" :_perm_take_step->to_string());})
 
 		if (explore_type_branches(ptm, hg, clause_root))
 		{
+DO_LOG({LAZY_LOG_FINE << "duude post continue exploration take="
+ << ((_perm_take_step==nullptr) ? "nullptr" :_perm_take_step->to_string())
+ << " havemore="
+ << ((_perm_have_more==nullptr) ? "nullptr" :_perm_have_more->to_string());})
+
 			return true;
 		}
 		if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
