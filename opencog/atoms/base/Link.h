@@ -52,6 +52,7 @@ class Link : public Atom
 
 private:
     void init(const HandleSeq&);
+    void init(const HandleSeq&&);
 
 protected:
     //! Array holding actual outgoing set of the link.
@@ -80,50 +81,31 @@ public:
     Link(Type t)
         : Atom(t)
     {
-        HandleSeq oset;
-        init(oset);
+        init(HandleSeq());
     }
 
 	Link(Type t, const Handle& h)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(1);
-        oset[0] = h;
-        init(oset);
+        init({h});
     }
 
     Link(Type t, const Handle& ha, const Handle &hb)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(2);
-        oset[0] = ha;
-        oset[1] = hb;
-        init(oset);
+        init({ha, hb});
     }
 
     Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(3);
-        oset[0] = ha;
-        oset[1] = hb;
-        oset[2] = hc;
-        init(oset);
+        init({ha, hb, hc});
     }
     Link(Type t, const Handle& ha, const Handle &hb,
 	      const Handle &hc, const Handle &hd)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(4);
-        oset[0] = ha;
-        oset[1] = hb;
-        oset[2] = hc;
-        oset[3] = hd;
-        init(oset);
+        init({ha, hb, hc, hd});
     }
 
     /**
@@ -150,7 +132,7 @@ public:
 
     virtual size_t size() const {
         size_t size = 1;
-        for (const Handle&h : _outgoing)
+        for (const Handle& h : _outgoing)
             size += h->size();
         return size;
     }

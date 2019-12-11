@@ -50,6 +50,17 @@ void Link::init(const HandleSeq& outgoingVector)
     _outgoing = outgoingVector;
 }
 
+void Link::init(const HandleSeq&& outgoingVector)
+{
+    if (not nameserver().isA(_type, LINK)) {
+        throw InvalidParamException(TRACE_INFO,
+            "Link ctor: Atom type is not a Link: '%d' %s.",
+            _type, nameserver().getTypeName(_type).c_str());
+    }
+
+    _outgoing = std::move(outgoingVector);
+}
+
 Link::~Link()
 {
     DPRINTF("Deleting link:\n%s\n", this->to_string().c_str());
