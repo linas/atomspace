@@ -164,6 +164,7 @@ public:
      *                  the outgoing set of the link
      */
     Handle add_link(Type t, const HandleSeq& outgoing, bool&& async=false);
+    Handle add_link(Type t, const HandleSeq&& outgoing, bool&& async=false);
 
     inline Handle add_link(Type t)
     {

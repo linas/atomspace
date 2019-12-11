@@ -324,6 +324,26 @@ Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool&& async)
     return rh;
 }
 
+Handle AtomSpace::add_link(Type t, const HandleSeq&& outgoing, bool&& async)
+{
+    // Cannot add atoms to a read-only atomspace. But if it's already
+    // in the atomspace, return it.
+    if (_read_only) return _atom_table.getHandle(t, outgoing);
+
+    // If it is a DeleteLink, then the addition will fail. Deal with it.
+    Handle rh;
+    try {
+        rh = _atom_table.add(createLink(outgoing, t), async);
+    }
+    catch (const DeleteException& ex) {
+        if (_backing_store) {
+           Handle h(createLink(outgoing, t));
+           _backing_store->removeAtom(h, false);
+        }
+    }
+    return rh;
+}
+
 Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
 {
     return _atom_table.getHandle(t, outgoing);
