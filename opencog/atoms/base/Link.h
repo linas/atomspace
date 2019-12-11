@@ -78,6 +78,12 @@ public:
         init(oset);
     }
 
+    Link(const HandleSeq&& oset, Type t=LINK)
+        : Atom(t)
+    {
+        init(oset);
+    }
+
     Link(Type t)
         : Atom(t)
     {
