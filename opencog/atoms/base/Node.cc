@@ -42,6 +42,17 @@ void Node::init(const std::string& cname)
     _name = cname;
 }
 
+void Node::init(const std::string&& cname)
+{
+    if (not nameserver().isA(_type, NODE))
+    {
+        throw InvalidParamException(TRACE_INFO,
+            "Node - Invalid node type '%d' %s.",
+            _type, nameserver().getTypeName(_type).c_str());
+    }
+    _name = std::move(cname);
+}
+
 /// Return a universally-unique string for each distinct node.
 /// It needs to be fast, to be human-readable, and without any
 /// trailing newlines.
