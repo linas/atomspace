@@ -234,8 +234,9 @@ static inline LinkPtr LinkCast(const AtomPtr& a)
 template< class... Args >
 Handle createLink( Args&&... args )
 {
-	// Do we need to say (std::forward<Args>(args)...) instead ???
-	LinkPtr tmp(std::make_shared<Link>(args ...));
+	// Using std::forward<Args>(args) ... instead of args ...
+	// seems to be the right thing to do!?
+	LinkPtr tmp(std::make_shared<Link>(std::forward<Args>(args) ...));
 	return classserver().factory(tmp->get_handle());
 }
 
