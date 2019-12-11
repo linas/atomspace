@@ -290,7 +290,7 @@ Handle AtomSpace::add_atom(const Handle& h, bool async)
 }
 
 Handle AtomSpace::add_node(Type t, const string& name,
-                           bool async)
+                           bool&& async)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
@@ -304,7 +304,7 @@ Handle AtomSpace::get_node(Type t, const string& name)
     return _atom_table.getHandle(t, name);
 }
 
-Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
+Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool&& async)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
