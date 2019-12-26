@@ -70,15 +70,18 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 	return false;
 }
 
-bool Recognizer::initiate_search(PatternMatchEngine* pme)
+bool Recognizer::initiate_search(void)
 {
+	PatternMatchEngine pme(*this);
+	pme.set_pattern(*_vars, *_pattern);
+
 	const HandleSeq& clauses = _pattern->mandatory;
 
 	_cnt = 0;
 	for (const Handle& h: clauses)
 	{
 		_root = h;
-		bool found = do_search(pme, h);
+		bool found = do_search(&pme, h);
 		if (found) return true;
 	}
 	return false;

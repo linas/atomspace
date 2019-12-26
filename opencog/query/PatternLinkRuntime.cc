@@ -103,9 +103,9 @@ class PMCGroundings : public PatternMatchCallback
 			_cb.set_pattern(vars, pat);
 		}
 
-		bool initiate_search(PatternMatchEngine* pme)
+		bool initiate_search(void)
 		{
-			return _cb.initiate_search(pme);
+			return _cb.initiate_search();
 		}
 
 		bool search_finished(bool done)
@@ -325,13 +325,10 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// in a direct fashion.
 	if (_num_comps <= 1)
 	{
-		PatternMatchEngine pme(pmcb);
-
 		debug_log();
 
-		pme.set_pattern(_variables, _pat);
 		pmcb.set_pattern(_variables, _pat);
-		bool found = pmcb.initiate_search(&pme);
+		bool found = pmcb.initiate_search();
 
 #ifdef DEBUG
 		logger().fine("================= Done with Search =================");
