@@ -202,6 +202,11 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
 /// then return a handle to that link; else return the null handle.
 Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
+    // If it's unordered, we have to run the ctor to get the
+    // correct sort order for the outging set. Oh well.
+    if (_nameserver.isA(t, UNORDERED_LINK))
+        return getHandle(createLink(seq, t));
+
     ContentHash ch = Link::compute_hash(t, seq);
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
