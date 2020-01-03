@@ -176,16 +176,48 @@ void AtomTable::clear()
     clear_all_atoms();
 }
 
+/// If a node of the given type and name exists in the Table,
+/// then return a handle to that node; else return the null handle.
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
-    AtomPtr a(createNode(t,n));
-    return lookupHandle(a);
+    ContentHash ch = Node::compute_hash(t, n);
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    auto range = _atom_store.equal_range(ch);
+    auto bkt = range.first;
+    auto end = range.second;
+    for (; bkt != end; bkt++) {
+        AtomPtr ap(bkt->second);
+        if (ap->get_type() == t and ap->get_name() == n)
+            return bkt->second;
+    }
+
+    if (_environ)
+        return _environ->getHandle(t, n);
+
+    return Handle::UNDEFINED;
 }
 
+/// If a link of the given type and outset exists in the Table,
+/// then return a handle to that link; else return the null handle.
 Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
-    AtomPtr a(createLink(seq, t));
-    return lookupHandle(a);
+    ContentHash ch = Link::compute_hash(t, seq);
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    auto range = _atom_store.equal_range(ch);
+    auto bkt = range.first;
+    auto end = range.second;
+    for (; bkt != end; bkt++) {
+        AtomPtr ap(bkt->second);
+        if (ap->get_type() == t and ap->getOutgoingSet() == seq)
+            return bkt->second;
+    }
+
+    if (_environ)
+        return _environ->getHandle(t, seq);
+
+    return Handle::UNDEFINED;
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If

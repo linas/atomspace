@@ -231,7 +231,7 @@ public:
      */
     virtual bool operator<(const Atom&) const;
 
-    static ContentHash compute_hash(const HandleSeq&, Type);
+    static ContentHash compute_hash(Type, const HandleSeq&);
 };
 
 static inline LinkPtr LinkCast(const Handle& h)
