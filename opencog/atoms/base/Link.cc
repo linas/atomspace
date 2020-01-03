@@ -118,15 +118,16 @@ std::string Link::to_string(const std::string& indent) const
     return answer;
 }
 
-// Content-based comparison.
+/// Content-based comparison.
 bool Link::operator==(const Atom& other) const
 {
     // If other points to this, then have equality.
     if (this == &other) return true;
 
+    if (get_type() != other.get_type()) return false;
+
     // Rule out obvious mis-matches, based on the hash.
     if (get_hash() != other.get_hash()) return false;
-    if (get_type() != other.get_type()) return false;
 
     Arity sz = get_arity();
     if (sz != other.get_arity()) return false;
@@ -136,6 +137,23 @@ bool Link::operator==(const Atom& other) const
     for (Arity i = 0; i < sz; i++)
     {
         if (*((AtomPtr)_outgoing[i]) != *((AtomPtr)rhs[i]))
+            return false;
+    }
+    return true;
+}
+
+/// Content-based comparison.
+bool Link::equal(Type t, const HandleSeq& oset) const
+{
+    if (get_type() != t) return false;
+
+    Arity sz = get_arity();
+    if (sz != oset.size()) return false;
+
+    // Perform a content-compare on the outgoing set.
+    for (Arity i = 0; i < sz; i++)
+    {
+        if (*((AtomPtr)_outgoing[i]) != *((AtomPtr)oset[i]))
             return false;
     }
     return true;

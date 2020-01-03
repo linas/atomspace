@@ -188,7 +188,7 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
     auto end = range.second;
     for (; bkt != end; bkt++) {
         AtomPtr ap(bkt->second);
-        if (ap->get_type() == t and ap->get_name() == n)
+        if (ap->equal(t, n))
             return bkt->second;
     }
 
@@ -215,7 +215,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
     auto end = range.second;
     for (; bkt != end; bkt++) {
         AtomPtr ap(bkt->second);
-        if (ap->get_type() == t and ap->getOutgoingSet() == seq)
+        if (ap->equal(t, seq))
             return bkt->second;
     }
 

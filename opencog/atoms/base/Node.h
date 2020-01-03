@@ -105,6 +105,7 @@ public:
      * @return true if content is equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
+    virtual bool equal(Type, const std::string&) const;
 
     /**
      * Provides an ordering operator, based on the atom hash.

@@ -80,11 +80,18 @@ bool Node::operator==(const Atom& other) const
     // If other points to this, then have equality.
     if (this == &other) return true;
 
+    if (get_type() != other.get_type()) return false;
+
     // Rule out obvious mis-matches, based on the hash.
     if (get_hash() != other.get_hash()) return false;
 
-    if (get_type() != other.get_type()) return false;
     return get_name() == other.get_name();
+}
+
+bool Node::equal(Type t, const std::string& na) const
+{
+    if (get_type() != t) return false;
+    return get_name() == na;
 }
 
 bool Node::operator<(const Atom& other) const
