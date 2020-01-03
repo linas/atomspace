@@ -48,7 +48,6 @@ protected:
     void init(const std::string&&);
 
     virtual ContentHash compute_hash() const;
-
 public:
     /**
      * Constructor for this class.
@@ -115,7 +114,9 @@ public:
      *
      * @return true if this atom is less than the given one, false otherwise.
      */
-	virtual bool operator<(const Atom&) const;
+    virtual bool operator<(const Atom&) const;
+
+    static ContentHash compute_hash(Type, const std::string&);
 };
 
 typedef std::shared_ptr<Node> NodePtr;

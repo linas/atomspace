@@ -230,6 +230,8 @@ public:
      * @return true if this atom is less than the given one, false otherwise.
      */
     virtual bool operator<(const Atom&) const;
+
+    static ContentHash compute_hash(const HandleSeq&, Type);
 };
 
 static inline LinkPtr LinkCast(const Handle& h)

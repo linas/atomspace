@@ -104,18 +104,23 @@ bool Node::operator<(const Atom& other) const
         return get_type() < other.get_type();
 }
 
-ContentHash Node::compute_hash() const
+ContentHash Node::compute_hash(Type type, const std::string& name)
 {
-	ContentHash hsh = std::hash<std::string>()(get_name());
+	ContentHash hsh = std::hash<std::string>()(name);
 
 	// 1<<43 - 369 is a prime number.
-	hsh += (hsh<<5) + ((1UL<<43)-369) * get_type();
+	hsh += (hsh<<5) + ((1UL<<43)-369) * type;
 
 	// Nodes will never have the MSB set.
 	ContentHash mask = ~(((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1));
 	hsh &= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
+	return hsh;
+}
+
+ContentHash Node::compute_hash() const
+{
+	_content_hash = compute_hash(get_type(), get_name());
 	return _content_hash;
 }

@@ -181,11 +181,11 @@ bool Link::operator<(const Atom& other) const
 
 /// Returns a Merkle tree hash -- that is, the hash of this link
 /// chains the hash values of the child atoms, as well.
-ContentHash Link::compute_hash() const
+ContentHash Link::compute_hash(const HandleSeq& oset, Type type)
 {
 	// 1<<44 - 377 is prime
-	ContentHash hsh = ((1UL<<44) - 377) * get_type();
-	for (const Handle& h: _outgoing)
+	ContentHash hsh = ((1UL<<44) - 377) * type;
+	for (const Handle& h: oset)
 	{
 		hsh += (hsh <<5) ^ (353 * h->get_hash()); // recursive!
 
@@ -202,7 +202,12 @@ ContentHash Link::compute_hash() const
 	hsh |= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
+	return hsh;
+}
+
+ContentHash Link::compute_hash() const
+{
+	_content_hash = compute_hash(_outgoing, get_type());
 	return _content_hash;
 }
 
