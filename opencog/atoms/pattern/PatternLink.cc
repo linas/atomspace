@@ -492,7 +492,8 @@ void PatternLink::locate_cacheable(const Handle& term)
 	// We don't cache constants and VariableNodes (or GlobNodes.)
 	if (not term->is_link()) return;
 
-	if (not term->is_executable())
+	// Anything executable can't be cached. Unordered links are ambiguous.
+	if (not term->is_executable() and not term->is_unordered_link())
 	{
 		HandleSet freev(unquoted_unscoped_in_tree(term, _variables.varset));
 		if (1 == freev.size())
