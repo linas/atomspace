@@ -489,6 +489,9 @@ void PatternLink::locate_globs(const HandleSeq& clauses)
  */
 void PatternLink::locate_cacheable(const Handle& term)
 {
+	// We don't cache constants and VariableNodes (or GlobNodes.)
+	if (not term->is_link()) return;
+
 	if (not term->is_executable())
 	{
 		HandleSet freev(unquoted_unscoped_in_tree(term, _variables.varset));
@@ -500,8 +503,7 @@ void PatternLink::locate_cacheable(const Handle& term)
 	}
 
 	// How about subterms?
-	if (term->is_link())
-		locate_cacheable(term->getOutgoingSet());
+	locate_cacheable(term->getOutgoingSet());
 }
 
 void PatternLink::locate_cacheable(const HandleSeq& clauses)

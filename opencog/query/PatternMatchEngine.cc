@@ -1112,6 +1112,43 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	auto gnd = var_grounding.find(hp);
 	if (gnd != var_grounding.end()) return (gnd->second == hg);
 
+	// Do we already have a grounding for this, because it's cacheable?
+	// If so, then used the cached grounding.
+	bool do_cache = false;
+	auto cac = _pat->cacheable_terms.find(hp);
+	if (cac != _pat->cacheable_terms.end())
+	{
+		do_cache = true;
+		Handle var(cac->second);
+		auto vgnd = var_grounding.find(var);
+		if (vgnd != var_grounding.end())
+		{
+			Handle varg(vgnd->second);
+			auto hit = _gnd_cache.find({hp, varg});
+			if (hit != _gnd_cache.end())
+				return (hg == hit->second);
+		}
+	}
+
+	bool match = tree_compare_direct(ptm, hg, caller);
+	if (do_cache and match)
+	{
+		Handle var(cac->second);
+		auto vgnd = var_grounding.find(var);
+		if (vgnd != var_grounding.end())
+		{
+			Handle varg(vgnd->second);
+			_gnd_cache.insert({{hp,varg}, hg});
+		}
+	}
+	return match;
+}
+
+bool PatternMatchEngine::tree_compare_direct(const PatternTermPtr& ptm,
+                                      const Handle& hg,
+                                      Caller caller)
+{
+	const Handle& hp = ptm->getHandle();
 	Type tp = hp->get_type();
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute

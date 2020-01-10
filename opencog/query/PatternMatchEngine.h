@@ -80,6 +80,10 @@ private:
 	void pop_redex(void);
 
 	// --------------------------------------------
+	// Cacheable grounded terms.
+	std::unordered_map<std::pair<Handle,Handle>, Handle> _gnd_cache;
+
+	// --------------------------------------------
 	// Current clause traversal state. These hold the state needed
 	// to traverse a single clause, and find groundings for it.
 	// Note, though, that these are cumulative: so e.g. the
@@ -242,6 +246,7 @@ private:
 	} Caller;   // temporary scaffolding !???
 
 	bool tree_compare(const PatternTermPtr&, const Handle&, Caller);
+	bool tree_compare_direct(const PatternTermPtr&, const Handle&, Caller);
 
 	bool variable_compare(const Handle&, const Handle&);
 	bool self_compare(const PatternTermPtr&);
