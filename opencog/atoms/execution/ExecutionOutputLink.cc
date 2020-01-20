@@ -105,9 +105,10 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 }
 
 /// execute_args -- execute a seq of arguments, return a seq of results.
+///
 /// Somewhat like force_execute(), but assumes that each atom knows
 /// how to behave itself correctly.
-static HandleSeq execute_args(AtomSpace* as, HandleSeq args, bool silent)
+static inline HandleSeq execute_args(AtomSpace* as, HandleSeq args, bool silent)
 {
 	HandleSeq exargs;
 	for (const Handle& h: args)
@@ -118,7 +119,26 @@ static HandleSeq execute_args(AtomSpace* as, HandleSeq args, bool silent)
 			if (not vp->is_atom())
 				exargs.push_back(h);
 			else
-				exargs.push_back(HandleCast(vp));
+			{
+				Handle rp(HandleCast(vp));
+
+				// Unwrap simple SetLinks. Unfortunately, multi-element sets
+				// have to be expanded into multiple HandleSeqs and I am too
+				// lazy to do that right now. The multiple HandleSeqs have
+				// to be, in turn, passed through, to get a Set return type.
+				// Yuck. So this is another ick factor with the current
+				// design.
+				if (SET_LINK == rp->get_type())
+				{
+					if (1 == rp->get_arity())
+						exargs.push_back(rp->getOutgoingAtom(0));
+					else
+						throw RuntimeException(TRACE_INFO,
+					         "Not implemented!");
+				}
+				else
+					exargs.push_back(rp);
+			}
 		}
 		else
 			exargs.push_back(h);
