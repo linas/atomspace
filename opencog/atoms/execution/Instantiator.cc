@@ -670,9 +670,24 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// capable of this, yet, but the FunctionLinks all do seem to work.
 	//
 	// if (expr->is_executable())
-	if (nameserver().isA(expr->get_type(), FUNCTION_LINK))
+	Type t = expr->get_type();
+	if (nameserver().isA(t, FUNCTION_LINK))
 	{
 		ValuePtr vp = expr->execute(_as, silent);
+		if (vp->is_atom())
+			return _as->add_atom(HandleCast(vp));
+		return vp;
+	}
+
+	// PutLink is self-executing... but is defined to perform reduction,
+	// only. By contrast, `cog-execute` is defined to continue executing
+	// the result obtained after that reduction, and so recurse to get
+	// that behavior.
+	if (PUT_LINK == t)
+	{
+		Handle red(HandleCast(expr->execute(_as, silent)));
+		ValuePtr vp = execute(red, silent);
+
 		if (vp->is_atom())
 			return _as->add_atom(HandleCast(vp));
 		return vp;
