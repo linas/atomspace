@@ -31,7 +31,7 @@ INSTALL (FILES
 	ArithmeticLink.h
 	DivideLink.h
 	FoldLink.h
-	GreaterThankLink.h
+	GreaterThanLink.h
 	MinusLink.h
 	PlusLink.h
 	TimesLink.h

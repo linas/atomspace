@@ -531,7 +531,6 @@ ANCHOR_NODE <- NODE
 // matcher is concerned, which, right now, is the only user of this
 // link type.)
 VIRTUAL_LINK <- EVALUATABLE_LINK
-GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
 // arguments; it true only if both sides are the same atom.
@@ -604,6 +603,8 @@ PREDICATE_FORMULA_LINK <- EVALUATABLE_LINK
 DYNAMIC_FORMULA_LINK <- EVALUATABLE_LINK
 
 // Basic arithmetic operators
+GREATER_THAN_LINK <- FUNCTION_LINK,VIRTUAL_LINK,NUMERIC_LINK
+
 FOLD_LINK <- FUNCTION_LINK
 ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
 PLUS_LINK <- ARITHMETIC_LINK

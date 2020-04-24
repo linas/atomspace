@@ -11,6 +11,7 @@
 #include <opencog/atoms/core/NumberNode.h>
 #include "ArithmeticLink.h"
 #include "GreaterThanLink.h"
+#include "MinusLink.h"
 
 using namespace opencog;
 
@@ -49,38 +50,44 @@ void GreaterThanLink::init(void)
 
 ValuePtr GreaterThanLink::execute(AtomSpace* as, bool silent)
 {
-	// If there is just one
-	if (1 == _outgoing.size())
+	ValuePtr vi;
+	if (2 == _outgoing.size())
 	{
-		ValuePtr vi(ArithmeticLink::get_value(as, silent, _outgoing[0]));
-		Type vitype = vi->get_type();
+		MinusLinkPtr diff = createMinusLink(_outgoing[0], _outgoing[1]);
+		vi = diff->execute();
+	}
+	else
+	{
+		vi = ArithmeticLink::get_value(as, silent, _outgoing[0]);
+	}
 
-		if (NUMBER_NODE == vitype)
+	Type vitype = vi->get_type();
+
+	if (NUMBER_NODE == vitype)
+	{
+		const std::vector<double>& dvec(NumberNodeCast(vi)->value());
+		std::vector<double> gtvec;
+		for (double dv : dvec)
 		{
-			const std::vector<double>& dvec = NumberNodeCast(vi)->value();
-			std::vector<double> gtvec;
-			for (double dv : dvec)
-			{
-				if (dv > 0.0) gtvec.push_back(1.0);
-				else gtvec.push_back(0.0);
-			}
-			return createNumberNode(gtvec);
+			if (dv > 0.0) gtvec.push_back(1.0);
+			else gtvec.push_back(0.0);
 		}
-	}
-	return createNumberNode(0.0);
-#if 0
-	// vector ops...
-	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
-	{
-		return minus(NumberNodeCast(vi), FloatValueCast(vj));
+		return createNumberNode(gtvec);
 	}
 
-	// Vector plus vector
-	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	if (nameserver().isA(vitype, FLOAT_VALUE))
 	{
-		return minus(FloatValueCast(vi), FloatValueCast(vj));
+		const std::vector<double>& dvec(FloatValueCast(vi)->value());
+		std::vector<double> gtvec;
+		for (double dv : dvec)
+		{
+			if (dv > 0.0) gtvec.push_back(1.0);
+			else gtvec.push_back(0.0);
+		}
+		return createFloatValue(gtvec);
 	}
-#endif
+
+	return createNumberNode(0.0);
 }
 
 DEFINE_LINK_FACTORY(GreaterThanLink, GREATER_THAN_LINK);
