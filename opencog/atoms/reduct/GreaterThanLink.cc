@@ -87,7 +87,7 @@ ValuePtr GreaterThanLink::execute(AtomSpace* as, bool silent)
 		return createFloatValue(gtvec);
 	}
 
-	return createNumberNode(0.0);
+	return vi;
 }
 
 DEFINE_LINK_FACTORY(GreaterThanLink, GREATER_THAN_LINK);
