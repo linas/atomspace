@@ -336,10 +336,33 @@ Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
     // in the atomspace, return it.
     if (_read_only) return _atom_table.getHandle(t, std::move(outgoing));
 
+for (size_t i=0; i<outgoing.size(); i++) {
+printf("oset[%d] =  %s\n", i, outgoing[i]->to_string().c_str());
+}
+    HandleSeq orig;
+    if (_copy_on_write) orig = outgoing;
+
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle h(createLink(std::move(outgoing), t));
     try {
-        return _atom_table.add(h);
+        Handle ha(_atom_table.add(h));
+        if (_copy_on_write) {
+            bool force = false;
+            for (size_t i=0; i<orig.size(); i++) {
+printf("nose[%d] =  %s\n", i, orig[i]->to_string().c_str());
+                if (orig[i].get() != ha->getOutgoingAtom(i).get()
+                    and orig[i]->_atom_space) {
+                    force = true; break;
+                }
+            }
+            if (force) {
+               ha = _atom_table.add(h, true);
+printf("duude forced not the same as: %s\n", ha->to_string().c_str());
+            } else {
+printf("not forced %s\n", ha->to_string().c_str());
+            }
+        }
+        return ha;
     }
     catch (const DeleteException& ex) {
         if (_backing_store)
