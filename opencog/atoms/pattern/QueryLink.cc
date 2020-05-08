@@ -25,6 +25,7 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -45,6 +46,7 @@ void QueryLink::init(void)
 
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
+	disable_untyped_variables();
 	common_init();
 	setup_components();
 	_pat.redex_name = "anonymous QueryLink";
@@ -102,6 +104,43 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 
 	// Initialize _variables with the scoped variables
 	init_scoped_variables(_vardecl);
+}
+
+static void erase_from_seq(const Handle& h, HandleSeq& hseq)
+{
+	auto it = std::find(hseq.begin(), hseq.end(), h);
+	if (it != hseq.end()) hseq.erase(it);
+}
+
+/// Remove any top-level clauses that are variables and are untyped
+/// and are unused in the implicand. These are always user-errors.
+/// They commonly result in an infininte loop. This has been a
+/// recurring issue for a decade, with many users tripping over
+/// this, and reporting it as a bug. So .. just squash these.
+/// Don't let them happen. Removing them from the search pattern
+/// has no effect on the search results. So .. remove them.
+void QueryLink::disable_untyped_variables(void)
+{
+	for (const Handle& h : _pat.unquoted_clauses)
+	{
+		Type ht = h->get_type();
+		if (VARIABLE_NODE == ht or GLOB_NODE == ht)
+		{
+			if (_variables._simple_typemap.find(h) ==
+			    _variables._simple_typemap.end()
+				and
+				_variables._deep_typemap.find(h) ==
+				_variables._deep_typemap.end()
+				and
+				not is_unquoted_in_any_tree(_implicand, h))
+			{
+				_variables.varset.erase(h);
+				erase_from_seq(h, _variables.varseq);
+				erase_from_seq(h, _pat.mandatory);
+				erase_from_seq(h, _pat.unquoted_clauses);
+			}
+		}
+	}
 }
 
 /* ================================================================= */

@@ -42,6 +42,7 @@ protected:
 	// more outgoing for the rewrite rule. In addition this method
 	// will initialize the rewrite term _implicand.
 	void extract_variables(const HandleSeq& oset);
+	void disable_untyped_variables(void);
 
 	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
 
