@@ -122,6 +122,7 @@ bool Satisfier::search_finished(bool done)
 bool SatisfyingSet::grounding(const GroundingMap &var_soln,
                               const GroundingMap &term_soln)
 {
+	std::lock_guard<std::mutex> lck(_mtx);
 	// PatternMatchEngine::log_solution(var_soln, term_soln);
 
 	// Do not accept new solution if maximum number has been already reached

@@ -103,6 +103,7 @@ class SatisfyingSet :
 {
 	protected:
 		AtomSpace* _as;
+		std::mutex _mtx;
 		HandleSeq _varseq;
 		HandleSet _satisfying_set;
 		QueueValuePtr _result_queue;
@@ -138,7 +139,7 @@ class SatisfyingSet :
 
 		virtual PatternMatchCallback* clone(void)
 		{
-			return new SatisfyingSet(*this);
+			return this; // new SatisfyingSet(*this);
 		}
 };
 

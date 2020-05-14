@@ -58,6 +58,7 @@ class Implicator :
 	protected:
 		AtomSpace* _as;
 
+		std::mutex _mtx;
 		ValueSet _result_set;
 		QueueValuePtr _result_queue;
 		void insert_result(ValuePtr);

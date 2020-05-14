@@ -56,7 +56,7 @@ class DefaultImplicator:
 
 	virtual PatternMatchCallback* clone(void)
 	{
-		return new DefaultImplicator(*this);
+		return this; // new DefaultImplicator(*this);
 	}
 };
 
