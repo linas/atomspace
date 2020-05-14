@@ -123,6 +123,7 @@ class PMCGroundings : public PatternMatchCallback
 		bool grounding(const GroundingMap &var_soln,
 		               const GroundingMap &term_soln)
 		{
+			std::lock_guard<std::mutex> lck(_groundings_mtx);
 			_term_groundings.push_back(term_soln);
 			_var_groundings.push_back(var_soln);
 			return false;
@@ -130,9 +131,10 @@ class PMCGroundings : public PatternMatchCallback
 
 		PatternMatchCallback* clone(void)
 		{
-			return new PMCGroundings(*this);
+			return this; // new PMCGroundings(*this);
 		}
 
+		std::mutex _groundings_mtx;
 		GroundingMapSeq _term_groundings;
 		GroundingMapSeq _var_groundings;
 };

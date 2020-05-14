@@ -23,7 +23,7 @@
 
 // #include <algorithm>
 // #include <execution>
-// #include <opencog/util/oc_omp.h>
+#include <opencog/util/oc_omp.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -1029,7 +1029,7 @@ void InitiateSearchCB::jit_analyze(void)
 bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
-#define SEQUENTIAL_LOOP 1
+// #define SEQUENTIAL_LOOP 1
 #ifdef SEQUENTIAL_LOOP
 	_recursing = true;
 #endif
@@ -1100,11 +1100,12 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 			delete pclone;
 		});
 
+	_recursing = false;
 	return 0 < nfnd;
 
 #endif
 
-// #define OMP_PM_PARALLEL 1
+#define OMP_PM_PARALLEL 1
 #ifdef OMP_PM_PARALLEL
 	// Parallel loop. This requies OpenMP to work.
 	_recursing = true;
@@ -1118,8 +1119,9 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	#pragma omp parallel for
 	for (size_t j=0; j<hsz; j++)
 	{
-		PatternMatchCallback *pclone = pmc.clone();
-		PatternMatchEngine pme(*pclone);
+		// PatternMatchCallback *pclone = pmc.clone();
+		// PatternMatchEngine pme(*pclone);
+		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
 
 		Handle h(_search_set[j]);
@@ -1127,8 +1129,9 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
 		             << h->to_string();})
 		if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
-		delete pclone;
+		// delete pclone;
 	}
+	_recursing = false;
 	return 0 < nfnd;
 #endif
 
