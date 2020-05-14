@@ -54,6 +54,7 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_variables = nullptr;
 	_pattern = nullptr;
 	_dynamic = nullptr;
+	_recursing = false;
 	_pl = nullptr;
 
 	_root = Handle::UNDEFINED;
@@ -1028,6 +1029,34 @@ void InitiateSearchCB::jit_analyze(void)
 bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
+#define SEQUENTIAL_LOOP 1
+#ifdef SEQUENTIAL_LOOP
+	_recursing = true;
+#endif
+
+	if (_recursing)
+	{
+		// Plain-old, olde-fashioned sequential search loop.
+		// This works.
+#ifdef QDEBUG
+		size_t i = 0, hsz = _search_set.size();
+#endif
+
+		PatternMatchEngine pme(pmc);
+		pme.set_pattern(*_variables, *_pattern);
+
+		for (const Handle& h : _search_set)
+		{
+			DO_LOG({LAZY_LOG_FINE << dbg_banner
+			             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
+			             << h->to_string();})
+			bool found = pme.explore_neighborhood(_root, _starter_term, h);
+			if (found) return true;
+		}
+
+		return false;
+	}
+
 	// TODO: This is kind-of the main entry point into the CPU-cycle
 	// sucking part of the pattern search.  It might be worth
 	// parallelizing at this point. That is, ***if*** the _search_set
@@ -1051,16 +1080,10 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	// To add insult to injury, the PMCGroundings::grounding() is
 	// called from these multiple threads, with no protection for
 	// the structures it's using.
-	//
-	// The solution for this seems to be to create a clone() method
-	// on pmc, and create a new copy of pmc for each thread. What's
-	// more, if any of those copies arrive here again, we should
-	// NOT create any new threads for them, we should continue
-	// single-threaded. This would avoid the need for locks in
-	// PMCGroundings::grounding(). I'm too lazy to do this right now.
 // #define PM_PARALLEL 1
 #ifdef PM_PARALLEL
 	// Parallel loop. This requires linking to -ltbb to work.
+	_recursing = true;
 
 	std::atomic<size_t> nfnd = 0;
 	std::for_each(
@@ -1084,6 +1107,7 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 // #define OMP_PM_PARALLEL 1
 #ifdef OMP_PM_PARALLEL
 	// Parallel loop. This requies OpenMP to work.
+	_recursing = true;
 
 #ifdef QDEBUG
 	size_t i = 0;
@@ -1106,28 +1130,6 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 		delete pclone;
 	}
 	return 0 < nfnd;
-#endif
-
-#define SEQUENTIAL_LOOP 1
-#ifdef SEQUENTIAL_LOOP
-	// Plain-old, olde-fashioned sequential search loop.
-	// This works.
-
-#ifdef QDEBUG
-	size_t i = 0, hsz = _search_set.size();
-#endif
-
-	PatternMatchEngine pme(pmc);
-	pme.set_pattern(*_variables, *_pattern);
-
-	for (const Handle& h : _search_set)
-	{
-		DO_LOG({LAZY_LOG_FINE << dbg_banner
-		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
-		             << h->to_string();})
-		bool found = pme.explore_neighborhood(_root, _starter_term, h);
-		if (found) return true;
-	}
 #endif
 
 	return false;
