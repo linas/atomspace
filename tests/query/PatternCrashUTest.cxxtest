@@ -82,6 +82,9 @@ class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
 
 		HandleMap preds;
 		HandleMap vars;
+
+		virtual PatternMatchCallback* clone(void)
+		{ return new PMCB(*this); }
 };
 
 bool PMCB::grounding(const HandleMap &var_soln,

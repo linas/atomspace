@@ -128,6 +128,11 @@ class PMCGroundings : public PatternMatchCallback
 			return false;
 		}
 
+		PatternMatchCallback* clone(void)
+		{
+			return new PMCGroundings(*this);
+		}
+
 		GroundingMapSeq _term_groundings;
 		GroundingMapSeq _var_groundings;
 };

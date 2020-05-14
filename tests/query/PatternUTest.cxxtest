@@ -120,6 +120,9 @@ class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
 		int found;
 		HandleMap preds;
 		HandleMap vars;
+
+		virtual PatternMatchCallback* clone(void)
+		{ return new PMCB(*this); }
 };
 
 bool PMCB::node_match(Node *npat, Node *nsoln)

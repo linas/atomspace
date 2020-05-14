@@ -81,6 +81,11 @@ class Recognizer :
 		virtual bool fuzzy_match(const Handle&, const Handle&);
 		virtual bool grounding(const GroundingMap &var_soln,
 		                       const GroundingMap &term_soln);
+
+		virtual PatternMatchCallback* clone(void)
+		{
+			return new Recognizer(*this);
+		}
 };
 
 } // namespace opencog

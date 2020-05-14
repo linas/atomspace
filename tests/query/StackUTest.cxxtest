@@ -101,6 +101,8 @@ class TestPMCB :
 		scnt ++;
 		return false;
 	}
+	virtual PatternMatchCallback* clone(void)
+	{ return new TestPMCB(*this); }
 };
 
 /*

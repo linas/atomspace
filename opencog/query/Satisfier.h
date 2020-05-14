@@ -78,6 +78,11 @@ class Satisfier :
 
 		// Final pass, if no grounding was found.
 		virtual bool search_finished(bool);
+
+		virtual PatternMatchCallback* clone(void)
+		{
+			return new Satisfier(*this);
+		}
 };
 
 /**
@@ -130,6 +135,11 @@ class SatisfyingSet :
 
 		virtual QueueValuePtr get_result_queue()
 		{ return _result_queue; }
+
+		virtual PatternMatchCallback* clone(void)
+		{
+			return new SatisfyingSet(*this);
+		}
 };
 
 }; // namespace opencog

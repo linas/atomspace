@@ -53,6 +53,11 @@ class DefaultImplicator:
 		InitiateSearchCB::set_pattern(vars, pat);
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
+
+	virtual PatternMatchCallback* clone(void)
+	{
+		return new DefaultImplicator(*this);
+	}
 };
 
 }; // namespace opencog
