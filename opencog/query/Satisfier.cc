@@ -32,6 +32,7 @@ using namespace opencog;
 bool Satisfier::grounding(const GroundingMap &var_soln,
                           const GroundingMap &term_soln)
 {
+	std::lock_guard<std::mutex> lck(_mtx);
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
 

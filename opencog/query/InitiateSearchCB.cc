@@ -1092,12 +1092,10 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 		_search_set.end(),
 		[&](auto&& h)
 		{
-			PatternMatchCallback *pclone = pmc.clone();
-			PatternMatchEngine pme(*pclone);
+			PatternMatchEngine pme(pmc);
 			pme.set_pattern(*_variables, *_pattern);
 
 			if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
-			delete pclone;
 		});
 
 	_recursing = false;
@@ -1119,8 +1117,6 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	#pragma omp parallel for
 	for (size_t j=0; j<hsz; j++)
 	{
-		// PatternMatchCallback *pclone = pmc.clone();
-		// PatternMatchEngine pme(*pclone);
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
 
@@ -1129,7 +1125,6 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
 		             << h->to_string();})
 		if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
-		// delete pclone;
 	}
 	_recursing = false;
 	return 0 < nfnd;

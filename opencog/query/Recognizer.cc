@@ -237,6 +237,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 bool Recognizer::grounding(const GroundingMap& var_soln,
                            const GroundingMap& term_soln)
 {
+	std::lock_guard<std::mutex> lck(_mtx);
 	Handle rule = term_soln.at(_root);
 
 	if (rule != _root) {

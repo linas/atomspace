@@ -56,6 +56,7 @@ class Satisfier :
 			DefaultPatternMatchCB(as),
 			_result(TruthValue::FALSE_TV()) {}
 
+		std::mutex _mtx;
 		HandleSeq _varseq;
 		Handle _ground;
 		TruthValuePtr _result;
@@ -78,11 +79,6 @@ class Satisfier :
 
 		// Final pass, if no grounding was found.
 		virtual bool search_finished(bool);
-
-		virtual PatternMatchCallback* clone(void)
-		{
-			return new Satisfier(*this);
-		}
 };
 
 /**
@@ -136,11 +132,6 @@ class SatisfyingSet :
 
 		virtual QueueValuePtr get_result_queue()
 		{ return _result_queue; }
-
-		virtual PatternMatchCallback* clone(void)
-		{
-			return this; // new SatisfyingSet(*this);
-		}
 };
 
 }; // namespace opencog

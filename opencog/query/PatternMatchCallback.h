@@ -367,14 +367,6 @@ class PatternMatchCallback
 		 */
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat) = 0;
-
-		/**
-		 * Called before search initiation, to return a version of this
-		 * class that is thread-safe for use in multi-threaded pattern
-		 * search. This may either return a copy of this class, or just
-		 * return `this`, if `this` is already thread-safe.
-		 */
-		virtual PatternMatchCallback* clone(void) = 0;
 };
 
 } // namespace opencog

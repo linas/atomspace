@@ -129,11 +129,6 @@ class PMCGroundings : public PatternMatchCallback
 			return false;
 		}
 
-		PatternMatchCallback* clone(void)
-		{
-			return this; // new PMCGroundings(*this);
-		}
-
 		std::mutex _groundings_mtx;
 		GroundingMapSeq _term_groundings;
 		GroundingMapSeq _var_groundings;
