@@ -1029,6 +1029,18 @@ void InitiateSearchCB::jit_analyze(void)
 bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
+	// TODO: This is the main entry point into the CPU-cycle
+	// sucking part of the pattern search.  It might be worth
+	// parallelizing at this point. That is, ***if*** the _search_set
+	// is large, or the pattern is large/complex, then it might be
+	// worth it to create N threads, and N copies of PatternMatchEngine
+	// and run one search per thread.  Maybe. CAUTION: this is not
+	// always the bottleneck, and so adding heavy-weight thread
+	// initialization here might hurt some users.  See the benchmark
+	// `nano-en.scm` in the benchmark get repo, for example.
+	//
+	// The if-defs further below attempt this parallelization.
+	// At this time, they do not yet pass unit tests.
 // #define SEQUENTIAL_LOOP 1
 #ifdef SEQUENTIAL_LOOP
 	_recursing = true;
@@ -1057,29 +1069,23 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 		return false;
 	}
 
-	// TODO: This is kind-of the main entry point into the CPU-cycle
-	// sucking part of the pattern search.  It might be worth
-	// parallelizing at this point. That is, ***if*** the _search_set
-	// is large, or the pattern is large/complex, then it might be
-	// worth it to create N threads, and N copies of PatternMatchEngine
-	// and run one search per thread.  Maybe. CAUTION: this is not
-	// always the bottleneck, and so adding heavy-weight thread
-	// initialization here might hurt some users.  See the benchmark
-	// `nano-en.scm` in the benchmark get repo, for example.
+	// Currently, the code below fails unit tests. The main reason
+	// seems to be that the PatternMatchCallback::grounding() is
+	// not thread-safe in most callbacks.
 	//
-	// Currently, the code below fails unit tests. The one (and only?)
-	// reason seems to be that, for multi-component patterns, this
-	// entire class is used recursively in multiple threads. The reason
-	// for this is subtle: PatternLink::satisfy() is recursive, when
-	// there are multiple components. So: we start here, create multiple
-	// threads, and then pass ourselves into each thread. When there are
+	// Note also: for multi-component patterns, this entire class
+	// is used recursively in multiple threads. This is because
+	// `PatternLink::satisfy()` is recursive, when there are multiple
+	// components. So: we start here, create multiple threads,
+	// and then pass ourselves into each thread. When there are
 	// components, this gets wrapped in PMCGroundings and then
-	// PatternLink::satisfy() is called .. once in each thread! Which
-	// causes a new start-point to be searched for, for each component
-	// which clobbers this structure against itself.  Ick. Fail.
+	// `PatternLink::satisfy()` is called .. once in each thread!
+	// Which causes a new start-point to be searched for, for each
+	// component which clobbers this structure against itself.  Ick. Fail.
 	// To add insult to injury, the PMCGroundings::grounding() is
 	// called from these multiple threads, with no protection for
-	// the structures it's using.
+	// the structures it's using. The `_recursing` flag is an attempt
+	// to deal with this.
 // #define PM_PARALLEL 1
 #ifdef PM_PARALLEL
 	// Parallel loop. This requires linking to -ltbb to work.
