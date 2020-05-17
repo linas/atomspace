@@ -180,7 +180,7 @@ HandleSeq opencog::quick_eval(const std::string& expr)
 	{
 		size_t l1 = l;
 		size_t r1 = r;
-		get_next_token(expr, l1, r1);
+		get_typename(expr, l1, r1);
 		const std::string stype = expr.substr(l1, r1-l1+1);
 		opencog::Type atype = namer.getType(stype);
 		if (atype == opencog::NOTYPE)
