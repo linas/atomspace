@@ -107,7 +107,7 @@ class SchemeEval : public GenericEval
 		void drain_output();
 
 		// Fast-path evaluation for s-expressions
-		bool try_eval_atomese(const std::string&);
+		Handle try_eval_atomese(const std::string&);
 
 		// Straight-up evaluation
 		SCM do_scm_eval(SCM, SCM (*)(void *));

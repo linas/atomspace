@@ -455,7 +455,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 /// than sending it through the guile evaluator.  This seems like a
 /// reasonable gamble to take, as it provides a fast-path for a very
 /// common case.
-bool SchemeEval::try_eval_atomese(const std::string &expr)
+Handle SchemeEval::try_eval_atomese(const std::string &expr)
 {
 	Handle h;
 	try
@@ -464,17 +464,17 @@ bool SchemeEval::try_eval_atomese(const std::string &expr)
 	}
 	catch (const std::exception& e)
 	{
-		return false;
+		return Handle::UNDEFINED;
 	}
 
 	AtomSpace* as = _atomspace;
 	if (nullptr == as)
 		as = SchemeSmob::ss_get_env_as("try_eval_atomese");
-	as->add_atom(h);
+	h = as->add_atom(h);
 
 	_eval_done = true;
 	_wait_done.notify_all();
-	return true;
+	return h;
 }
 
 /* ============================================================== */
@@ -499,6 +499,9 @@ bool SchemeEval::try_eval_atomese(const std::string &expr)
  */
 void SchemeEval::eval_expr(const std::string &expr)
 {
+	Handle pure = try_eval_atomese(expr);
+	if (nullptr != pure) return;
+
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
 	// Just go.
