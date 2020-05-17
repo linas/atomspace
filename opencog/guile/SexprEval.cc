@@ -40,8 +40,11 @@ using namespace opencog;
 // and `r` points at the matching close-paren.
 static void get_next_expr(const std::string& s, size_t& l, size_t& r)
 {
-	while (s[l] != '(' and l < r) l++;
+	// Advance past whitespace
+	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 	if (l >= r) return;
+	if (s[l] != '(')
+		throw std::runtime_error("Unexpected text");
 
 	size_t p = l;
 	int count = 1;
@@ -53,8 +56,8 @@ static void get_next_expr(const std::string& s, size_t& l, size_t& r)
 			if (0 < p and s[p - 1] != '\\')
 				quoted = !quoted;
 		}
-		if (quoted) continue;
-		if (s[p] == '(') count++;
+		else if (quoted) continue;
+		else if (s[p] == '(') count++;
 		else if (s[p] == ')') count--;
 	} while (p < r and count > 0);
 
@@ -75,7 +78,7 @@ static void get_next_token(const std::string& s, size_t& l, size_t& r)
 	if (s[l] == '(') l++;
 
 	// Advance past whitespace.
-	for (; l < r and (s[l] == ' ' || s[l] == '\t' || s[l] == '\n'); l++);
+	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 
 	// We are parsing string
 	if (s[l] == '"')
@@ -103,7 +106,7 @@ static Handle recursive_parse(const std::string& s, size_t l, size_t r)
 {
 	size_t l1 = l, r1 = r;
 	get_next_token(s, l1, r1);
-	const std::string stype = s.substr(l1, r1);
+	const std::string stype = s.substr(l1, r1-l1+1);
 
 	opencog::Type atype = namer.getType(stype);
 	if (atype == opencog::NOTYPE)
@@ -112,6 +115,7 @@ static Handle recursive_parse(const std::string& s, size_t l, size_t r)
 	l = r1 + 1;
 	if (namer.isLink(atype))
 	{
+		r--; // get rid of trailing paren
 		HandleSeq outgoing;
 		do {
 			l1 = l;
@@ -143,7 +147,7 @@ static Handle recursive_parse(const std::string& s, size_t l, size_t r)
 		if (l2 < r2)
 			throw std::runtime_error("Unexpexted stuff");
 
-		const std::string name = s.substr(l1, r1);
+		const std::string name = s.substr(l1, r1-l1+1);
 		return createNode(atype, std::move(name));
 	}
 	throw std::runtime_error("Got a Value");
