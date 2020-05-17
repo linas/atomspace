@@ -121,11 +121,12 @@ static Handle recursive_parse(const std::string& s)
 			r1 = r;
 			get_next_expr(s, l1, r1);
 
-			if (l1 < r1)
-			{
-				const std::string expr = s.substr(l1, r1-l1);
-				outgoing.push_back(recursive_parse(expr));
-			}
+			if (l1 == r1)
+				throw std::runtime_error("Expecting Atom");
+
+			const std::string expr = s.substr(l1, r1-l1);
+			outgoing.push_back(recursive_parse(expr));
+
 			l = r1 + 1;
 		} while (l < r);
 
@@ -160,5 +161,5 @@ Handle opencog::quick_eval(const std::string& expr)
 	size_t l = 0;
 	size_t r = expr.length();
 	get_next_expr(expr, l, r);
-	return recursive_parse(expr.substr(l, r - l));
+	return recursive_parse(expr.substr(l, r - l + 1));
 }
