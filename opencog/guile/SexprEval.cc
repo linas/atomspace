@@ -99,11 +99,8 @@ static NameServer& namer = nameserver();
 
 // Parse the string `s`, returning a Handle that corresponds to that
 // string.
-static Handle recursive_parse(const std::string& s)
+static Handle recursive_parse(const std::string& s, size_t l, size_t r)
 {
-	size_t l = 0;
-	size_t r = s.length();
-
 	size_t l1 = l, r1 = r;
 	get_next_token(s, l1, r1);
 	const std::string stype = s.substr(l1, r1);
@@ -124,8 +121,7 @@ static Handle recursive_parse(const std::string& s)
 			if (l1 == r1)
 				throw std::runtime_error("Expecting Atom");
 
-			const std::string expr = s.substr(l1, r1-l1);
-			outgoing.push_back(recursive_parse(expr));
+			outgoing.push_back(recursive_parse(s, l1, r1));
 
 			l = r1 + 1;
 		} while (l < r);
@@ -151,8 +147,7 @@ static Handle recursive_parse(const std::string& s)
 
 		return createNode(atype, std::move(name));
 	}
-	throw std::runtime_error(
-	   "Syntax error Strange type: " + stype + " in " + s);
+	throw std::runtime_error("Got a Value");
 }
 
 /// load_file -- load the given file into the given AtomSpace.
@@ -161,5 +156,5 @@ Handle opencog::quick_eval(const std::string& expr)
 	size_t l = 0;
 	size_t r = expr.length();
 	get_next_expr(expr, l, r);
-	return recursive_parse(expr.substr(l, r - l + 1));
+	return recursive_parse(expr, l, r+1);
 }
