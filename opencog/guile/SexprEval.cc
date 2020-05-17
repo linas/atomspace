@@ -150,10 +150,23 @@ static Handle recursive_parse(const std::string& s, size_t l, size_t r)
 }
 
 /// load_file -- load the given file into the given AtomSpace.
-Handle opencog::quick_eval(const std::string& expr)
+HandleSeq opencog::quick_eval(const std::string& expr)
 {
+	size_t len = expr.length();
 	size_t l = 0;
-	size_t r = expr.length();
-	get_next_expr(expr, l, r);
-	return recursive_parse(expr, l, r+1);
+	size_t r = len;
+
+	HandleSeq hseq;
+	while(l < r)
+	{
+		get_next_expr(expr, l, r);
+		r++;
+		Handle h = recursive_parse(expr, l, r);
+		hseq.emplace_back(h);
+
+		l = r + 1;
+		r = len;
+	}
+
+	return hseq;
 }

@@ -30,7 +30,7 @@
 #include <opencog/atoms/base/Handle.h>
 
 namespace opencog {
-	Handle quick_eval(const std::string&);
+	HandleSeq quick_eval(const std::string&);
 }
 
 #endif // SEXPR_EVAL_H

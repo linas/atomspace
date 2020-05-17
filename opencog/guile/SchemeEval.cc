@@ -457,10 +457,10 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 /// common case.
 Handle SchemeEval::try_eval_atomese(const std::string &expr)
 {
-	Handle h;
+	HandleSeq hseq;
 	try
 	{
-		h = quick_eval(expr);
+		hseq = quick_eval(expr);
 	}
 	catch (const std::exception& e)
 	{
@@ -470,11 +470,12 @@ Handle SchemeEval::try_eval_atomese(const std::string &expr)
 	AtomSpace* as = _atomspace;
 	if (nullptr == as)
 		as = SchemeSmob::ss_get_env_as("try_eval_atomese");
-	h = as->add_atom(h);
 
-	_eval_done = true;
-	_wait_done.notify_all();
-	return h;
+	Handle last;
+	for (const Handle& h : hseq)
+		last = as->add_atom(h);
+
+	return last;
 }
 
 /* ============================================================== */
@@ -500,7 +501,12 @@ Handle SchemeEval::try_eval_atomese(const std::string &expr)
 void SchemeEval::eval_expr(const std::string &expr)
 {
 	Handle pure = try_eval_atomese(expr);
-	if (nullptr != pure) return;
+	if (nullptr != pure)
+	{
+		_eval_done = true;
+		_wait_done.notify_all();
+		return;
+	}
 
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
@@ -932,6 +938,9 @@ void * SchemeEval::c_wrap_eval_v(void * p)
  */
 ValuePtr SchemeEval::eval_v(const std::string &expr)
 {
+	Handle pure = try_eval_atomese(expr);
+	if (nullptr != pure) return pure;
+
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
 	// Just go.
