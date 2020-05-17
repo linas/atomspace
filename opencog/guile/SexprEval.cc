@@ -134,17 +134,16 @@ static Handle recursive_parse(const std::string& s, size_t l, size_t r)
 		l1 = l;
 		r1 = r;
 		get_next_token(s, l1, r1);
-		const std::string name = s.substr(l1, r1);
-
 		if (l1 >= r1)
 			throw std::runtime_error("Bad Atom name");
 
-		l1 = r1 + 1;
-		r1 = r;
-		get_next_token(s, l1, r1);
-		if (l1 < r1)
+		size_t l2 = r1 + 1;
+		size_t r2 = r;
+		get_next_token(s, l2, r2);
+		if (l2 < r2)
 			throw std::runtime_error("Unexpexted stuff");
 
+		const std::string name = s.substr(l1, r1);
 		return createNode(atype, std::move(name));
 	}
 	throw std::runtime_error("Got a Value");
