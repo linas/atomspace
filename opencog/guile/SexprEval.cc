@@ -37,12 +37,18 @@ using namespace opencog;
 
 // Extract s-expression. Given a string `s`, update the `l` and `r`
 // values so that `l` points at the next open-parenthsis (left paren)
-// and `r` points at the matching close-paren.
-static void get_next_expr(const std::string& s, size_t& l, size_t& r)
+// and `r` points at the matching close-paren.  Returns parenthesis
+// count. If zero, the parens match. If non-zero, then `r` points
+// at the first non-valid character in the string (e.g. comment char).
+static int get_next_expr(const std::string& s, size_t& l, size_t& r)
 {
-	// Advance past whitespace
+	// Advance past whitespace.
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
-	if (l >= r) return;
+	if (l == r) return 0;
+
+	// Ignore comment lines.
+	if (s[l] == ';') { r = l; return 1; }
+
 	if (s[l] != '(')
 		throw std::runtime_error("Unexpected text");
 
@@ -59,43 +65,50 @@ static void get_next_expr(const std::string& s, size_t& l, size_t& r)
 		else if (quoted) continue;
 		else if (s[p] == '(') count++;
 		else if (s[p] == ')') count--;
+		else if (s[p] == ';') break;	  // comments!
 	} while (p < r and count > 0);
 
-	if (count != 0)
-		throw std::runtime_error("Parenthsis mismatch");
-
 	r = p;
+	return count;
 }
 
-// Tokenizer - extracts link or node type or name. Given the string `s`,
-// this updates the `l` and `r` values such that `l` points at the first
+// Extracts link or node type. Given the string `s`, this updates
+// the `l` and `r` values such that `l` points at the first
 // non-whitespace character of the name, and `r` points at the last.
-// The string is considered to start *after* the first quote, and ends
-// just before the last quote. In this case, escaped quotes \" are
-// ignored (are considered to be part of the string).
-static void get_next_token(const std::string& s, size_t& l, size_t& r)
+static void get_typename(const std::string& s, size_t& l, size_t& r)
 {
 	// Advance past whitespace.
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 
-	// We are parsing string
-	if (s[l] == '"')
-	{
-		l++;
-		size_t p = l;
-		for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
-		r = p-1;
-	}
-	else if (s[l] == '(')
-	{
-		// Atom type name. Advance until whitespace.
-		// Faster to use strtok!?
-		l++;
-		size_t p = l;
-		for (; l < r and s[p] != '(' and s[p] != ' ' and s[p] != '\t' and s[p] != '\n'; p++);
-		r = p - 1;
-	}
-	throw std::runtime_error("Wasn't a token");
+	if (s[l] != '(')
+		throw std::runtime_error("Unexpected content");
+
+	// Advance until whitespace. Might be fast to use strtok?
+	l++;
+	size_t p = l;
+	for (; l < r and s[p] != '(' and s[p] != ' ' and s[p] != '\t' and s[p] != '\n'; p++);
+	r = p;
+}
+
+// Extracts Node name-string. Given the string `s`, this updates
+// the `l` and `r` values such that `l` points at the first
+// non-whitespace character of the name, and `r` points at the last.
+// The string is considered to start *after* the first quote, and ends
+// just before the last quote. In this case, escaped quotes \" are
+// ignored (are considered to be part of the string).
+static void get_node_name(const std::string& s, size_t& l, size_t& r)
+{
+	// Advance past whitespace.
+	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
+
+	// Tell caller to throw, if the syntax is bad.
+	if (s[l] != '"')
+		throw std::runtime_error("Unexpected content");
+
+	l++;
+	size_t p = l;
+	for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
+	r = p;
 }
 
 static NameServer& namer = nameserver();
@@ -105,17 +118,16 @@ static NameServer& namer = nameserver();
 static Handle recursive_parse(const std::string& s, size_t l, size_t r)
 {
 	size_t l1 = l, r1 = r;
-	get_next_token(s, l1, r1);
-	const std::string stype = s.substr(l1, r1-l1+1);
+	get_typename(s, l1, r1);
+	const std::string stype = s.substr(l1, r1-l1);
 
 	opencog::Type atype = namer.getType(stype);
 	if (atype == opencog::NOTYPE)
 		throw std::runtime_error("Not an Atom");
 
-	l = r1 + 1;
+	l = r1;
 	if (namer.isLink(atype))
 	{
-		r--; // get rid of trailing paren
 		HandleSeq outgoing;
 		do {
 			l1 = l;
@@ -137,22 +149,20 @@ static Handle recursive_parse(const std::string& s, size_t l, size_t r)
 	{
 		l1 = l;
 		r1 = r;
-		get_next_token(s, l1, r1);
-		if (l1 >= r1)
-			throw std::runtime_error("Bad Atom name");
+		get_node_name(s, l1, r1);
 
-		size_t l2 = r1 + 1;
+		// There might be an stv in the content. Handle it.. or not
+		size_t l2 = r1+1;
 		size_t r2 = r;
-		get_next_token(s, l2, r2);
+		get_next_expr(s, l2, r2);
 		if (l2 < r2)
-			throw std::runtime_error("Unexpexted stuff");
+			throw std::runtime_error("Unsupported stuff");
 
-		const std::string name = s.substr(l1, r1-l1+1);
+		const std::string name = s.substr(l1, r1-l1);
 		return createNode(atype, std::move(name));
 	}
 	throw std::runtime_error("Got a Value");
 }
-
 /// load_file -- load the given file into the given AtomSpace.
 HandleSeq opencog::quick_eval(const std::string& expr)
 {
