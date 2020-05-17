@@ -75,8 +75,6 @@ static void get_next_expr(const std::string& s, size_t& l, size_t& r)
 // ignored (are considered to be part of the string).
 static void get_next_token(const std::string& s, size_t& l, size_t& r)
 {
-	if (s[l] == '(') l++;
-
 	// Advance past whitespace.
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 
@@ -88,14 +86,16 @@ static void get_next_token(const std::string& s, size_t& l, size_t& r)
 		for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
 		r = p-1;
 	}
-	else
+	else if (s[l] == '(')
 	{
 		// Atom type name. Advance until whitespace.
 		// Faster to use strtok!?
+		l++;
 		size_t p = l;
 		for (; l < r and s[p] != '(' and s[p] != ' ' and s[p] != '\t' and s[p] != '\n'; p++);
 		r = p - 1;
 	}
+	throw std::runtime_error("Wasn't a token");
 }
 
 static NameServer& namer = nameserver();
@@ -110,7 +110,7 @@ static Handle recursive_parse(const std::string& s, size_t l, size_t r)
 
 	opencog::Type atype = namer.getType(stype);
 	if (atype == opencog::NOTYPE)
-	   throw std::runtime_error("Not an Atom");
+		throw std::runtime_error("Not an Atom");
 
 	l = r1 + 1;
 	if (namer.isLink(atype))
@@ -161,6 +161,22 @@ HandleSeq opencog::quick_eval(const std::string& expr)
 	size_t r = len;
 
 	HandleSeq hseq;
+
+	// Before we do anything, a very fast check to see if its
+	// actually Atomese. Atomese will ALWAYS begin with an
+	// open-paren followed by an atom name. If its not that,
+	// give up immediately. Waste no time.
+	if (l < r)
+	{
+		size_t l1 = l;
+		size_t r1 = r;
+		get_next_token(expr, l1, r1);
+		const std::string stype = expr.substr(l1, r1-l1+1);
+		opencog::Type atype = namer.getType(stype);
+		if (atype == opencog::NOTYPE)
+			return hseq;
+	}
+
 	while(l < r)
 	{
 		get_next_expr(expr, l, r);
