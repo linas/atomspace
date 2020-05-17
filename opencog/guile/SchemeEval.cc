@@ -500,6 +500,17 @@ Handle SchemeEval::try_eval_atomese(const std::string &expr)
  */
 void SchemeEval::eval_expr(const std::string &expr)
 {
+	// Fast-path code. If the expression consists of pure Atomese,
+	// (i.e. no scheme, other than Atom defintions) then just generate
+	// the Atoms directly into the AtomSpace. That's it ... we're done.
+	// This should work well, since any scheme that isn't pure Atomese
+	// should be detected very quicky, thus bailing out immediately,
+	// while the performance gains for pure are quite large .. about
+	// 8x faster than guile-3.0.  The primary beneficiearies of this
+	// are going to be the cogserver users who are blasting atoms
+	// across the network.
+#define ATOMESE_FAST_PATH
+#ifdef ATOMESE_FAST_PATH
 	Handle pure = try_eval_atomese(expr);
 	if (nullptr != pure)
 	{
@@ -507,6 +518,7 @@ void SchemeEval::eval_expr(const std::string &expr)
 		_wait_done.notify_all();
 		return;
 	}
+#endif
 
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
@@ -938,8 +950,13 @@ void * SchemeEval::c_wrap_eval_v(void * p)
  */
 ValuePtr SchemeEval::eval_v(const std::string &expr)
 {
+#if NOT_RIGHT_NOW
+	// Ifdef'd out here, mostly because this does very little
+	// for the unit tests, and given how it's used in other code,
+	// e.g. GroundedPredicateNode, it probably won't win much.
 	Handle pure = try_eval_atomese(expr);
 	if (nullptr != pure) return pure;
+#endif
 
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
