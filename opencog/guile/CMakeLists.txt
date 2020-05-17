@@ -18,6 +18,7 @@ ADD_LIBRARY (smob
 	SchemeSmobTV.cc
 	SchemeSmobValue.cc
 	SchemeSmobLogger.cc
+	SexprEval.cc
 )
 
 TARGET_LINK_LIBRARIES(smob

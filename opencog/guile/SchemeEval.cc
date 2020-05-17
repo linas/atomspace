@@ -26,6 +26,7 @@
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
 #include "SchemeSmob.h"
+#include "SexprEval.h"
 
 using namespace opencog;
 
@@ -442,6 +443,38 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	set_error_string(scm_get_output_string(port));
 	scm_close_port(port);
 	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+
+/// try_eval_atomese -- Try evaluating expression that is pure Atomese
+/// That is, if `expr` specifies nothing except for pure Atomese, and
+/// nothing else - no scheme, nothing, and consists only of balanced
+/// parenthesis (i.e. is a complete expression) then just try to parse
+/// it directly. Based on direct measurement, this is about 8x faster
+/// than sending it through the guile evaluator.  This seems like a
+/// reasonable gamble to take, as it provides a fast-path for a very
+/// common case.
+bool SchemeEval::try_eval_atomese(const std::string &expr)
+{
+	Handle h;
+	try
+	{
+		h = quick_eval(expr);
+	}
+	catch (const std::exception& e)
+	{
+		return false;
+	}
+
+	AtomSpace* as = _atomspace;
+	if (nullptr == as)
+		as = SchemeSmob::ss_get_env_as("try_eval_atomese");
+	as->add_atom(h);
+
+	_eval_done = true;
+	_wait_done.notify_all();
+	return true;
 }
 
 /* ============================================================== */
@@ -1184,6 +1217,5 @@ opencog::SchemeEval* get_scheme_evaluator(opencog::AtomSpace* as)
 }
 
 };
-
 
 /* ===================== END OF FILE ============================ */

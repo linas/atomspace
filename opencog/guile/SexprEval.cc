@@ -176,7 +176,7 @@ static Handle recursive_parse(const std::string& s)
 }
 
 /// load_file -- load the given file into the given AtomSpace.
-Handle quick_eval(const std::string& expr)
+Handle opencog::quick_eval(const std::string& expr)
 {
 	uint l;
 	uint r;

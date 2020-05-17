@@ -27,10 +27,10 @@
 #define SEXPR_EVAL_H
 
 #include <string>
-#include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog {
-	ValuePtr quick_eval(const std::string&);
+	Handle quick_eval(const std::string&);
 }
 
 #endif // SEXPR_EVAL_H
