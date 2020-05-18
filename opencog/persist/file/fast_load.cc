@@ -28,6 +28,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <time.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
@@ -35,6 +36,63 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "fast_load.h"
+
+timespec then;
+timespec now;
+timespec createn;
+timespec createl;
+timespec add;
+timespec xread;
+size_t no=0;
+size_t li=0;
+size_t ad=0;
+
+
+void timespec_diff(struct timespec& result, struct timespec& stop,
+                   struct timespec& start)
+{
+    if ((stop.tv_nsec - start.tv_nsec) < 0) {
+        result.tv_sec = stop.tv_sec - start.tv_sec - 1;
+        result.tv_nsec = stop.tv_nsec - start.tv_nsec + 1000000000;
+    } else {
+        result.tv_sec = stop.tv_sec - start.tv_sec;
+        result.tv_nsec = stop.tv_nsec - start.tv_nsec;
+    }
+}
+
+void timespec_sum(struct timespec& result,
+                  struct timespec& stop, struct timespec& start)
+{
+    if ((stop.tv_nsec + start.tv_nsec) >= 1000000000) {
+        result.tv_sec = stop.tv_sec + start.tv_sec + 1;
+        result.tv_nsec = stop.tv_nsec + start.tv_nsec - 1000000000;
+    } else {
+        result.tv_sec = stop.tv_sec + start.tv_sec;
+        result.tv_nsec = stop.tv_nsec + start.tv_nsec;
+    }
+}
+
+void timespec_zero(struct timespec& result)
+{
+        result.tv_sec = 0;
+        result.tv_nsec = 0;
+}
+
+void timespec_print(struct timespec& result, std::string msg)
+{
+	double secs = result.tv_sec;
+	secs +=  1.0e-9 * result.tv_nsec;
+	printf("duude time %s is %g\n", msg.c_str(), secs);
+}
+void timespec_acc(struct timespec& which)
+{
+timespec scratch;
+clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now);
+timespec_diff(scratch, now, then);
+timespec_sum(which, which, scratch);
+then = now;
+
+}
 
 using namespace opencog;
 
@@ -155,7 +213,11 @@ static Handle recursive_parse(const std::string& s,
             l = r1 + 1;
         } while (l < r);
 
-        return createLink(std::move(outgoing), atype);
+timespec_acc(xread);
+li++;
+        Handle h = createLink(std::move(outgoing), atype);
+timespec_acc(createl);
+        return h;
     }
     else
     if (namer.isNode(atype))
@@ -175,7 +237,11 @@ static Handle recursive_parse(const std::string& s,
                 " in expr: " + s);
 
         const std::string name = s.substr(l1, r1-l1);
-        return createNode(atype, std::move(name));
+timespec_acc(xread);
+no++;
+        Handle h =createNode(atype, std::move(name));
+timespec_acc(createn);
+        return h;
     }
     throw std::runtime_error(
         "Syntax error at line " + std::to_string(line_cnt) +
@@ -185,12 +251,23 @@ static Handle recursive_parse(const std::string& s,
 /// load_file -- load the given file into the given AtomSpace.
 void opencog::load_file(std::string fname, AtomSpace& as)
 {
+static bool init = false;
+if (not init) {
+init = true;
+timespec_zero( createn);
+timespec_zero( createl);
+timespec_zero( add);
+timespec_zero( xread);
+}
+
+clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &then);
     std::ifstream f(fname);
     if (not f.is_open())
        throw std::runtime_error("Cannot find file >>" + fname + "<<");
 
     size_t expr_cnt = 0;
     size_t line_cnt = 0;
+
 
     std::string expr;
     while (!f.eof())
@@ -218,9 +295,21 @@ void opencog::load_file(std::string fname, AtomSpace& as)
             if (l == r) break;
 
             expr_cnt++;
+timespec_acc(xread);
+ad++;
             as.add_atom(recursive_parse(expr, l, r, line_cnt));
+timespec_acc(add);
             expr = expr.substr(r+1);
         }
     }
+
+timespec_print( createn, "node create");
+timespec_print( createl, "link create");
+timespec_print( add, "atomspace");
+timespec_print( xread, "i/o");
+
+printf("duude nodes=%lu link=%lu adds=%lu\n", no, li, ad);
+clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &then);
     f.close();
+timespec_acc(xread);
 }
