@@ -143,7 +143,7 @@ static NameServer& namer = nameserver();
 
 // Parse the string `s`, returning a Handle that corresponds to that
 // string.
-static Handle recursive_parse(const std::string& s,
+static ValuePtr recursive_parse(const std::string& s,
                               size_t l, size_t r, size_t line_cnt)
 {
     size_t l1 = l, r1 = r;
@@ -151,10 +151,10 @@ static Handle recursive_parse(const std::string& s,
     const std::string stype = s.substr(l1, r1-l1);
 
     opencog::Type atype = namer.getType(stype);
+
+    // Assume its an SimpleTruthValue and return that.
     if (atype == opencog::NOTYPE)
-        throw std::runtime_error(
-            "Syntax error at line " + std::to_string(line_cnt) +
-            " Unknown Atom type: " + stype);
+        return ValueCast(get_stv(s, l, r, line_cnt));
 
     l = r1;
     if (namer.isLink(atype))
@@ -167,10 +167,11 @@ static Handle recursive_parse(const std::string& s,
             get_next_expr(s, l1, r1, line_cnt);
             if (l1 == r1) break;
 
-            if (0 == s.compare(l1, 5, "(stv "))
-                tvp = get_stv(s, l1, r1, line_cnt);
+            ValuePtr vp(recursive_parse(s, l1, r1, line_cnt));
+            if (vp->is_atom())
+                outgoing.push_back(HandleCast(vp));
             else
-                outgoing.push_back(recursive_parse(s, l1, r1, line_cnt));
+                tvp = TruthValueCast(vp);
 
             l = r1 + 1;
         } while (l < r);
@@ -197,6 +198,11 @@ static Handle recursive_parse(const std::string& s,
 
         return h;
     }
+
+    if (namer.isA(atype, TRUTH_VALUE))
+        return ValueCast(TruthValue::factory(atype,
+                NumberNode::to_vector(s.substr(l, r-l))));
+
     throw std::runtime_error(
         "Syntax error at line " + std::to_string(line_cnt) +
         "Got a Value, not supported: " + s);
@@ -238,7 +244,7 @@ void opencog::load_file(std::string fname, AtomSpace& as)
             if (l == r) break;
 
             expr_cnt++;
-            as.add_atom(recursive_parse(expr, l, r, line_cnt));
+            as.add_atom(HandleCast(recursive_parse(expr, l, r, line_cnt)));
             expr = expr.substr(r+1);
         }
     }
