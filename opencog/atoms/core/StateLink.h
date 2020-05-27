@@ -54,7 +54,10 @@ public:
 	StateLink(const StateLink&) = delete;
 	StateLink& operator=(const StateLink&) = delete;
 	Handle get_alias(void) const { return _outgoing.at(0); }
-	Handle get_state(void) const { return _outgoing.at(1); }
+	Handle get_state(void) const;
+
+	virtual bool is_executable() const { return true; }
+	virtual ValuePtr execute(AtomSpace*, bool silent);
 
 	/**
 	 * Return false, if the state contains a variable.

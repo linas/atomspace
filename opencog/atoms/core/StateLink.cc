@@ -28,10 +28,11 @@ using namespace opencog;
 
 void StateLink::init()
 {
-	// Must have name and body
-	if (2 != _outgoing.size())
+	// Must have name name, and optionally body
+	size_t sz = _outgoing.size();
+	if (2 != sz and 1 != sz)
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting name and state, got size %d", _outgoing.size());
+			"Expecting name and (optional) state, got %s", to_string().c_str());
 
 	FreeLink::init();
 }
@@ -55,8 +56,14 @@ StateLink::StateLink(const Handle& name, const Handle& defn)
  */
 Handle StateLink::get_state(const Handle& alias)
 {
-	Handle uniq(get_unique(alias, STATE_LINK, true));
+	const Handle& uniq(get_unique(alias, STATE_LINK, true));
 	return uniq->getOutgoingAtom(1);
+}
+
+Handle StateLink::get_state(void) const
+{
+	if (2 == _outgoing.size()) return _outgoing[1];
+	return get_state(_outgoing[0]);
 }
 
 /**
@@ -72,7 +79,7 @@ void StateLink::install()
 {
 	// If the handlset is closed (no free variables), then
 	// only one copy of the atom can exist in the atomspace.
-	if (not is_closed())
+	if (not is_closed() or 1 == _outgoing.size())
 	{
 		Link::install();
 		return;
@@ -114,6 +121,15 @@ void StateLink::install()
 	}
 
 	if (not swapped) Link::install();
+}
+
+ValuePtr StateLink::execute(AtomSpace* as, bool silent)
+{
+	if (2 == _outgoing.size())
+		return _outgoing[1];
+
+	const Handle& uniq(get_unique(_outgoing[0], STATE_LINK, true, silent));
+	return uniq->getOutgoingAtom(1);
 }
 
 DEFINE_LINK_FACTORY(StateLink, STATE_LINK);

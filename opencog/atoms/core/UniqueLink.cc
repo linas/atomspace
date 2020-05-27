@@ -85,7 +85,7 @@ UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
 
 /// Get the unique link for this alias.
 Handle UniqueLink::get_unique(const Handle& alias, Type type,
-                              bool allow_open)
+                              bool allow_open, bool silent)
 {
 	// Get all UniqueLinks associated with the alias. Be aware that
 	// the incoming set will also include those UniqueLinks which
@@ -96,6 +96,9 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 	// variables in it.
 	for (const Handle& defl : defs)
 	{
+		// Skip over references without a body.
+		if (1 == defl->get_arity()) continue;
+
 		if (defl->getOutgoingAtom(0) == alias)
 		{
 			if (allow_open)
@@ -106,6 +109,9 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 			return defl;
 		}
 	}
+
+	if (silent)
+		throw SilentException();
 
 	// There is no definition for the alias.
 	throw InvalidParamException(TRACE_INFO,
