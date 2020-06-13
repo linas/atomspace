@@ -332,7 +332,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 	// PresentLinks. They are not mandatory, since they exist only in
 	// some of the choice branches, but not others. Unless there is
 	// only one branch, in which case they become mandatory.
-	if (not reverse and CHOICE_LINK == typ)
+	if (not reverse and (CHOICE_LINK == typ or OR_LINK == typ))
 	{
 		// If there is only one choice, then there is effectively no
 		// choice at all. Unwrap and discard.
@@ -975,7 +975,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 
 	// If a term is literal then the corresponding pattern term
 	// should be also.
-	if (CHOICE_LINK == t)
+	if (CHOICE_LINK == t or OR_LINK == t)
 	{
 		for (PatternTermPtr& optm: ptm->getOutgoingSet())
 		{

@@ -164,7 +164,7 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 	}
 
 	// Ignore all dynamically-evaluatable links up front.
-	if (ptm->hasEvaluatable())
+	if (ptm->hasEvaluatable() and OR_LINK != t)
 		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
@@ -184,7 +184,7 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 		// but it cannot be a ChoiceLink; it must be above or below
 		// any choice link.
 		Handle sbr(startrm);
-		if (CHOICE_LINK != t) sbr = h;
+		if (CHOICE_LINK != t and OR_LINK != t) sbr = h;
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
 
@@ -192,7 +192,7 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 		{
 			// Each ChoiceLink is potentially disconnected from the rest
 			// of the graph. Assume the worst case, explore them all.
-			if (CHOICE_LINK == t)
+			if (CHOICE_LINK == t or OR_LINK == t)
 			{
 				Choice ch;
 				ch.clause = _curr_clause;
@@ -236,7 +236,8 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 	for (const PatternTermPtr& ptm: clauses)
 	{
 		// Cannot start with an evaluatable clause!
-		if (ptm->hasAnyEvaluatable()) continue;
+		if (ptm->hasAnyEvaluatable() and
+		    OR_LINK != ptm->getHandle()->get_type()) continue;
 
 		_curr_clause = ptm;
 		size_t depth = 0;
@@ -302,7 +303,8 @@ bool InitiateSearchMixin::setup_neighbor_search(void)
 	bool try_optionals = true;
 	for (const PatternTermPtr& m : _pattern->pmandatory)
 	{
-		if (not m->hasAnyEvaluatable())
+		if (not m->hasAnyEvaluatable() or
+		    OR_LINK == m->getHandle()->get_type())
 		{
 			try_optionals = false;
 			break;
