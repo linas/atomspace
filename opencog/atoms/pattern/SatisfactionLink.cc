@@ -59,7 +59,7 @@ TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as, bool silent)
 			as->add_link(MEMBER_LINK, h, _variables._anchor);
 	}
 
-	return sater._result;
+	return sater._result ? TruthValue::TRUE_TV() : TruthValue::FALSE_TV();
 }
 
 DEFINE_LINK_FACTORY(SatisfactionLink, SATISFACTION_LINK)

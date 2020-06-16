@@ -60,12 +60,12 @@ class Satisfier :
 		Satisfier(AtomSpace* as) :
 			InitiateSearchMixin(as),
 			TermMatchMixin(as),
-			_result(TruthValue::FALSE_TV()) {}
+			_result(false) {}
 
 		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
 		Handle _ground;
-		TruthValuePtr _result;
+		bool _result;
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
