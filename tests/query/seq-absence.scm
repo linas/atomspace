@@ -4,38 +4,40 @@
 ;; Test the AbsentLink inside a SequentialAndLink.
 ;;
 ;; Check to see if the atomspace does NOT contain the link
-;;    (EvaluationLink
-;;        (PredicateNode "visible")
-;;            (ListLink
-;;               (ConceptNode "anything")))
+;;    (Evaluation
+;;        (Predicate "visible")
+;;        (List (Concept "anything")))
 ;;
-
 ; ------------------------------------------------------
+
+(use-modules (opencog) (opencog exec))
 
 ; Unit test makes the PresentLink true
 (define or-visible-put
-	(SatisfactionLink
-		;; SequentialOrLink - verify predicates in sequential order.
-		(SequentialOrLink
-			(PresentLink (EvaluationLink (PredicateNode "yes-visible")
-					(ListLink (VariableNode "$x"))))
+	(Satisfaction
+		(TypedVariable (Variable "$x") (Type 'Concept))
+		;; SequentialOr - verify predicates in sequential order.
+		(SequentialOr
+			(Present (Evaluation (Predicate "yes-visible")
+					(List (Variable "$x"))))
 			;; If above fails then set state
-			(TrueLink (PutLink
-					(StateLink (AnchorNode "state") (VariableNode "$yy"))
-					(ConceptNode "ohhh noot visible")))
+			(True (Put
+					(State (Anchor "state") (Variable "$yy"))
+					(Concept "ohhh noot visible")))
 		)))
 
 ; Same as above, except unit test makes the PresentLink false
 (define or-put
-	(SatisfactionLink
-		;; SequentialOrLink - verify predicates in sequential order.
-		(SequentialOrLink
-			(PresentLink (EvaluationLink (PredicateNode "or-visible")
-					(ListLink (VariableNode "$x"))))
+	(Satisfaction
+		(TypedVariable (Variable "$x") (Type 'Concept))
+		;; SequentialOr - verify predicates in sequential order.
+		(SequentialOr
+			(Present (Evaluation (Predicate "or-visible")
+					(List (Variable "$x"))))
 			;; If above fails then set state
-			(TrueLink (PutLink
-					(StateLink (AnchorNode "state") (VariableNode "$yy"))
-					(ConceptNode "not-vis")))
+			(True (Put
+					(State (Anchor "state") (Variable "$yy"))
+					(Concept "not-vis")))
 		)))
 
 
@@ -43,25 +45,24 @@
 (define (incr-trig) (set! trig (+ trig 1)) (stv 1 1))
 
 (define or-presence
-	(SatisfactionLink
+	(Satisfaction
+		(TypedVariable (Variable "$x") (Type 'Concept))
 		;; SequentialOrLink - verify predicates in sequential order.
-		(SequentialOrLink
-			(PresentLink (EvaluationLink (PredicateNode "visible")
-					(ListLink (VariableNode "$x"))))
+		(SequentialOr
+			(Present (Evaluation (Predicate "visible")
+					(List (Variable "$x"))))
 			;; If above fails then increment
-			(EvaluationLink
-				(GroundedPredicateNode "scm: incr-trig") (ListLink))
+			(Evaluation (GroundedPredicate "scm: incr-trig") (List))
 		)))
 
 (define and-absence
-	(SatisfactionLink
-		(TypedVariable (VariableNode "$x") (Type 'Concept))
-		(SequentialAndLink
-			(AbsentLink (EvaluationLink (PredicateNode "visible")
-					(ListLink (VariableNode "$x"))))
+	(Satisfaction
+		(TypedVariable (Variable "$x") (Type 'Concept))
+		(SequentialAnd
+			(Absent (Evaluation (Predicate "visible")
+					(List (Variable "$x"))))
 			;; If above fails then increment
-			(EvaluationLink
-				(GroundedPredicateNode "scm: incr-trig") (ListLink))
+			(Evaluation (GroundedPredicate "scm: incr-trig") (List))
 		)))
 
 ;; You might think that this one is similar to the above, but the
@@ -69,13 +70,14 @@
 ;; different way. This one actually does not work correctly,
 ;; and right now, I'm not gonna fix it... XXX FIXME.
 (define and-not-present
-	(SatisfactionLink
-		(SequentialAndLink
-			(NotLink (PresentLink (EvaluationLink (PredicateNode "visible")
-					(ListLink (VariableNode "$x")))))
+	(Satisfaction
+		(TypedVariable (Variable "$x") (Type 'Concept))
+		(SequentialAnd
+			(Not (Present (Evaluation (Predicate "visible")
+					(List (Variable "$x")))))
 			;; If above fails then increment
-			(EvaluationLink
-				(GroundedPredicateNode "scm: incr-trig") (ListLink))
+			(Evaluation
+				(GroundedPredicate "scm: incr-trig") (List))
 		)))
 
 ;; This one is a bit perverted, and similar expressions are guaranteed
@@ -86,13 +88,13 @@
 ;; XXX FIXME ... this and the above need to get done right.
 
 (define or-not-absent
-	(SatisfactionLink
-		(SequentialOrLink
-			(NotLink (AbsentLink (EvaluationLink (PredicateNode "visible")
-					(ListLink (VariableNode "$x")))))
+	(Satisfaction
+		(TypedVariable (Variable "$x") (Type 'Concept))
+		(SequentialOr
+			(Not (Absent (Evaluation (Predicate "visible")
+					(List (Variable "$x")))))
 			;; If above fails then increment
-			(EvaluationLink
-				(GroundedPredicateNode "scm: incr-trig") (ListLink))
+			(Evaluation (GroundedPredicate "scm: incr-trig") (List))
 		)))
 
 ; ------------------------------------------------------
