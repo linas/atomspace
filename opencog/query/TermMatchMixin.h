@@ -117,16 +117,16 @@ class TermMatchMixin : public virtual PatternMatchCallback
 		const Variables* _gnd_bound_vars;
 
 		// Temp atomspace used for test-groundings of virtual links.
-		AtomSpace* _temp_aspace;
+		AtomSpacePtr _temp_aspace;
 
 		// The transient atomspace cache. The goal here is to
 		// avoid the overhead of constantly creating/deleting
 		// the temp atomspaces above. So instead, just keep a
 		// cache of empty ones, ready to go.
 		static std::mutex s_transient_cache_mutex;
-		static std::vector<AtomSpace*> s_transient_cache;
-		static AtomSpace* grab_transient_atomspace(AtomSpace* parent);
-		static void release_transient_atomspace(AtomSpace* atomspace);
+		static std::vector<AtomSpacePtr> s_transient_cache;
+		static AtomSpacePtr grab_transient_atomspace(AtomSpace* parent);
+		static void release_transient_atomspace(AtomSpacePtr atomspace);
 
 		// Crisp-logic evaluation of evaluatable terms
 		TypeSet _connectives;

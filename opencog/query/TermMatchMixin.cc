@@ -41,7 +41,7 @@ using namespace opencog;
 #endif
 
 /* ======================================================== */
-// Cache for temp (transient) atomsapaces.  The evaluation of
+// Cache for temp (transient) atomspaces.  The evaluation of
 // expressions during pattern matching requires having a temporary
 // atomspace, treated as a scratch space to hold temporary results.
 // These are then discarded, after the match is confirmed or denied.
@@ -54,11 +54,11 @@ const int MAX_CACHED_TRANSIENTS = 8;
 
 // Allocated storage for the transient atomspace cache static variables.
 std::mutex TermMatchMixin::s_transient_cache_mutex;
-std::vector<AtomSpace*> TermMatchMixin::s_transient_cache;
+std::vector<AtomSpacePtr> TermMatchMixin::s_transient_cache;
 
-AtomSpace* TermMatchMixin::grab_transient_atomspace(AtomSpace* parent)
+AtomSpacePtr TermMatchMixin::grab_transient_atomspace(AtomSpace* parent)
 {
-	AtomSpace* transient_atomspace = nullptr;
+	AtomSpacePtr transient_atomspace = nullptr;
 
 	// See if the cache has one...
 	if (s_transient_cache.size() > 0)
@@ -81,15 +81,13 @@ AtomSpace* TermMatchMixin::grab_transient_atomspace(AtomSpace* parent)
 
 	// If we didn't get one from the cache, then create a new one.
 	if (!transient_atomspace)
-		transient_atomspace = new AtomSpace(parent, TRANSIENT_SPACE);
+		transient_atomspace = createAtomSpace(parent, TRANSIENT_SPACE);
 
 	return transient_atomspace;
 }
 
-void TermMatchMixin::release_transient_atomspace(AtomSpace* atomspace)
+void TermMatchMixin::release_transient_atomspace(AtomSpacePtr atomspace)
 {
-	bool atomspace_cached = false;
-
 	// If the cache is not full...
 	if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
 	{
@@ -104,15 +102,8 @@ void TermMatchMixin::release_transient_atomspace(AtomSpace* atomspace)
 
 			// Place this transient into the cache.
 			s_transient_cache.push_back(atomspace);
-
-			// The atomspace has been cached.
-			atomspace_cached = true;
 		}
 	}
-
-	// If we didn't cache the atomspace, then delete it.
-	if (!atomspace_cached)
-		delete atomspace;
 }
 
 /* ======================================================== */
@@ -134,14 +125,7 @@ TermMatchMixin::TermMatchMixin(AtomSpace* as) :
 }
 
 TermMatchMixin::~TermMatchMixin()
-{
-	// If we have a transient atomspace, release it.
-	if (_temp_aspace)
-	{
-		release_transient_atomspace(_temp_aspace);
-		_temp_aspace = nullptr;
-	}
-}
+{}
 
 void TermMatchMixin::set_pattern(const Variables& vars,
                                  const Pattern& pat)
@@ -472,7 +456,7 @@ bool TermMatchMixin::clause_match(const Handle& ptrn,
 		// default callback ignores the TV on EvaluationLinks. So this
 		// is kind-of schizophrenic here.  Not sure what else to do.
 		_temp_aspace->clear();
-		bool crispy = EvaluationLink::crisp_eval_scratch(_as, grnd, _temp_aspace);
+		bool crispy = EvaluationLink::crisp_eval_scratch(_as, grnd, _temp_aspace.get());
 
 		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded: "
 		                      << crispy << std::endl;})
@@ -627,7 +611,7 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	_temp_aspace->clear();
 	try
 	{
-		bool crispy = EvaluationLink::crisp_eval_scratch(_as, gvirt, _temp_aspace, true);
+		bool crispy = EvaluationLink::crisp_eval_scratch(_as, gvirt, _temp_aspace.get(), true);
 		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded crisp-tv="
 		                      << crispy << std::endl;})
 		return crispy;
