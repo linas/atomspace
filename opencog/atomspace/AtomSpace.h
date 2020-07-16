@@ -26,6 +26,7 @@
 #define _OPENCOG_ATOMSPACE_H
 
 #include <list>
+#include <memory>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
@@ -54,6 +55,7 @@ const bool DONT_CHECK_VALUES = false;
  * @endcode
  */
 class AtomSpace
+	: public std::enable_shared_from_this<AtomSpace>
 {
     friend class Atom;               // Needs to call get_atomtable()
     friend class BackingStore;
@@ -564,6 +566,9 @@ public:
         return _atom_table.TVChangedSignal();
     }
 };
+
+typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
+#define createAtomSpace std::make_shared<AtomSpace>
 
 /** @}*/
 } // namespace opencog
