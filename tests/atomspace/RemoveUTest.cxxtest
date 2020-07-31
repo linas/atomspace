@@ -60,8 +60,8 @@ void RemoveUTest::testSimple()
 	AtomSpace as1;
 	AtomSpace as2(&as1);
 
-	TS_ASSERT(as1.get_size() == 0);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as1.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Create atoms in different atomspaces
 	Handle hna = as1.add_node(CONCEPT_NODE, "node a");
@@ -69,8 +69,8 @@ void RemoveUTest::testSimple()
 
 	Handle hli = as2.add_link(LIST_LINK, hna, hnb);
 
-	TS_ASSERT(as1.get_size() == 2);
-	TS_ASSERT(as2.get_size() == 3);
+	TS_ASSERT(as1.get_size() == 3);
+	TS_ASSERT(as2.get_size() == 4);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -81,8 +81,8 @@ void RemoveUTest::testSimple()
 	// Simple removal of hli should leave everything unaffeced.
 	as2.remove_atom(hli);
 
-	TS_ASSERT(as1.get_size() == 2);
-	TS_ASSERT(as2.get_size() == 2);
+	TS_ASSERT(as1.get_size() == 3);
+	TS_ASSERT(as2.get_size() == 3);
 
 	// Handle hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -101,7 +101,7 @@ void RemoveUTest::testDangling()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 	AtomSpace as1;
 
-	TS_ASSERT(as1.get_size() == 0);
+	TS_ASSERT(as1.get_size() == 1);
 
 	// Create atoms in different atomspaces
 	Handle hna = as1.add_node(CONCEPT_NODE, "node a");
@@ -109,7 +109,7 @@ void RemoveUTest::testDangling()
 
 	Handle hli(createLink(LIST_LINK, hna, hnb));
 
-	TS_ASSERT(as1.get_size() == 2);
+	TS_ASSERT(as1.get_size() == 3);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -120,7 +120,7 @@ void RemoveUTest::testDangling()
 	// Recursive removal of hna should blow away hli.
 	as1.remove_atom(hna, true);
 
-	TS_ASSERT(as1.get_size() == 1);
+	TS_ASSERT(as1.get_size() == 2);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -139,8 +139,8 @@ void RemoveUTest::testRecursive()
 	AtomSpace as1;
 	AtomSpace as2(&as1);
 
-	TS_ASSERT(as1.get_size() == 0);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as1.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Create atoms in different atomspaces
 	Handle hna = as1.add_node(CONCEPT_NODE, "node a");
@@ -148,8 +148,8 @@ void RemoveUTest::testRecursive()
 
 	Handle hli = as2.add_link(LIST_LINK, hna, hnb);
 
-	TS_ASSERT(as1.get_size() == 2);
-	TS_ASSERT(as2.get_size() == 3);
+	TS_ASSERT(as1.get_size() == 3);
+	TS_ASSERT(as2.get_size() == 4);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -160,8 +160,8 @@ void RemoveUTest::testRecursive()
 	// Recursive removal of hna should blow away hli.
 	as1.remove_atom(hna, true);
 
-	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 1);
+	TS_ASSERT(as1.get_size() == 2);
+	TS_ASSERT(as2.get_size() == 2);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -181,8 +181,8 @@ void RemoveUTest::testCross()
 	AtomSpace as1;
 	AtomSpace as2(&as1);
 
-	TS_ASSERT(as1.get_size() == 0);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as1.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Create atoms in different atomspaces
 	Handle hna = as1.add_node(CONCEPT_NODE, "node a");
@@ -190,8 +190,8 @@ void RemoveUTest::testCross()
 
 	Handle hli = as2.add_link(LIST_LINK, hna, hnb);
 
-	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 3);
+	TS_ASSERT(as1.get_size() == 2);
+	TS_ASSERT(as2.get_size() == 4);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -202,8 +202,8 @@ void RemoveUTest::testCross()
 	// Recursive removal of hna should blow away hli.
 	as1.remove_atom(hna, true);
 
-	TS_ASSERT(as1.get_size() == 0);
-	TS_ASSERT(as2.get_size() == 1);
+	TS_ASSERT(as1.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 2);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -223,8 +223,8 @@ void RemoveUTest::testReCross()
 	AtomSpace as1;
 	AtomSpace as2(&as1);
 
-	TS_ASSERT(as1.get_size() == 0);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as1.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Create atoms in different atomspaces
 	Handle hna = as1.add_node(CONCEPT_NODE, "node a");
@@ -232,8 +232,8 @@ void RemoveUTest::testReCross()
 
 	Handle hli = as2.add_link(LIST_LINK, hna, hnb);
 
-	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 3);
+	TS_ASSERT(as1.get_size() == 2);
+	TS_ASSERT(as2.get_size() == 4);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -244,8 +244,8 @@ void RemoveUTest::testReCross()
 	// Recursive removal of hnb should blow away hli.
 	as2.remove_atom(hnb, true);
 
-	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 1);
+	TS_ASSERT(as1.get_size() == 2);
+	TS_ASSERT(as2.get_size() == 2);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -265,8 +265,8 @@ void RemoveUTest::testRepeat()
 	AtomSpace as1;
 	AtomSpace as2(&as1);
 
-	TS_ASSERT(as1.get_size() == 0);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as1.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Create atoms in different atomspaces
 	Handle hna = as1.add_node(CONCEPT_NODE, "node a");
@@ -275,8 +275,8 @@ void RemoveUTest::testRepeat()
 	Handle hli = as2.add_link(LIST_LINK, hna, hnb);
 	Handle hlili = as2.add_link(LIST_LINK, hli, hli);
 
-	TS_ASSERT(as1.get_size() == 2);
-	TS_ASSERT(as2.get_size() == 4);
+	TS_ASSERT(as1.get_size() == 3);
+	TS_ASSERT(as2.get_size() == 5);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -287,8 +287,8 @@ void RemoveUTest::testRepeat()
 	// Recursive removal of hna should blow away hli.
 	as1.remove_atom(hna, true);
 
-	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 1);
+	TS_ASSERT(as1.get_size() == 2);
+	TS_ASSERT(as2.get_size() == 2);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -313,8 +313,8 @@ void RemoveUTest::testHeads()
 	AtomSpace as1;
 	AtomSpace as2(&as1);
 
-	TS_ASSERT(as1.get_size() == 0);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as1.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Create atoms in different atomspaces
 	Handle hna = as1.add_node(CONCEPT_NODE, "node a");
@@ -336,8 +336,8 @@ void RemoveUTest::testHeads()
 	Handle hohox = as2.add_link(LIST_LINK, hoho, ho, hoo, hnb, haha);
 	Handle hohoy = as2.add_link(LIST_LINK, hna, hoho, ho, hoo, hohox, hwa);
 
-	TS_ASSERT(as1.get_size() == 6);
-	TS_ASSERT(as2.get_size() == 13);
+	TS_ASSERT(as1.get_size() == 7);
+	TS_ASSERT(as2.get_size() == 14);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -348,8 +348,8 @@ void RemoveUTest::testHeads()
 	// Recursive removal of hna should blow away hli.
 	as1.remove_atom(hna, true);
 
-	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 1);
+	TS_ASSERT(as1.get_size() == 2);
+	TS_ASSERT(as2.get_size() == 2);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -369,8 +369,8 @@ void RemoveUTest::testTails()
 	AtomSpace as1;
 	AtomSpace as2(&as1);
 
-	TS_ASSERT(as1.get_size() == 0);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as1.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Create atoms in different atomspaces
 	Handle hna = as1.add_node(CONCEPT_NODE, "node a");
@@ -392,13 +392,13 @@ void RemoveUTest::testTails()
 	Handle hohox = as2.add_link(LIST_LINK, hoho, ho, hoo, hnb, haha);
 	Handle hohoy = as2.add_link(LIST_LINK, hna, hoho, ho, hoo, hohox, hwa);
 
-	TS_ASSERT(as1.get_size() == 6);
-	TS_ASSERT(as2.get_size() == 13);
+	TS_ASSERT(as1.get_size() == 7);
+	TS_ASSERT(as2.get_size() == 14);
 
 	as2.remove_atom(hoo, true);
 
-	TS_ASSERT(as1.get_size() == 6);
-	TS_ASSERT(as2.get_size() == 9);
+	TS_ASSERT(as1.get_size() == 7);
+	TS_ASSERT(as2.get_size() == 10);
 
 	as1.clear();
 	as2.clear();

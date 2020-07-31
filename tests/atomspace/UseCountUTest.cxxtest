@@ -200,9 +200,10 @@ public:
         std::cout << "Total removed:" << rmtot << std::endl;
         TS_ASSERT_EQUALS((int) __totalRemoved, rmtot);
 
-        // We should get only 1 atom, the anchor node itself
-        TS_ASSERT_EQUALS(isize, 1);
-        TS_ASSERT_EQUALS(fsize, 1);
+        // We should get only 2 atom, the anchor node itself,
+        // and the truth-value predicate.
+        TS_ASSERT_EQUALS(isize, 2);
+        TS_ASSERT_EQUALS(fsize, 2);
 
         // Initial and final use counts for the anchor should be identical.
         TS_ASSERT_EQUALS(initial_use_count, final_use_count);

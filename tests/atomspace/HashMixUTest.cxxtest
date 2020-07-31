@@ -71,7 +71,7 @@ public:
 		size_t sz = as->get_size();
 
 		printf("Final size is %lu\n", sz);
-		TS_ASSERT_EQUALS(sz, num_atoms+1);
+		TS_ASSERT_EQUALS(sz, num_atoms+2);
 
 		while (h->is_link())
 		{
@@ -81,7 +81,7 @@ public:
 			h = h2;
 			sz --;
 		}
-		TS_ASSERT_EQUALS(sz, 1);
+		TS_ASSERT_EQUALS(sz, 2);
 		as->clear();
 	}
 

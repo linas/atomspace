@@ -58,6 +58,18 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _read_only(false),
     _copy_on_write(transient)
 {
+	// Super-special key, for backwards-compat:
+	// All truth values are stored under this key.
+	add_node(PREDICATE_NODE, "*-TruthValueKey-*");
+}
+
+void AtomSpace::clear()
+{
+    _atom_table.clear();
+
+	// Super-special key, for backwards-compat:
+	// All truth values are stored under this key.
+	add_node(PREDICATE_NODE, "*-TruthValueKey-*");
 }
 
 AtomSpace::~AtomSpace()

@@ -60,7 +60,7 @@ void FastLoadUTest::test_expr_parse()
 
     Handle h = parseExpression(in, _as);
 
-    TS_ASSERT_EQUALS(5, _as.get_size());
+    TS_ASSERT_EQUALS(6, _as.get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     logger().info("END TEST: %s", __FUNCTION__);
@@ -85,14 +85,14 @@ void FastLoadUTest::test_pattern_parse()
     _as.clear();
     Handle h = parseExpression(input_sym, _as);
 
-    // This test adds 9 atoms.
-    TS_ASSERT_EQUALS(9, _as.get_size());
+    // This test adds 9 atoms. Plus one for predicate-truth-value
+    TS_ASSERT_EQUALS(10, _as.get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     _as.clear();
 
     h = parseExpression(input_not_sym, _as);
-    TS_ASSERT_EQUALS(9, _as.get_size());
+    TS_ASSERT_EQUALS(10, _as.get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     logger().info("END TEST: %s", __FUNCTION__);

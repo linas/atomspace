@@ -155,8 +155,7 @@ public:
 
     //! Clear the atomspace, extract all atoms. Does NOT clear the
     //! attached backingstore.
-    void clear()
-        { _atom_table.clear(); }
+    void clear();
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists

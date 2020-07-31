@@ -306,8 +306,8 @@ void MultiAtomSpace::test_nest(void)
 	size_t main_sz = main_as->get_size();
 	size_t main_no = main_as->get_num_nodes();
 	size_t main_li = main_as->get_num_links();
-	TSM_ASSERT("Expect two atoms in main atomspace", 2 == main_sz);
-	TSM_ASSERT("Expect two nodes in main atomspace", 2 == main_no);
+	TSM_ASSERT("Expect three atoms in main atomspace", 3 == main_sz);
+	TSM_ASSERT("Expect three nodes in main atomspace", 3 == main_no);
 	TSM_ASSERT("Expect zero links in main atomspace", 0 == main_li);
 
 	size_t locas_sz = locas->get_size() - main_sz;
@@ -325,8 +325,8 @@ void MultiAtomSpace::test_nest(void)
 	delete locas;
 
 	// Above deletion should not affect the main atomspace
-	TSM_ASSERT("Still two atoms in main atomspace", 2 == main_as->get_size());
-	TSM_ASSERT("Still two nodes in main atomspace", 2 == main_as->get_num_nodes());
+	TSM_ASSERT("Still three atoms in main atomspace", 3 == main_as->get_size());
+	TSM_ASSERT("Still three nodes in main atomspace", 3 == main_as->get_num_nodes());
 	TSM_ASSERT("Still zero links in main atomspace", 0 == main_as->get_num_links());
 
 	// The pointer hl should still be alive, even though the atomspace

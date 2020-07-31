@@ -88,28 +88,28 @@ public:
     // =================================================================
     void atomAdded1(Handle h)
     {
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atomSpace->get_size() == 2);
         logger().debug("atomAdded1: %s", h->to_string().c_str());
         __testSignalsCounter += 1;
     }
 
     void atomAdded2(Handle h)
     {
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atomSpace->get_size() == 2);
         logger().debug("atomAdded2: %s", h->to_string().c_str());
         __testSignalsCounter += 10;
     }
 
     void atomMerged1(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
     {
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atomSpace->get_size() == 2);
         logger().debug("atomMerged1: %s", h->to_string().c_str());
         __testSignalsCounter += 100;
     }
 
     void atomMerged2(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
     {
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atomSpace->get_size() == 2);
         logger().debug("atomMerged2: %s", h->to_string().c_str());
         __testSignalsCounter += 1000;
     }
@@ -117,7 +117,7 @@ public:
     void atomRemoved1(AtomPtr atom)
     {
         // Atom is not removed from table until AFTER callbacks are completed
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atomSpace->get_size() == 2);
         logger().debug("atomRemoved1: %s", atom->to_string().c_str());
         __testSignalsCounter += 10000;
     }
@@ -125,7 +125,7 @@ public:
     void atomRemoved2(AtomPtr atom)
     {
         // Atom is not removed from table until AFTER callbacks are completed
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atomSpace->get_size() == 2);
         logger().debug("atomRemoved2: %s", atom->to_string().c_str());
         __testSignalsCounter += 100000;
     }
@@ -151,19 +151,19 @@ public:
         logger().debug("before first atom add");
         Handle wnHandle = atomSpace->add_node(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 11);
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atomSpace->get_size() == 2);
 
         /* Since we're adding *exactly* the same atom, we should get a tv-merged signal */
         logger().debug("before second atom add");
         TruthValuePtr tv(SimpleTruthValue::createTV(0.5, 1.0));
         atomSpace->add_node(NUMBER_NODE, "1.41421356")->setTruthValue(tv);
         TS_ASSERT(__testSignalsCounter == 1111);
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atomSpace->get_size() == 2);
 
         logger().debug("before atom remove, table size = %u", atomSpace->get_size());
         atomSpace->extract_atom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 111111);
-        TS_ASSERT(atomSpace->get_size() == 0);
+        TS_ASSERT(atomSpace->get_size() == 1);
 
         // test disconnections
         __testSignalsCounter = 0;
@@ -238,7 +238,7 @@ public:
         std::cout << "unique atomspace size:" << size << std::endl;
 
         // we should get num_atoms * n_threads distinct atoms
-        TS_ASSERT_EQUALS(size, num_atoms * n_threads);
+        TS_ASSERT_EQUALS(size, num_atoms * n_threads + 1);
     }
 
     void testThreadedDuplicateAdd()
@@ -253,7 +253,7 @@ public:
         std::cout << "duplicate atomspace size:" << size << std::endl;
 
         // We should get only num_atoms, because all threads are creating duplicates.
-        TS_ASSERT_EQUALS(size, num_atoms);
+        TS_ASSERT_EQUALS(size, num_atoms + 1);
     }
 
     // =================================================================
@@ -299,7 +299,7 @@ public:
         }
         for (std::thread& t : thread_pool) t.join();
         size_t size = atomSpace->get_size();
-        TS_ASSERT_EQUALS(size, 0);
+        TS_ASSERT_EQUALS(size, 1);
         size = atomSpace->get_size();
     }
 
@@ -387,7 +387,7 @@ public:
         std::cout << "TV atomspace size:" << size << std::endl;
 
         // We should get only num_atoms, because all threads created duplicates.
-        TS_ASSERT_EQUALS(size, num_atoms);
+        TS_ASSERT_EQUALS(size, num_atoms + 1);
 
         TS_ASSERT_EQUALS((int) __totalAdded, 0); // no change from before.
         TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * n_threads); // lots!
@@ -463,7 +463,7 @@ public:
 
         // We should get only 2*num_atoms, because all threads created duplicates.
         // num_atoms nodes, and num_atoms links.
-        TS_ASSERT_EQUALS(size, 2*num_atoms);
+        TS_ASSERT_EQUALS(size, 2*num_atoms + 1);
 
         TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
         TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * n_threads); // lots!
@@ -520,7 +520,7 @@ public:
         // We should get only n_thread*num_atoms + 2*num_atoms +
         // n_thread, because all threads created duplicate ListLinks,
         // duplicate PredicateNodes, but unique EvaluationLinks.
-        TS_ASSERT_EQUALS(size, (n_threads+2)*num_atoms + n_threads);
+        TS_ASSERT_EQUALS(size, (n_threads+2)*num_atoms + n_threads + 1);
     }
 
     // =================================================================
@@ -589,7 +589,7 @@ public:
         size_t size = atomSpace->get_size();
 
         std::cout << "Final size:" << size << std::endl;
-        TS_ASSERT_EQUALS(size, n_threads);
+        TS_ASSERT_EQUALS(size, n_threads + 1);
         atomSpace->atomRemovedSignal().disconnect(del);
     }
 
@@ -648,7 +648,7 @@ public:
         size_t size = atomSpace->get_size();
 
         std::cout << "Total created:" << size << std::endl;
-        TS_ASSERT_EQUALS(size, (n_threads+NEST)*num_atoms);
+        TS_ASSERT_EQUALS(size, (n_threads+NEST)*num_atoms + 1);
 
         // Now start removing ...
         __totalPurged = 0;
@@ -674,6 +674,6 @@ public:
         size = atomSpace->get_size();
 
         std::cout << "Final size:" << size << std::endl;
-        TS_ASSERT_EQUALS(size, 0);
+        TS_ASSERT_EQUALS(size, 1);
     }
 };

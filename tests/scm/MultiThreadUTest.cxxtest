@@ -218,8 +218,9 @@ void MultiThreadUTest::test_multi_threads(void)
 	size_t size = as->get_size();
 	std::cout << "atomspace size:" << size << std::endl;
 
-	// we should get num_atoms * n_threads distinct atoms
-	TS_ASSERT_EQUALS(size, num_atoms * n_threads);
+	// We should get num_atoms * n_threads distinct atoms
+	// Plus fone for truth-value-predicate
+	TS_ASSERT_EQUALS(size, num_atoms * n_threads + 1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
