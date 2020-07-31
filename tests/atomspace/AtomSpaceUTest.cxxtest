@@ -406,7 +406,8 @@ public:
         }
         logger().debug("TVS checked");
 
-        TS_ASSERT(atomSpace->get_num_nodes() == NUM_NODES);
+        // Plus-one for PredicateNode "*-TruthValueKey-*"
+        TS_ASSERT(atomSpace->get_num_nodes() == NUM_NODES+1);
         TS_ASSERT(atomSpace->get_num_links() == 8);
 
         // Test filters
@@ -434,10 +435,11 @@ public:
             everything e;
             getHandleSetFiltered(atomSpace, back_inserter(all), ATOM, true, e);
 
-            TS_ASSERT(high_mean.size() == 4);
-            TS_ASSERT(nodes.size() == NUM_NODES);
+            // Plus-one for PredicateNode "*-TruthValueKey-*"
+            TS_ASSERT(high_mean.size() == 4+1);
+            TS_ASSERT(nodes.size() == NUM_NODES+1);
             TS_ASSERT(links.size() == 8);
-            TS_ASSERT(all.size() == 14);
+            TS_ASSERT(all.size() == 14+1);
 
             if (vhIdx == 0) {
                 TS_ASSERT(find(high_mean.begin(), high_mean.end(), FU[0]) != high_mean.end());
@@ -809,7 +811,7 @@ public:
 
         HandleSeq namedAtoms;
         atomSpace->get_handles_by_type(back_inserter(namedAtoms), NODE, true);
-        TS_ASSERT_EQUALS(namedAtoms.size(), 3);
+        TS_ASSERT_EQUALS(namedAtoms.size(), 4);
     }
 
     // Helpers for testQuoteLink
