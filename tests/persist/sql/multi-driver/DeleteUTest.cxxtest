@@ -517,9 +517,10 @@ void DeleteUTest::do_test_remove(void)
     /* Push all atoms out to storage */
     _as->store_atomspace();
 
-    printf("Initial Atomspace size=%lu expect=%d\n", _as->get_size(), 7*idx);
+    // Plus-one for PredicateNode "*-TruthValueKey-*"
+    printf("Initial Atomspace size=%lu expect=%d\n", _as->get_size(), 7*idx+1);
     TSM_ASSERT("Initial unexpected atomspace size",
-          ((unsigned)(7*idx)) == _as->get_size());
+          ((unsigned)(7*idx+1)) == _as->get_size());
     /* Delete some atoms with non-empty incoming sets.
      * This should result in thier being removed from the atomspace,
      * but NOT fom the backend!
@@ -529,8 +530,9 @@ void DeleteUTest::do_test_remove(void)
     for (i=0; i<idx; i++)
         extract_links(i, _as);
 
-    printf("Atomspace size=%lu expect=%d\n", _as->get_size(), 4*idx);
-    TSM_ASSERT("Post-extract unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    // Plus-one for PredicateNode "*-TruthValueKey-*"
+    printf("Atomspace size=%lu expect=%d\n", _as->get_size(), 4*idx+1);
+    TSM_ASSERT("Post-extract unexpected atomspace size", ((unsigned)(4*idx+1)) == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
     for (i=0; i<idx; i++) {
@@ -641,7 +643,7 @@ void DeleteUTest::do_test_recurse(void)
         extract_nodes(i, _as);
 
     // Plus-one for PredicateNode "*-TruthValueKey-*"
-    size_t expsz = 7*(idx-zap) + 3*zap; // + 1;
+    size_t expsz = 7*(idx-zap) + 3*zap + 1;
     printf("Atomspace size=%lu expect=%lu\n",
          _as->get_size(), expsz);
     TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
@@ -656,8 +658,6 @@ void DeleteUTest::do_test_recurse(void)
     for (i=0; i<zap; i++)
         delete_nodes(i, _as);
 
-    // Plus-one for PredicateNode "*-TruthValueKey-*"
-    expsz += 1;
     printf("Post-remove size=%lu expect=%lu\n",
          _as->get_size(), expsz);
     TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
