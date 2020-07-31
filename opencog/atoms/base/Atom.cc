@@ -133,8 +133,15 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
     // writing this at a time. std:shared_ptr is NOT thread-safe against
     // multiple writers: see "Example 5" in
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    setValue (truth_key(), ValueCast(newTV));
 
+    if (_atom_space != nullptr)
+        setValue (_atom_space->add_atom(truth_key()), ValueCast(newTV));
+    else
+        setValue (truth_key(), ValueCast(newTV));
+
+
+    // XXX FIXME Can we just nuke signals, already? They are
+    // a complete waste of CPU cycles...
     if (_atom_space != nullptr) {
         TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
         tvch.emit(get_handle(), oldTV, newTV);
@@ -143,7 +150,12 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
 
 TruthValuePtr Atom::getTruthValue() const
 {
-    ValuePtr pap(getValue(truth_key()));
+    ValuePtr pap;
+    if (_atom_space != nullptr)
+        pap = getValue(_atom_space->add_atom(truth_key()));
+    else
+        pap = getValue(truth_key());
+
     if (nullptr == pap) return TruthValue::DEFAULT_TV();
     return TruthValueCast(pap);
 }
