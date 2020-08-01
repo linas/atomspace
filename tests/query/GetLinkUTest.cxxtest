@@ -276,6 +276,7 @@ void GetLinkUTest::test_not_equal(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
+	Handle K = an(PREDICATE_NODE, "*-TruthValueKey-*");
 
 	Handle P = an(PREDICATE_NODE, "P");
 	Handle Q = an(PREDICATE_NODE, "Q");
@@ -292,7 +293,7 @@ void GetLinkUTest::test_not_equal(void)
 	Handle gl = al(GET_LINK, vardecl, body);
 
 	Handle result = satisfying_set(as, gl);
-	Handle expect = al(SET_LINK, Q);
+	Handle expect = al(SET_LINK, Q, K);
 
 	printf("Expected this: %s\n", expect->to_string().c_str());
 	printf("Found this answer: %s\n", result->to_string().c_str());

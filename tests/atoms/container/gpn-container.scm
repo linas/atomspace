@@ -19,13 +19,18 @@
 	(format #t "I was minimally told ~A" ATOM)
 	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
 
-(define (max-like-pie ATOM)
+(define (xmax-like-pie ATOM)
 	(define pred (cog-outgoing-atom ATOM 0))
 	(define label (cog-name pred))
 	(format #t "I was maximally told ~A" ATOM)
 	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
 
-(define (like-both-pie PRED EVAL)
+; Argh work-around the truth-value key
+(define (max-like-pie ATOM)
+	(define ptv (PredicateNode "*-TruthValueKey-*"))
+	(if (equal? ptv ATOM) (stv 0 1) (xmax-like-pie ATOM)))
+
+(define (xlike-both-pie PRED EVAL)
 	(define pred (cog-outgoing-atom EVAL 0))
 	(define label (cog-name pred))
 	(format #t "I was told both ~A and ~A" PRED EVAL)
@@ -33,7 +38,12 @@
 		(throw 'test-failure "like-both-pie" "You blew it!"))
 	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
 
-(define (like-triple-pie PRED ARG EVAL)
+; Argh work-around the truth-value key
+(define (like-both-pie PRED EVAL)
+	(define ptv (PredicateNode "*-TruthValueKey-*"))
+	(if (equal? ptv EVAL) (stv 0 1) (xlike-both-pie PRED EVAL)))
+
+(define (xlike-triple-pie PRED ARG EVAL)
 	(define pred (cog-outgoing-atom EVAL 0))
 	(define lst (cog-outgoing-atom EVAL 1))
 	(define arg (cog-outgoing-atom lst 0))
@@ -48,6 +58,11 @@
 		(format #t "Yes its pie!\n\n")
 		(format #t "No its not!\n\n"))
 	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
+
+; Argh work-around the truth-value key
+(define (like-triple-pie PRED ARG EVAL)
+	(define ptv (PredicateNode "*-TruthValueKey-*"))
+	(if (equal? ptv EVAL) (stv 0 1) (xlike-triple-pie PRED ARG EVAL)))
 
 (define min-gpn
 	(MinimalJoin

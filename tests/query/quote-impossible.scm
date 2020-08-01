@@ -5,6 +5,8 @@
 ; The problem is that the search tries to start within
 ; the QuoteLink, but do_term_up does not like that.
 ;
+(use-modules (opencog) (opencog exec))
+
 (define imp
   (SatisfactionLink
     (TypedVariable
