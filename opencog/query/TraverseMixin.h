@@ -38,7 +38,7 @@ class TraverseMixin : public virtual PatternMatchCallback
 {
 	public:
 		TraverseMixin(AtomSpace*);
-		~TraverseMixin();
+		virtual ~TraverseMixin();
 		virtual IncomingSet get_incoming_set(const Handle&, Type);
 
 	protected:

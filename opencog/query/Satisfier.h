@@ -106,6 +106,7 @@ class Satisfier :
 
 class SatisfyingSet :
 	public InitiateSearchMixin,
+	public TraverseMixin,
 	public TermMatchMixin,
 	public SatisfyMixin
 {
@@ -118,7 +119,9 @@ class SatisfyingSet :
 
 	public:
 		SatisfyingSet(AtomSpace* as) :
-			InitiateSearchMixin(as), TermMatchMixin(as),
+			InitiateSearchMixin(as),
+			TraverseMixin(as),
+			TermMatchMixin(as),
 			_as(as), max_results(SIZE_MAX) {}
 
 		size_t max_results;
