@@ -544,13 +544,6 @@ bool TermMatchMixin::always_clause_match(const Handle& ptrn,
 
 /* ======================================================== */
 
-IncomingSet TermMatchMixin::get_incoming_set(const Handle& h, Type t)
-{
-	return h->getIncomingSetByType(t, _as);
-}
-
-/* ======================================================== */
-
 /// Evaluation of the link requires working with an atomspace of
 /// some sort, so that the atoms can be communicated to scheme
 /// or python for the actual evaluation. We don't want to put

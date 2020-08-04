@@ -32,6 +32,7 @@
 
 #include <opencog/query/InitiateSearchMixin.h>
 #include <opencog/query/TermMatchMixin.h>
+#include <opencog/query/TraverseMixin.h>
 #include <opencog/query/SatisfyMixin.h>
 
 namespace opencog {
@@ -49,6 +50,7 @@ namespace opencog {
 
 class Satisfier :
 	public InitiateSearchMixin,
+	public TraverseMixin,
 	public TermMatchMixin,
 	public SatisfyMixin
 {
@@ -59,6 +61,7 @@ class Satisfier :
 	public:
 		Satisfier(AtomSpace* as) :
 			InitiateSearchMixin(as),
+			TraverseMixin(as),
 			TermMatchMixin(as),
 			_result(TruthValue::FALSE_TV()) {}
 

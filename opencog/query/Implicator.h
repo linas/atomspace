@@ -28,12 +28,14 @@
 #include "RewriteMixin.h"
 #include "SatisfyMixin.h"
 #include "TermMatchMixin.h"
+#include "TraverseMixin.h"
 
 namespace opencog {
 
 class Implicator:
 	public InitiateSearchMixin,
 	public RewriteMixin,
+	public TraverseMixin,
 	public TermMatchMixin,
 	public SatisfyMixin
 {
@@ -41,6 +43,7 @@ class Implicator:
 		Implicator(AtomSpace* asp) :
 			InitiateSearchMixin(asp),
 			RewriteMixin(asp),
+			TraverseMixin(asp),
 			TermMatchMixin(asp) {}
 
 			virtual void set_pattern(const Variables& vars,

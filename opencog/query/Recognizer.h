@@ -25,6 +25,7 @@
 #define _OPENCOG_RECOGNIZER_H
 
 #include <opencog/query/TermMatchMixin.h>
+#include <opencog/query/TraverseMixin.h>
 #include <opencog/query/SatisfyMixin.h>
 
 namespace opencog {
@@ -47,6 +48,7 @@ namespace opencog {
  */
 class Recognizer :
 	public TermMatchMixin,
+	public TraverseMixin,
 	public SatisfyMixin
 {
 	private:
@@ -67,6 +69,7 @@ class Recognizer :
 
 		Recognizer(AtomSpace* as) :
 		    TermMatchMixin(as),
+		    TraverseMixin(as),
 		    _pattern(nullptr),
 		    _cnt(0)
 		{}

@@ -25,7 +25,6 @@
 #ifndef _OPENCOG_TERM_MATCH_MIXIN_H
 #define _OPENCOG_TERM_MATCH_MIXIN_H
 
-#include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
@@ -77,8 +76,6 @@ class TermMatchMixin : public virtual PatternMatchCallback
 		virtual bool always_clause_match(const Handle& pattrn,
 		                                 const Handle& grnd,
 		                                 const GroundingMap&);
-
-		virtual IncomingSet get_incoming_set(const Handle&, Type);
 
 		/**
 		 * Called when a virtual link is encountered. Returns false

@@ -9,6 +9,7 @@ ADD_LIBRARY(query-engine
 	Satisfier.cc
 	SatisfyMixin.cc
 	TermMatchMixin.cc
+	TraverseMixin.cc
 )
 
 # Optionally enable debug logging for the pattern matcher.
@@ -35,5 +36,6 @@ INSTALL (FILES
 	Satisfier.h
 	SatisfyMixin.h
 	TermMatchMixin.h
+	TraverseMixin.h
 	DESTINATION "include/opencog/query"
 )

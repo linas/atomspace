@@ -471,6 +471,9 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
     static IncomingSet empty_set;
     if (nullptr == _incoming_set) return empty_set;
 
+    // Special case (for pattern matcher)
+    if (ATOM == type) return getIncomingSet(as);
+
     // Lock to prevent updates of the set of atoms.
     std::lock_guard<std::mutex> lck(_mtx);
 
