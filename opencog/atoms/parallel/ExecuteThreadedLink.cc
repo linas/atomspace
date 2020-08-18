@@ -118,6 +118,8 @@ timespec push = {0,0};
 timespec tryg = {0,0}; // try-get
 timespec thrj = {0,0}; // join
 timespec tott = {0,0};
+int item = 0;
+#define G ->getOutgoingAtom
 
 static void thread_exec(AtomSpace* as, bool silent,
                         concurrent_queue<Handle>* todo,
@@ -134,6 +136,8 @@ clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
 timespec_diff(start, end, diff);
 timespec_add(tryg, diff);
+int thit = item;
+item++;
 
 		// This is "identical" to what cog-execute! would do...
 		try
@@ -143,6 +147,22 @@ clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
 timespec_diff(start, end, diff);
 timespec_add(exec, diff);
+
+QueueValuePtr qvp = QueueValueCast(pap);
+qvp->value();
+if (1000 < qvp->LinkValue::size()) {
+Handle a = h G(1);
+Handle c1 = a G(0) G(1) G(0);
+Handle c2 = a G(1) G(1) G(0);
+Handle c3 = a G(2) G(1) G(0);
+std::string name;
+if (c1->get_type() == CONCEPT_NODE) name = c1->get_name();
+if (c2->get_type() == CONCEPT_NODE) name = c2->get_name();
+if (c3->get_type() == CONCEPT_NODE) name = c3->get_name();
+printf("duuude item %d %s time=%ld %09ld\n", thit, name.c_str(),
+diff.tv_sec, diff.tv_nsec);
+}
+
 
 			if (pap and pap->is_atom())
 				pap = as->add_atom(HandleCast(pap));
@@ -205,12 +225,13 @@ clock_gettime(CLOCK_REALTIME, &tend);
 timespec_diff(tstart, tend, tdiff);
 timespec_add(tott, tdiff);
 
-printf("duuude thread-create %ld %9ld\n", thrc.tv_sec, thrc.tv_nsec);
-printf("duuude thread-join   %ld %9ld\n", thrj.tv_sec, thrj.tv_nsec);
-printf("duuude try-get       %ld %9ld\n", tryg.tv_sec, tryg.tv_nsec);
-printf("duuude exec-only     %ld %9ld\n", exec.tv_sec, exec.tv_nsec);
-printf("duuude push          %ld %9ld\n", push.tv_sec, push.tv_nsec);
-printf("duuude total-wall    %ld %9ld\n", tott.tv_sec, tott.tv_nsec);
+printf("duuude did %d items\n", item);
+printf("duuude thread-create %ld %09ld\n", thrc.tv_sec, thrc.tv_nsec);
+printf("duuude thread-join   %ld %09ld\n", thrj.tv_sec, thrj.tv_nsec);
+printf("duuude try-get       %ld %09ld\n", tryg.tv_sec, tryg.tv_nsec);
+printf("duuude exec-only     %ld %09ld\n", exec.tv_sec, exec.tv_nsec);
+printf("duuude push          %ld %09ld\n", push.tv_sec, push.tv_nsec);
+printf("duuude total-wall    %ld %09ld\n", tott.tv_sec, tott.tv_nsec);
 thrc = {0,0}; // thread create
 inst = {0,0};
 exec = {0,0};
@@ -218,6 +239,7 @@ push = {0,0};
 tryg = {0,0}; // try-get
 thrj = {0,0}; // join
 tott = {0,0};
+item=0;
 
 	return qvp;
 }
