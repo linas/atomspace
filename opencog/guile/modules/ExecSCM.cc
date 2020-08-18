@@ -33,17 +33,60 @@ void opencog_exec_init(void);
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/guile/SchemeModule.h>
 
+#include <time.h>
+
 // ========================================================
 
 using namespace opencog;
+
+timespec sexe = {0,0};
+int calls =0;
+
+
+static void timespec_diff(struct timespec &start, struct timespec &stop,
+                   struct timespec &result)
+{
+    if ((stop.tv_nsec - start.tv_nsec) < 0) {
+        result.tv_sec = stop.tv_sec - start.tv_sec - 1;
+        result.tv_nsec = stop.tv_nsec - start.tv_nsec + 1000000000L;
+    } else {
+        result.tv_sec = stop.tv_sec - start.tv_sec;
+        result.tv_nsec = stop.tv_nsec - start.tv_nsec;
+    }
+}
+
+static void timespec_add(struct timespec &acc, struct timespec &delt)
+{
+   acc.tv_sec += delt.tv_sec;
+   acc.tv_nsec += delt.tv_nsec;
+    if (1000000000L < acc.tv_nsec)
+   {
+      acc.tv_sec ++;
+      acc.tv_nsec -= 1000000000L;
+   }
+}
+
 
 /**
  * cog-execute! executes any/all FunctionLinks
  */
 static ValuePtr ss_execute(AtomSpace* atomspace, const Handle& h)
 {
+timespec start, end, diff;
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 	Instantiator inst(atomspace);
 	ValuePtr pap(inst.execute(h));
+if (MEET_LINK == h->get_type()) {
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+timespec_diff(start, end, diff);
+timespec_add(sexe, diff);
+calls++;
+if (681 == calls) {
+calls = 0;
+printf("duude meetsy=  %ld %9ld\n", sexe.tv_sec, sexe.tv_nsec);
+}
+}
+
 #if LATER
 	if (pap == h)
 	{

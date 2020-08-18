@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <time.h>
 #include <thread>
 
 #include <opencog/util/concurrent_queue.h>
@@ -33,6 +34,30 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
+
+
+static void timespec_diff(struct timespec &start, struct timespec &stop,
+                   struct timespec &result)
+{
+    if ((stop.tv_nsec - start.tv_nsec) < 0) {
+        result.tv_sec = stop.tv_sec - start.tv_sec - 1;
+        result.tv_nsec = stop.tv_nsec - start.tv_nsec + 1000000000L;
+    } else {
+        result.tv_sec = stop.tv_sec - start.tv_sec;
+        result.tv_nsec = stop.tv_nsec - start.tv_nsec;
+    }
+}
+
+static void timespec_add(struct timespec &acc, struct timespec &delt)
+{
+	acc.tv_sec += delt.tv_sec;
+	acc.tv_nsec += delt.tv_nsec;
+    if (1000000000L < acc.tv_nsec)
+	{
+		acc.tv_sec ++;
+		acc.tv_nsec -= 1000000000L;
+	}
+}
 
 /// ExecuteThreadedLink
 /// Perform execution in parallel threads.
@@ -86,24 +111,46 @@ ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
 	_nthreads = std::min(_nthreads, _outgoing[_setoff]->get_arity());
 }
 
+timespec thrc = {0,0}; // thread create
+timespec inst = {0,0};
+timespec exec = {0,0};
+timespec push = {0,0};
+timespec tryg = {0,0}; // try-get
+timespec thrj = {0,0}; // join
+timespec tott = {0,0};
+
 static void thread_exec(AtomSpace* as, bool silent,
                         concurrent_queue<Handle>* todo,
                         QueueValuePtr qvp,
                         std::exception_ptr* returned_ex)
 {
+	Instantiator inst(as);
+timespec start, end, diff;
 	while (true)
 	{
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 		Handle h;
 		if (not todo->try_get(h)) return;
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+timespec_diff(start, end, diff);
+timespec_add(tryg, diff);
 
 		// This is "identical" to what cog-execute! would do...
-		Instantiator inst(as);
 		try
 		{
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 			ValuePtr pap(inst.execute(h));
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+timespec_diff(start, end, diff);
+timespec_add(exec, diff);
+
 			if (pap and pap->is_atom())
 				pap = as->add_atom(HandleCast(pap));
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 			qvp->push(std::move(pap));
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+timespec_diff(start, end, diff);
+timespec_add(push, diff);
 		}
 		catch (const std::exception& ex)
 		{
@@ -116,6 +163,8 @@ static void thread_exec(AtomSpace* as, bool silent,
 ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
                                       bool silent)
 {
+timespec tstart, tend, tdiff;
+clock_gettime(CLOCK_REALTIME, &tstart);
 	// Place the work items onto a queue.
 	concurrent_queue<Handle> todo_list;
 	const HandleSeq& exes = _outgoing[_setoff]->getOutgoingSet();
@@ -129,20 +178,39 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 	std::vector<std::thread> thread_set;
 	std::exception_ptr ex;
 
+timespec start, end, diff;
 	// Launch the workers
 	for (size_t i=0; i<_nthreads; i++)
 	{
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 		thread_set.push_back(std::thread(&thread_exec,
 			as, silent, &todo_list, qvp, &ex));
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+timespec_diff(start, end, diff);
+timespec_add(thrc, diff);
 	}
 
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 	// Wait for it all to come together.
 	for (std::thread& t : thread_set) t.join();
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+timespec_diff(start, end, diff);
+timespec_add(thrj, diff);
 
 	// Were there any exceptions? If so, rethrow.
 	if (ex) std::rethrow_exception(ex);
 
 	qvp->close();
+clock_gettime(CLOCK_REALTIME, &tend);
+timespec_diff(tstart, tend, tdiff);
+timespec_add(tott, tdiff);
+
+printf("duuude thread-create %ld %9ld\n", thrc.tv_sec, thrc.tv_nsec);
+printf("duuude thread-join   %ld %9ld\n", thrj.tv_sec, thrj.tv_nsec);
+printf("duuude try-get       %ld %9ld\n", tryg.tv_sec, tryg.tv_nsec);
+printf("duuude exec-only     %ld %9ld\n", exec.tv_sec, exec.tv_nsec);
+printf("duuude push          %ld %9ld\n", push.tv_sec, push.tv_nsec);
+printf("duuude total-wall    %ld %9ld\n", tott.tv_sec, tott.tv_nsec);
 	return qvp;
 }
 
