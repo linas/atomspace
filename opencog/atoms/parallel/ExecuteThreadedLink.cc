@@ -148,9 +148,10 @@ clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
 timespec_diff(start, end, diff);
 timespec_add(exec, diff);
 
-QueueValuePtr qvp = QueueValueCast(pap);
-qvp->value();
-if (1000 < qvp->LinkValue::size()) {
+QueueValuePtr rvp = QueueValueCast(pap);
+rvp->value();
+size_t sz = rvp->LinkValue::size();
+if (1000 < sz) {
 Handle a = h G(1);
 Handle c1 = a G(0) G(1) G(0);
 Handle c2 = a G(1) G(1) G(0);
