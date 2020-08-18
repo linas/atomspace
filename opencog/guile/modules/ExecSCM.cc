@@ -84,6 +84,7 @@ calls++;
 if (681 == calls) {
 calls = 0;
 printf("duude meetsy=  %ld %9ld\n", sexe.tv_sec, sexe.tv_nsec);
+sexe = {0,0};
 }
 }
 

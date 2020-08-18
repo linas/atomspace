@@ -211,6 +211,14 @@ printf("duuude try-get       %ld %9ld\n", tryg.tv_sec, tryg.tv_nsec);
 printf("duuude exec-only     %ld %9ld\n", exec.tv_sec, exec.tv_nsec);
 printf("duuude push          %ld %9ld\n", push.tv_sec, push.tv_nsec);
 printf("duuude total-wall    %ld %9ld\n", tott.tv_sec, tott.tv_nsec);
+thrc = {0,0}; // thread create
+inst = {0,0};
+exec = {0,0};
+push = {0,0};
+tryg = {0,0}; // try-get
+thrj = {0,0}; // join
+tott = {0,0};
+
 	return qvp;
 }
 
