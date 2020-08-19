@@ -118,6 +118,7 @@ timespec push = {0,0};
 timespec tryg = {0,0}; // try-get
 timespec thrj = {0,0}; // join
 timespec tott = {0,0};
+timespec hiex = {0,0}; // total of executation for high-timers.
 int item = 0;
 #define G ->getOutgoingAtom
 
@@ -151,15 +152,16 @@ timespec_add(exec, diff);
 QueueValuePtr rvp = QueueValueCast(pap);
 rvp->value();
 size_t sz = rvp->LinkValue::size();
-if (1000 < sz) {
+if (2000 < sz) {
+timespec_add(hiex, diff);
 Handle a = h G(1);
 Handle c1 = a G(0) G(1) G(0);
 Handle c2 = a G(1) G(1) G(0);
 Handle c3 = a G(2) G(1) G(0);
 std::string name;
-if (c1->get_type() == CONCEPT_NODE) name = c1->get_name();
-if (c2->get_type() == CONCEPT_NODE) name = c2->get_name();
-if (c3->get_type() == CONCEPT_NODE) name = c3->get_name();
+if (c1->get_type() != VARIABLE_NODE) name = c1->get_name();
+if (c2->get_type() != VARIABLE_NODE) name = c2->get_name();
+if (c3->get_type() != VARIABLE_NODE) name = c3->get_name();
 printf("duuude item %d %s time=%ld %09ld\n", thit, name.c_str(),
 diff.tv_sec, diff.tv_nsec);
 }
@@ -231,6 +233,7 @@ printf("duuude thread-create %ld %09ld\n", thrc.tv_sec, thrc.tv_nsec);
 printf("duuude thread-join   %ld %09ld\n", thrj.tv_sec, thrj.tv_nsec);
 printf("duuude try-get       %ld %09ld\n", tryg.tv_sec, tryg.tv_nsec);
 printf("duuude exec-only     %ld %09ld\n", exec.tv_sec, exec.tv_nsec);
+printf("duuude high-exec     %ld %09ld\n", hiex.tv_sec, hiex.tv_nsec);
 printf("duuude push          %ld %09ld\n", push.tv_sec, push.tv_nsec);
 printf("duuude total-wall    %ld %09ld\n", tott.tv_sec, tott.tv_nsec);
 thrc = {0,0}; // thread create
@@ -240,6 +243,7 @@ push = {0,0};
 tryg = {0,0}; // try-get
 thrj = {0,0}; // join
 tott = {0,0};
+hiex = {0,0};
 item=0;
 
 	return qvp;
