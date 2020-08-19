@@ -91,8 +91,8 @@ include(OpenCogLibOptions)
 include(OpenCogInstallOptions)
 include(Summary)
 
-# SET(CMAKE_C_FLAGS "-O3 -g -fno-omit-frame-pointer")
-SET(CMAKE_C_FLAGS "-O3 -g")
+SET(CMAKE_C_FLAGS "-O2 -g -fno-omit-frame-pointer")
+# SET(CMAKE_C_FLAGS "-O3 -g")
 SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++17")
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
 
