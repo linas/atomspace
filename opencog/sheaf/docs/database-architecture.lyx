@@ -1,0 +1,392 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Sheaf/Tensor Databases
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+6 Sept 2020
+\end_layout
+
+\begin_layout Abstract
+The sheaf/tensor viewpoint of graphs offers the possibility creating a database
+ that natively holds data in this format (as opposed to being layered on
+ top of some other database/data representation system).
+ This document attempts to describe an architecture for such a system.
+\end_layout
+
+\begin_layout Abstract
+In progress, still being written...
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+Graph-sheaves (or graph-tensors) provide a natural way of representing connectio
+nist knowledge: that is, of providing a foundation for knowledge representation
+ and reasoning (KRR).
+ Current experiments with this representational form have taken place within
+ the AtomSpace (i.e.
+ by layering them on top of the metagraph concepts that the AtomSpace provides.)
+ Perhaps it would be more efficient to provide a native representation?
+\end_layout
+
+\begin_layout Standard
+This document explores the data structure more deeply, examines the requirements
+ in greater detail, and attempts to sketch a generic architecture for a
+ 
+\begin_inset Quotes eld
+\end_inset
+
+tensor database
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf database
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Graph Tensors
+\end_layout
+
+\begin_layout Standard
+Ordinarily, a graph is taken to be a collection of vertexes and edges.
+ The tensor representation of a graph is closely related, but appears to
+ be more suitable for knowledge representation and reasoning.
+ This section quickly reviews the abstract structure.
+\end_layout
+
+\begin_layout Standard
+The canonical definition of an undirected graph is that of two sets: a set
+ 
+\begin_inset Formula $V$
+\end_inset
+
+ of vertices and a set 
+\begin_inset Formula $E$
+\end_inset
+
+ of edges.
+ An edge 
+\begin_inset Formula $e_{k}\in E$
+\end_inset
+
+ is a pair 
+\begin_inset Formula $e_{k}=\left\{ v_{i},v_{j}\right\} $
+\end_inset
+
+ of vertices, with each 
+\begin_inset Formula $v_{i}\in V$
+\end_inset
+
+.
+ A directed graph replaces the (unordered) pair 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ with an ordered pair 
+\begin_inset Formula $e_{k}=\left(v_{i},v_{j}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Although this definition is adequate for most mathematical applications,
+ it is severely deficient for algorithmic applications.
+ The biggest issue is that of non-locality of data.
+ If one merely stuffs the vertices and edges into a table, then a graph
+ walk in general appears to look like a uniformly distributed random hop
+ through those tables: terrible for modern computers which rely on locality,
+ so that caches can speed data access performance.
+\end_layout
+
+\begin_layout Standard
+This section develops an alternative representation for graphs, and argues
+ that it is foundational in nature.
+ It addresses not only some of the practical problems in the DAG-view of
+ the world (of the noosphere) but also provides an alternative to some of
+ the philosophical foundations of the same.
+\end_layout
+
+\begin_layout Subsubsection*
+Seeds
+\end_layout
+
+\begin_layout Standard
+The problem of locality can be (partly) solved by defining graphs in a different
+ way: in terms of vertexes, and the (half-)edges that attach to each vertex.
+ In this case, one creates a table of pairs 
+\begin_inset Formula $\left(v_{i},\left\{ e_{i1},e_{i2},\cdots,e_{ik}\right\} \right)$
+\end_inset
+
+ of a vertex 
+\begin_inset Formula $v_{i}$
+\end_inset
+
+ and the set of all edges landing on that vertex.
+ It is convenient to think of the edges as 
+\begin_inset Quotes eld
+\end_inset
+
+half-edges
+\begin_inset Quotes erd
+\end_inset
+
+, as it is enough to identify the remote end to which they connect; the
+ local end is implicit: it is just the vertex 
+\begin_inset Formula $v_{i}$
+\end_inset
+
+ at the 
+\begin_inset Quotes eld
+\end_inset
+
+center
+\begin_inset Quotes erd
+\end_inset
+
+.
+ As this is obvious, it can be belabored with a diagram.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/seed.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The black dot represents the vertex; the open circles represent the unconnected
+ half-edges.
+ As this vaguely resembles a burr, this general shape will be referred to
+ as a 
+\begin_inset Quotes eld
+\end_inset
+
+seed
+\begin_inset Quotes erd
+\end_inset
+
+, or sometimes a 
+\begin_inset Quotes eld
+\end_inset
+
+germ
+\begin_inset Quotes erd
+\end_inset
+
+ in what follows.
+ Connecting these proceeds in the 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+ fashion, and so a pair of connected seeds is shown below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/seeds-two.eps
+	lyxscale 60
+	width 30col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The unconnected dots, the half-edges, can be called connectors, in which
+ the jigsaw-puzzle piece analogy comes into full force.
+ Another 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+ diagram illustrates this:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle.eps
+	lyxscale 60
+	width 45col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The explicit polarity of the mating, despite the fact that the resulting
+ edge is an undirected edge, serves several purposes.
+ Foremost, it helps avoid mating errors: if the connectors do not have opposite
+ polarity, they cannot attach.
+ Secondly, they can be used to establish directionality, when that is needed.
+ As the previous section noted, directed edges are everywhere; this did
+ not mean to imply that they are useless! The collection of tabs and sockets
+ can come in a large variety of shapes.
+ These shapes correspond to the 
+\begin_inset Quotes eld
+\end_inset
+
+types
+\begin_inset Quotes erd
+\end_inset
+
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+type theory
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Most importantly, the concept of vertices adorned with connectors allows
+ one to define a concept of a grammar.
+\end_layout
+
+\begin_layout Subsubsection*
+Sections and Compostionality
+\end_layout
+
+\begin_layout Standard
+The burrs/seeds/puzzle-pieces, as presented above, are obviously 
+\begin_inset Quotes eld
+\end_inset
+
+compositional
+\begin_inset Quotes erd
+\end_inset
+
+, in that there is an obvious way to connect them together.
+ Once connected, the resulting structure is again of the same form: some
+ network of vertices connected with edges, and some unconnected half-edges
+ sticking out of it.
+ Furthermore, it should be clear that the order in which pieces are assembled
+ is immaterial: one obtains the same figure, no matter what the sequence.
+\end_layout
+
+\end_body
+\end_document

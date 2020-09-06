@@ -169,11 +169,6 @@ Key points:
 \end_layout
 
 \begin_layout Itemize
-Metatrees can be thought of as either s-expressions or as json.
- But with a cactch...
-\end_layout
-
-\begin_layout Itemize
 Walks are explicit: one moves up or down the trees e.g.
  the car, cdr of lisp, but also the tinkerpop/gremlin primitives for graph-walki
 ng.
