@@ -193,7 +193,7 @@ The canonical definition of an undirected graph is that of two sets: a set
 \begin_inset Formula $e_{k}=\left(v_{i},v_{j}\right)$
 \end_inset
 
-
+.
 \end_layout
 
 \begin_layout Standard
@@ -204,14 +204,6 @@ Although this definition is adequate for most mathematical applications,
  walk in general appears to look like a uniformly distributed random hop
  through those tables: terrible for modern computers which rely on locality,
  so that caches can speed data access performance.
-\end_layout
-
-\begin_layout Standard
-This section develops an alternative representation for graphs, and argues
- that it is foundational in nature.
- It addresses not only some of the practical problems in the DAG-view of
- the world (of the noosphere) but also provides an alternative to some of
- the philosophical foundations of the same.
 \end_layout
 
 \begin_layout Subsubsection*
