@@ -10,8 +10,8 @@
 
 (cog-prt-atomspace)
 
-(cog-execute! (CountOf a-set))
-(cog-execute! (CountOf (ForEach a-set)))
+; (cog-execute! (CountOf a-set))
+; (cog-execute! (CountOf (ForEach a-set)))
 ; Perhaps ForEach returns a LinkValue that CountValue can process??
 
 (define qry
@@ -21,7 +21,62 @@
 
 (cog-execute! qry)
 
-;Ideas:
-(cog-execute! (CountOf qry))
-(cog-execute! (CountOf (Run qry)))
+; Ideas:
+; (cog-execute! (CountOf qry))
+; (cog-execute! (CountOf (Run qry)))
 ;
+
+; Desired result:
+(define sum
+	(Fold
+		(Lamda
+			(VariableList (Variable "$itm") (Variable "$acc"))
+			(Plus (CountOf (Variable "$item")) (Variable "$acc")))
+		(Number 0)
+		qry))
+; (cog-execute! sum)  ; return 6 (a umber, or a FloatValue?)
+
+; Change NumberNode to be executable, and when it executes,
+; it runs it's argument. If the arg returns a FloatValue, the
+; the NumberNode stores that.
+
+
+; ----------------------
+; Fancier version -- the dot product
+
+; A pair of vectors
+(Evaluation (Predicate "has legs") (Concept "dog") (CountTruthValue 1 0 1))
+(Evaluation (Predicate "has nose") (Concept "dog") (CountTruthValue 1 0 2))
+(Evaluation (Predicate "has tail") (Concept "dog") (CountTruthValue 1 0 3))
+(Evaluation (Predicate "furry")    (Concept "dog") (CountTruthValue 1 0 4))
+(Evaluation (Predicate "domestic") (Concept "dog") (CountTruthValue 1 0 5))
+
+(Evaluation (Predicate "has legs") (Concept "cat") (CountTruthValue 1 0 1))
+(Evaluation (Predicate "has nose") (Concept "cat") (CountTruthValue 1 0 2))
+(Evaluation (Predicate "has tail") (Concept "cat") (CountTruthValue 1 0 3))
+(Evaluation (Predicate "furry")    (Concept "cat") (CountTruthValue 1 0 4))
+(Evaluation (Predicate "domestic") (Concept "cat") (CountTruthValue 1 0 5))
+
+; A search that returns the left-prpduct
+(define qdot
+	(Query
+		(TypedVariable (Variable "$prop") (Type 'Predicate))
+		(Present
+			(Evaluation (Variable "$prop") (Concept "dog"))
+			(Evaluation (Variable "$prop") (Concept "cat")))
+		(List
+			(Evaluation (Variable "$prop") (Concept "dog"))
+			(Evaluation (Variable "$prop") (Concept "cat")))))
+
+(define dot
+	(Fold
+		(Lamda
+			(VariableList (Variable "$itm") (Variable "$acc"))
+			(Plus
+				(Times
+					(CountOf
+				(Variable "$item")) (Variable "$acc")))
+		(Plus (Times (CountOf (Variable "$X")))
+		(Number 0)
+		qdot))
+
