@@ -58,7 +58,7 @@
 (Evaluation (Predicate "domestic") (Concept "cat") (CountTruthValue 1 0 5))
 
 ; A search that returns the left-prpduct
-(define qdot
+(define qdot-classic
 	(Query
 		(TypedVariable (Variable "$prop") (Type 'Predicate))
 		(Present
@@ -67,6 +67,17 @@
 		(List
 			(Evaluation (Variable "$prop") (Concept "dog"))
 			(Evaluation (Variable "$prop") (Concept "cat")))))
+
+; Wow -- this actually works!
+(define qdot-math
+	(Query
+		(TypedVariable (Variable "$prop") (Type 'Predicate))
+		(Present
+			(Evaluation (Variable "$prop") (Concept "dog"))
+			(Evaluation (Variable "$prop") (Concept "cat")))
+		(Times
+			(CountOf (Evaluation (Variable "$prop") (Concept "dog")))
+			(CountOf (Evaluation (Variable "$prop") (Concept "cat"))))))
 
 (define dot
 	(Fold
