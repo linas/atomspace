@@ -10,7 +10,7 @@ Reading-list TODO:
   can be reversed. This enableds back-tracking on a rule system.
 
 * Scott Garrabrant, Tsvi Benson-Tilsen, Andrew Critch, Nate Soares,
-  Jessica Taylor "Logical Induction" (2016) 
+  Jessica Taylor "Logical Induction" (2016)
   https://arxiv.org/abs/1609.03543
 
   "We present a computable algorithm that assigns probabilities to
@@ -31,3 +31,14 @@ Reading-list TODO:
 
 * empahsize: generalization is what the voting algorithm does
 * keywords: novelty
+
+* random walk through the graph, however, look-ahead by spreading
+  attention by weights - this needs the attention allocation redisign.
+  This is for generation.
+
+* Use a small collection of words from text chat to deposit attention
+  into the network. Then trace throught grammatically network crawls
+  throught the net. Do this on an IRC chat channel.
+
+* Document the quanutm collapse idea in the current generation
+  code base README
