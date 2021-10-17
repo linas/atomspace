@@ -42,3 +42,18 @@ Reading-list TODO:
 
 * Document the quanutm collapse idea in the current generation
   code base README
+
+* Multiple input streams need multiple pair correlation counters
+  and need to be distinguished. Each input stream needs it's own
+  tag type. The tag type is not WordNode any more but Stream1Node
+  and Stream2Node or ... needs to be flexible but compact.
+
+* Move away from word-node to generic item-node...!? Only to avoid
+  collisions between type defintions? But want a node-type per-stream.
+  So (TagLink (PredicateNode "tag-name") (TagNode "word"))
+  where TagNode is a kind-of connectorNode.
+  or instead
+  (TagLink (TagNode "tag-name") (ItemNode "word"))
+  where TagNode is a kind-of DirectionNode
+  ItemNode is a type of connector
+  TagLink is a ConnectorLink
