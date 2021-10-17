@@ -16,3 +16,15 @@ Reading-list TODO:
   "We present a computable algorithm that assigns probabilities to
   every logical statement in a given formal language, and refines
   those probabilities over time."
+
+
+* document Log2Link
+* demo for dot product
+* unit test for dot product acumultate
+* slides into README
+* slides into blog post
+* dot product into fast matrix
+* ChoiceLink/IdenticalLink
+* atomspace smart pointer
+* atomspace multi-children
+* atomspace multi-search.
