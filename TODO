@@ -69,3 +69,15 @@ a before-simultaneous-after marker for that pair.
 
 
 
+Reducing the entropy as the expresion reduces
+
+programming with galois connections
+
+draw the lambda explicitly as a jigsaw puzzle piece.
+
+as probabilistic type theory
+(a:A, b1:B) @ p or (a:A, b2:B) @ (1-p) 
+is same thing 
+p|a,b1> \oplus (1-p)|a,b2>
+is the same things as
+p(|a> \otimes |b1>) \oplus (1-p)(|a> \otimes |b2>)
