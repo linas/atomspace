@@ -68,10 +68,15 @@ item of another stream
 a before-simultaneous-after marker for that pair.
 
 
+How will lumping vs splitting work?
+Because we are doing lumping now.  Splitting later!?
+
+stoplight example: it shows  an analysis of a singe stop-light,
+but what are stop-lights in general? (It's a disjunct vector)
+(probability of matching sizes, shapes, locations, colors)
 
 Reducing the entropy as the expresion reduces
 
-programming with galois connections
 
 draw the lambda explicitly as a jigsaw puzzle piece.
 
@@ -89,3 +94,5 @@ anna patterson
 constructible duality logic
 
 algeraic mind 1996 Sciece paper
+
+programming with galois connections
