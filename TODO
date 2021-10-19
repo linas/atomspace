@@ -78,6 +78,15 @@ but what are stop-lights in general? (It's a disjunct vector)
 Reducing the entropy as the expresion reduces
 
 
+post talk slides on linkedin and tag eray
+
+hyperon achitecture - and pattern matcher
+if variable is matched, then perform search for y
+else do not.
+
+During traversal, cut search off in certain directions if
+some probability is too low...
+
 draw the lambda explicitly as a jigsaw puzzle piece.
 
 as probabilistic type theory
