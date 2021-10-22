@@ -165,7 +165,7 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 	}
 
 	// Ignore all dynamically-evaluatable links up front.
-	if (ptm->hasEvaluatable())
+	if (ptm->hasEvaluatable() and not ptm->isIdentical())
 		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
@@ -276,10 +276,14 @@ const PatternTermSeq& InitiateSearchMixin::get_clause_list(void)
 	// start searching with an optional clause. But if there ARE
 	// mandatories, we must NOT start search on an optional, since,
 	// after all, it might be absent!
+	//
+	// FYI, At this time, identities are marked as being evaluatable
+	// (because they can be evaluated) but they also behave like
+	// concrete clauses, sice onf of their terms may be groundable.
 	bool try_optionals = true;
 	for (const PatternTermPtr& m : _pattern->pmandatory)
 	{
-		if (not m->hasAnyEvaluatable())
+		if (not m->hasAnyEvaluatable() or m->isIdentical())
 		{
 			try_optionals = false;
 			break;
