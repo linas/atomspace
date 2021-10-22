@@ -656,7 +656,7 @@ void PatternLink::validate_variables(HandleSet& vars,
 /// variables in it. Otherwise, it can be evaluated on the spot.
 ///
 /// At this time, the pattern matcher does not support mathematical
-/// optimzation within virtual clauses.
+/// optimization within virtual clauses.
 /// See https://en.wikipedia.org/wiki/Mathematical_optimization
 ///
 /// So, virtual clauses are already one step towards full support
@@ -674,6 +674,10 @@ bool PatternLink::is_virtual(const Handle& clause)
 {
 	size_t nfree = num_unquoted_unscoped_in_tree(clause, _variables.varset);
 	if (2 > nfree) return false;
+
+	// IdenticalLinks can brdige over thier two sides.
+	// So we treat them as an unsual but not really virtual link.
+	if (IDENTICAL_LINK == clause->get_type()) return false;
 
 	size_t nsub = 0;
 	size_t nsolv = 0;
@@ -741,6 +745,15 @@ void PatternLink::add_dummies(const PatternTermPtr& ptm)
 	if (not nameserver().isA(t, VIRTUAL_LINK)
 	    or SATISFACTION_LINK == t)
 		return;
+
+if (IDENTICAL_LINK == t) {
+printf("duuuude blow off adding dummies for dientical!\n");
+}
+	// IdenticalLinks can be treated like ordinary clauses,
+	// by copying the grounded side to the ungrounded side.
+	if (IDENTICAL_LINK == t) return;
+// XXX FIXME ... we do want to add dummy for the side that is not a
+// variable or add dummy for both...
 
 	for (const PatternTermPtr& sub: ptm->getOutgoingSet())
 	{

@@ -2382,6 +2382,10 @@ bool PatternMatchEngine::explore_clause_evaluatable(const PatternTermPtr& term,
 	if (term->isBoundVariable() or term->isGlobbyVar())
 		var_grounding[term->getHandle()] = grnd;
 
+// XXX replace by clause->isIdentical()
+	if (IDENTICAL_LINK == clause->getHandle()->get_type())
+		return explore_clause_identical(term, grnd, clause);
+
 	// All variables in the clause had better be grounded!
 	OC_ASSERT(is_clause_grounded(clause), "Internal error!");
 
@@ -2400,6 +2404,34 @@ bool PatternMatchEngine::explore_clause_evaluatable(const PatternTermPtr& term,
 	}
 
 	return false;
+}
+
+bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
+                                                  const Handle& grnd,
+                                                  const PatternTermPtr& clause)
+{
+	logmsg("Clause is identity; perform identification");
+
+	const HandleSeq& ioset = clause->getHandle()->getOutgoingSet();
+
+	Handle vterm;
+	Handle gterm;
+	for (const Handle& side : ioset)
+	{
+		auto gnd = var_grounding.find(side);
+		if (var_grounding.end() != gnd)
+		{
+			vterm = side;
+			gterm = gnd->second;
+			break;
+		}
+	}
+	OC_ASSERT(nullptr != gterm, "Internal Error!");
+
+	for (const Handle& side : ioset)
+		var_grounding[side] = gterm;
+
+	return clause_accept(clause, grnd);
 }
 
 /**
