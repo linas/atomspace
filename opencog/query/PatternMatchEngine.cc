@@ -1325,6 +1325,15 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		}
 	}
 
+	// We may have walked up to the top of an evaluatable term.
+	// At this time, we only handle IdenticalLinks.
+	if (parent->isIdentical())
+		return explore_clause_identical(ptm, hg, clause);
+
+	OC_ASSERT(clause != parent, "Error: unexpected situation!\n");
+	// if (clause == parent)
+	//	return explore_XXX_branches(ptm, hg, clause);
+
 	// If we are here, then somehow the upward-term is not unique, and
 	// we have to explore the incoming set of the ground to see which
 	// (if any) of the incoming set satsisfies the parent term.
@@ -1850,7 +1859,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 		// been grounded!  If they're not, something is badly wrong!
 		logmsg("Term inside evaluatable, move up to it's top:",
 			       clause->getHandle());
-
+OC_ASSERT(false, "I meant to do that");
 		bool found = _pmc.evaluate_sentence(clause->getHandle(), var_grounding);
 		logmsg("After evaluating clause, found = ", found);
 		if (found)
@@ -2414,6 +2423,13 @@ printf("duuuude the term is %s\n",
 term->getHandle()->to_string().c_str());
 printf("duuuude the ground is %s\n",
 grnd->to_string().c_str());
+
+printf("duuude parental unit? %d\n", term->getParent() == clause);
+
+	// We have not yet reached the top. So keep going.
+	if (term->getParent() != clause)
+		return explore_term_branches(term, grnd, clause);
+
 	const HandleSeq& ioset = clause->getHandle()->getOutgoingSet();
 
 	Handle vterm;
@@ -2428,11 +2444,12 @@ grnd->to_string().c_str());
 			break;
 		}
 	}
+
 	OC_ASSERT(nullptr != gterm, "Internal Error!");
 
 	// Proposed groundings may have ungrounded variables in them.
 	// Reject these.
-	if (not is_clause_grounded(gterm)) return false;
+	// if (not is_clause_grounded(gterm)) return false;
 
 printf("duuuude the vside %s\n", vterm->to_string().c_str());
 printf("duuuude the gside %s\n", gterm->to_string().c_str());
