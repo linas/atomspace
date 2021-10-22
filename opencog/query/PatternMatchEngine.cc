@@ -2384,10 +2384,6 @@ bool PatternMatchEngine::explore_clause_evaluatable(const PatternTermPtr& term,
 	if (term->isBoundVariable() or term->isGlobbyVar())
 		var_grounding[term->getHandle()] = grnd;
 
-// XXX replace by clause->isIdentical()
-	if (IDENTICAL_LINK == clause->getHandle()->get_type())
-		return explore_clause_identical(term, grnd, clause);
-
 	// All variables in the clause had better be grounded!
 	OC_ASSERT(is_clause_grounded(clause), "Internal error!");
 
@@ -2505,6 +2501,10 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
                                         const Handle& grnd,
                                         const PatternTermPtr& pclause)
 {
+	// The two sides of an identity can be equated directly.
+	if (pclause->isIdentical())
+		return explore_clause_identical(term, grnd, pclause);
+
 	// Evaluatable clauses are not cacheable.
 	if (pclause->hasAnyEvaluatable())
 		return explore_clause_evaluatable(term, grnd, pclause);

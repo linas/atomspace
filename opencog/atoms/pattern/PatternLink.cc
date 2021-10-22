@@ -676,7 +676,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 	size_t nfree = num_unquoted_unscoped_in_tree(clause, _variables.varset);
 	if (2 > nfree) return false;
 
-	// IdenticalLinks can brdige over thier two sides.
+	// IdenticalLinks can bridge over thier two sides.
 	// So we treat them as an unsual but not really virtual link.
 	if (IDENTICAL_LINK == clause->get_type()) return false;
 
@@ -925,12 +925,18 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 			// identify those clauses that bridge across multiple
 			// components... not everything here does so. The
 			// get_bridged_components() should be modified to
-			// identify the bridging clauses...
-			if ((parent->getHandle() == nullptr or not parent->isVirtual())
-			     and is_virtual(h))
+			// identify the bridging clauses... XXX Wait, maybe this
+			// does not need to be fixed, since the component splitter
+			// will not split these. So we're good, I think ...
+			if (parent->getHandle() == nullptr or not parent->isVirtual())
 			{
-				_virtual.emplace_back(h);
-				ptm->markVirtual();
+				if (is_virtual(h))
+				{
+					_virtual.emplace_back(h);
+					ptm->markVirtual();
+				}
+				else if (IDENTICAL_LINK == t)
+					ptm->markIdentical();
 			}
 		}
 	}
