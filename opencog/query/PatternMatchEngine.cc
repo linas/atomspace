@@ -1330,9 +1330,10 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	if (parent->isIdentical())
 		return explore_clause_identical(ptm, hg, clause);
 
-	OC_ASSERT(clause != parent, "Error: unexpected situation!\n");
-	// if (clause == parent)
-	//	return explore_XXX_branches(ptm, hg, clause);
+	if (clause == parent and clause->hasEvaluatable())
+	{
+		OC_ASSERT(false, "Error: Unexpected situation!\n");
+	}
 
 	// If we are here, then somehow the upward-term is not unique, and
 	// we have to explore the incoming set of the ground to see which
@@ -2424,10 +2425,8 @@ term->getHandle()->to_string().c_str());
 printf("duuuude the ground is %s\n",
 grnd->to_string().c_str());
 
-printf("duuude parental unit? %d\n", term->getParent() == clause);
-
-	// We have not yet reached the top. So keep going.
-	if (term->getParent() != clause)
+	// We have not yet reached the IdenticalLink. So keep going.
+	if (not term->getParent()->isIdentical())
 		return explore_term_branches(term, grnd, clause);
 
 	const HandleSeq& ioset = clause->getHandle()->getOutgoingSet();
