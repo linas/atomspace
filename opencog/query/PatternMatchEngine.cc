@@ -28,6 +28,8 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
+#include <opencog/atoms/core/FindUtils.h> // XXX
+
 #include "PatternMatchEngine.h"
 
 using namespace opencog;
@@ -2412,6 +2414,8 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 {
 	logmsg("Clause is identity; perform identification");
 
+printf("duuuude do the identity dance at %s\n",
+clause->getHandle()->to_string().c_str());
 	const HandleSeq& ioset = clause->getHandle()->getOutgoingSet();
 
 	Handle vterm;
@@ -2427,6 +2431,13 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 		}
 	}
 	OC_ASSERT(nullptr != gterm, "Internal Error!");
+
+	// XXX FIXME, this should search only for variables out of the
+	// varlist.
+	if (not is_closed(gterm)) return false;
+
+printf("duuuude the vside %s\n", vterm->to_string().c_str());
+printf("duuuude the gside %s\n", gterm->to_string().c_str());
 
 	for (const Handle& side : ioset)
 		var_grounding[side] = gterm;

@@ -19,7 +19,7 @@ ADD_LIBRARY (pattern
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(pattern opencog_atom_types)
 
-# TARGET_COMPILE_OPTIONS(pattern PRIVATE -DQDEBUG=1)
+TARGET_COMPILE_OPTIONS(pattern PRIVATE -DQDEBUG=1)
 
 TARGET_LINK_LIBRARIES(pattern
 	query-engine

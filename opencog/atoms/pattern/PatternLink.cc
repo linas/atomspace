@@ -146,7 +146,8 @@ void PatternLink::init(void)
 	setup_components();
 
 #ifdef QDEBUG
-	logger().fine("Pattern: %s", to_long_string("").c_str());
+	debug_log();
+	// logger().fine("Pattern: %s", to_long_string("").c_str());
 #endif
 }
 
@@ -746,21 +747,16 @@ void PatternLink::add_dummies(const PatternTermPtr& ptm)
 	    or SATISFACTION_LINK == t)
 		return;
 
-if (IDENTICAL_LINK == t) {
-printf("duuuude blow off adding dummies for dientical!\n");
-}
-	// IdenticalLinks can be treated like ordinary clauses,
-	// by copying the grounded side to the ungrounded side.
-	if (IDENTICAL_LINK == t) return;
-// XXX FIXME ... we do want to add dummy for the side that is not a
-// variable or add dummy for both...
-
 	for (const PatternTermPtr& sub: ptm->getOutgoingSet())
 	{
 		const Handle& sh = sub->getHandle();
 		if (can_evaluate(sh)) continue;
 		if (not any_unquoted_unscoped_in_tree(sh, _variables.varset))
 			continue;
+
+// Can't do this because DisconnectedUTest has (Not (Indentical ...))
+// if (IDENTICAL_LINK == t and VARIABLE_NODE == sh->get_type()) continue;
+printf("duuude adding dummy %s\n", sh->to_string().c_str());
 
 		_fixed.emplace_back(sub);
 	}
@@ -1084,6 +1080,7 @@ void PatternLink::debug_log(void) const
 
 DEFINE_LINK_FACTORY(PatternLink, PATTERN_LINK)
 
+// XXX FIXME: debug_log() above is more readable than the below.
 std::string PatternLink::to_long_string(const std::string& indent) const
 {
 	std::string indent_p = indent + oc_to_string_indent;

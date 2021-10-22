@@ -104,7 +104,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
 // If the clause has NO variables, then its connected to anything.
 bool is_connected(const Handle& cl, const HandleSet& cur_vars)
 {
-printf("duuude examine clause=%s\n", cl->to_string().c_str());
+printf("duuude is_connected examine clause=%s\n", cl->to_string().c_str());
 	// The likely case.
 	if	(any_unquoted_in_tree(cl, cur_vars)) return true;
 
