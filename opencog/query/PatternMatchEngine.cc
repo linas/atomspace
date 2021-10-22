@@ -28,8 +28,6 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/atoms/core/FindUtils.h> // XXX
-
 #include "PatternMatchEngine.h"
 
 using namespace opencog;
@@ -2412,6 +2410,10 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 
 printf("duuuude do the identity dance at %s\n",
 clause->getHandle()->to_string().c_str());
+printf("duuuude the term is %s\n",
+term->getHandle()->to_string().c_str());
+printf("duuuude the ground is %s\n",
+grnd->to_string().c_str());
 	const HandleSeq& ioset = clause->getHandle()->getOutgoingSet();
 
 	Handle vterm;
@@ -2428,9 +2430,9 @@ clause->getHandle()->to_string().c_str());
 	}
 	OC_ASSERT(nullptr != gterm, "Internal Error!");
 
-	// XXX FIXME, this should search only for variables out of the
-	// varlist.
-	if (not is_closed(gterm)) return false;
+	// Proposed groundings may have ungrounded variables in them.
+	// Reject these.
+	if (not is_clause_grounded(gterm)) return false;
 
 printf("duuuude the vside %s\n", vterm->to_string().c_str());
 printf("duuuude the gside %s\n", gterm->to_string().c_str());
