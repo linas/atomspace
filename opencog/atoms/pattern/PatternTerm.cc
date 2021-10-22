@@ -50,6 +50,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _is_virtual(false),
+	  _is_identical(false),
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
