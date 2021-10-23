@@ -402,10 +402,10 @@ logger().info("duuuuude known choicey");
 		Choice ch;
 		ch.clause = unsolved_clause;
 		PatternTermSeq stseq = term_of_handle(joint, unsolved_clause);
-logger().info("duuuuude regular choicey termy=%s",
-ch.start_term->to_string().c_str());
 		OC_ASSERT(1 == stseq.size(), "Not implemented!");
 		ch.start_term = stseq[0];
+logger().info("duuuuude regular choicey termy=%s",
+ch.start_term->to_string().c_str());
 		_next_choices.emplace_back(ch);
 	}
 	return true;
