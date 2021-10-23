@@ -1858,8 +1858,20 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	const PatternTermPtr& parent = ptm->getParent();
 	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
 
+	// Most of the time, we expect to hit this.
+	if (parent->isPresent() and not parent->isLiteral())
+	{
+		OC_ASSERT(parent != clause, "Not expecting a Present term here!");
+		return explore_present_branches(ptm, hg, clause);
+	}
+
+	// Handle identical terms before evaluatables.
+	if (parent->isIdentical())
+		return explore_clause_identical(ptm, hg, clause);
+
 	if (parent->hasAnyEvaluatable())
 	{
+OC_ASSERT(false, "I meant to do that");
 		// XXX TODO make sure that all variables in the clause have
 		// been grounded!  If they're not, something is badly wrong!
 		logmsg("Term inside evaluatable, move up to it's top:",
@@ -1870,12 +1882,6 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 			return clause_accept(clause, hg);
 
 		return false;
-	}
-
-	if (parent->isPresent() and not parent->isLiteral())
-	{
-		OC_ASSERT(parent != clause, "Not expecting a Present term here!");
-		return explore_present_branches(ptm, hg, clause);
 	}
 
 	// Do the simple case first, Choice terms are harder.
