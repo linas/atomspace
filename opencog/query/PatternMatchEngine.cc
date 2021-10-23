@@ -2426,14 +2426,7 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 	if (not term->getParent()->isIdentical())
 		return explore_term_branches(term, grnd, clause);
 
-	logmsg("Clause is identity; perform identification");
-
-logger().info("duuuude do the identity dance at %s\n",
-clause->getHandle()->to_string().c_str());
-logger().info("duuuude the term is %s\n",
-term->getHandle()->to_string().c_str());
-logger().info("duuuude the ground is %s\n",
-grnd->to_string().c_str());
+	logmsg("Clause is identity:", clause);
 
 	// XXX maybe FIXME: don't we need to push and pop the solution stack?
 	// solution_push();
@@ -2469,8 +2462,7 @@ grnd->to_string().c_str());
 	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
 	if (any_free_in_tree(gterm, it->second)) return false;
 
-logger().info("duuuude the vside %s\n", vterm->to_string().c_str());
-logger().info("duuuude the gside %s\n", gterm->to_string().c_str());
+	logmsg("Identity grounding to validate:", gterm);
 
 	// Perhaps another side of the link has been grounded
 	// already. If so, then it must have exactly the same
