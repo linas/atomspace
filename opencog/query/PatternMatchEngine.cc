@@ -2428,13 +2428,12 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 
 	logmsg("Clause is identity:", clause);
 
-	// XXX maybe FIXME: don't we need to push and pop the solution stack?
-	// solution_push();
+logmsg("duuuude gonna tree tcom= ", term);
+logmsg("duuuude gonna to  gre= ", grnd);
 	if (not tree_compare(term, grnd, CALL_SOLN))
 	{
 		logmsg("iiii NO solution for term:", term);
 		logmsg("iiii NOT solved by:", grnd);
-		// solution_pop();
 		return false;
 	}
 
@@ -2463,23 +2462,31 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 	if (any_free_in_tree(gterm, it->second)) return false;
 
 	logmsg("Identity grounding to validate:", gterm);
+logmsg("duuuude the vertm= ", vterm);
 
 	// Perhaps another side of the link has been grounded
 	// already. If so, then it must have exactly the same
 	// grounding, else its a mismatch.
 	for (const Handle& side : ioset)
 	{
+		if (side == vterm) continue;
+
 		auto gnd = var_grounding.find(side);
 		if (var_grounding.end() == gnd)
 		{
-			// If the side might not be grounded yet, because it's a
-			// constant. If it is a constant, then it must be identical
-			// to gterm.
+logmsg("duuuude no grounding for side= ", side);
+logger().info("duuude free? = %d", any_free_in_tree(side, it->second));
+			// A grounding for the side might not be recorded, because
+			// it's a constant. If it is a constant, then it must be
+			// identical to `gterm`.
 			if ((side != gterm) and
 			    (not any_free_in_tree(side, it->second))) return false;
 		}
 		else if (gnd->second != gterm)
+{
+logmsg("duuuude grounding but not equal ", gnd->second);
 			return false;
+}
 	}
 
 	// We're done. We have a grounding that we can propgate.
