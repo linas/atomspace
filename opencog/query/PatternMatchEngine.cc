@@ -1580,6 +1580,7 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 	// is, we never start with a term underneath a Choice, move up,
 	// discover that we are in a Choice, and then have to explore the
 	// other choices. And that's OK, because this avoids complexity.
+	// XXX except that this is no longer true ...
 	if (ptm->isChoice())
 		return explore_choice_branches(ptm, hg, clause);
 
@@ -1861,7 +1862,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// Most of the time, we expect to hit this.
 	if (parent->isPresent() and not parent->isLiteral())
 	{
-		OC_ASSERT(parent != clause, "Not expecting a Present term here!");
+		OC_ASSERT(parent != clause, "Not expecting a Present clause here!");
 		return explore_present_branches(ptm, hg, clause);
 	}
 
@@ -2489,6 +2490,7 @@ logmsg("duuuude grounding but not equal ", gnd->second);
 }
 	}
 
+logmsg("duuuude gooodie!");
 	// We're done. We have a grounding that we can propgate.
 	// XXX TODO: the ungrounded side may have variables in it.
 	// We should fish those out and record them.

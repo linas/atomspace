@@ -86,8 +86,10 @@ bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
 {
 	if (0 == _next_choices.size())
 	{
+logger().info("duuuuude no next choice\n");
 		if (0 < _choice_stack.size())
 		{
+logger().info("duuuuude so we poppy to next choice\n");
 			_next_choices = _choice_stack.top();
 			_choice_stack.pop();
 		}
@@ -99,6 +101,8 @@ bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
 	joint = ch.start_term;
 	_next_choices.pop_back();
 
+logger().info("duuuuude choicey joint next is %s", joint->to_string().c_str());
+
 	_issued.insert(clause);
 	return true;
 }
@@ -108,14 +112,22 @@ void InitiateSearchMixin::next_connections(const GroundingMap& var_grounding)
 	_choice_stack.push(_next_choices);
 	_next_choices.clear();
 
+logger().info("duuuude enter next connections\n");
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no absents.
-	if (get_next_thinnest_clause(var_grounding, false, false)) return;
+	if (get_next_thinnest_clause(var_grounding, false, false)) {
+
+logger().info("duuuude yahoo return from basic thin\n");
+return;
+}
 
 	// Don't bother looking for evaluatables if they are not there.
 	if (_pattern->have_evaluatables)
 	{
-		if (get_next_thinnest_clause(var_grounding, true, false)) return;
+		if (get_next_thinnest_clause(var_grounding, true, false)) {
+logger().info("duuuude yahoo return vrom eval thin\n");
+return;
+}
 	}
 
 	// Try again, this time, considering the absent clauses.
@@ -261,7 +273,10 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	// Make a list of the as-yet ungrounded variables.
 	HandleSet ungrounded_vars;
 
-	// Grounded variables ordered by the size of their grounding incoming set
+	// Grounded variables ordered by the size of their grounding
+	// incoming set.  Ideally, we should look only at the incoming
+	// set that matches the type of the parent term. But for now,
+	// this simpler code is good enough. XXX FIXME someday?
 	std::multimap<std::size_t, Handle> thick_vars;
 
 	for (const Handle &v : _variables->varset)
@@ -341,6 +356,7 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	// earlier, they can always use a SequentialAndLink.
 	if (not unsolved and search_eval)
 	{
+logger().info("duuuuude ffffffffffffffffffffffu");
 		for (const PatternTermPtr& root : _pattern->pmandatory)
 		{
 			if (_issued.end() != _issued.find(root)) continue;
@@ -365,6 +381,7 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	// Return what we found.
 	if (unsolved_clause->isChoice())
 	{
+logger().info("duuuuude known choicey");
 		for (const PatternTermPtr& alt : unsolved_clause->getOutgoingSet())
 		{
 			Choice ch;
@@ -381,6 +398,8 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 		Choice ch;
 		ch.clause = unsolved_clause;
 		ch.start_term = term_of_handle(joint, unsolved_clause);
+logger().info("duuuuude regular choicey termy=%s",
+ch.start_term->to_string().c_str());
 		_next_choices.emplace_back(ch);
 	}
 	return true;

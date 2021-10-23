@@ -365,11 +365,18 @@ bool InitiateSearchMixin::setup_neighbor_search(const PatternTermSeq& clauses)
 		ch.search_set = get_incoming_set(best_start,
 		                              _starter_term->getQuote()->get_type());
 		_start_choices.push_back(ch);
+logger().info("duuude single choice\n");
 	}
 	else
 	{
 		// TODO -- weed out duplicates!
 	}
+for (auto& ch: _start_choices) {
+logger().info("duuude start term is %s", ch.start_term->to_string().c_str());
+for (auto& hinc: ch.search_set) {
+logger().info("duuude serch set=%s\n", hinc->to_string().c_str());
+}
+}
 	return true;
 }
 
