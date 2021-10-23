@@ -26,7 +26,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/FindUtils.h> // XXX
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchEngine.h"
@@ -2449,7 +2449,6 @@ grnd->to_string().c_str());
 
 	// Proposed groundings may have ungrounded variables in them.
 	// Reject these.
-	// XXX nowhere else do we use FindUtils ... so fix this?
 	const auto& it = _pat->clause_variables.find(clause);
 	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
 	for (const Handle& hvar : it->second)
@@ -2460,8 +2459,25 @@ grnd->to_string().c_str());
 printf("duuuude the vside %s\n", vterm->to_string().c_str());
 printf("duuuude the gside %s\n", gterm->to_string().c_str());
 
+	// Perhaps another side of the link has been grounded
+	// already. If so, then it must have exactly the same
+	// grounding, else its a mismatch.
 	for (const Handle& side : ioset)
+	{
+
+		auto gnd = var_grounding.find(side);
+		if ((var_grounding.end() != gnd) and
+		    (gnd->second != gterm)) return false;
+	}
+
+	// We're done. We have a grounding that we can propgate.
+	// XXX TODO: the ungrounded side may have variables in it.
+	// We should fish those out and record them.
+	for (const Handle& side : ioset)
+	{
+		if (side == vterm) continue;
 		var_grounding[side] = gterm;
+	}
 
 	return clause_accept(clause, grnd);
 }
