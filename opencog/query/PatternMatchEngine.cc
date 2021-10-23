@@ -2419,11 +2419,11 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 {
 	logmsg("Clause is identity; perform identification");
 
-printf("duuuude do the identity dance at %s\n",
+logger().info("duuuude do the identity dance at %s\n",
 clause->getHandle()->to_string().c_str());
-printf("duuuude the term is %s\n",
+logger().info("duuuude the term is %s\n",
 term->getHandle()->to_string().c_str());
-printf("duuuude the ground is %s\n",
+logger().info("duuuude the ground is %s\n",
 grnd->to_string().c_str());
 
 	// We have not yet reached the IdenticalLink. So keep going.
@@ -2451,23 +2451,27 @@ grnd->to_string().c_str());
 	// Reject these.
 	const auto& it = _pat->clause_variables.find(clause);
 	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
-	for (const Handle& hvar : it->second)
-	{
-		if (is_free_in_tree(gterm, hvar)) return false;
-	}
+	if (any_free_in_tree(gterm, it->second)) return false;
 
-printf("duuuude the vside %s\n", vterm->to_string().c_str());
-printf("duuuude the gside %s\n", gterm->to_string().c_str());
+logger().info("duuuude the vside %s\n", vterm->to_string().c_str());
+logger().info("duuuude the gside %s\n", gterm->to_string().c_str());
 
 	// Perhaps another side of the link has been grounded
 	// already. If so, then it must have exactly the same
 	// grounding, else its a mismatch.
 	for (const Handle& side : ioset)
 	{
-
 		auto gnd = var_grounding.find(side);
-		if ((var_grounding.end() != gnd) and
-		    (gnd->second != gterm)) return false;
+		if (var_grounding.end() == gnd)
+		{
+			// If the side might not be grounded yet, because it's a
+			// constant. If it is a constant, then it must be identical
+			// to gterm.
+			if ((side != gterm) and
+			    (not any_free_in_tree(side, it->second))) return false;
+		}
+		else if (gnd->second != gterm)
+			return false;
 	}
 
 	// We're done. We have a grounding that we can propgate.
