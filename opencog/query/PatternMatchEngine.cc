@@ -2431,12 +2431,19 @@ term->getHandle()->to_string().c_str());
 logger().info("duuuude the ground is %s\n",
 grnd->to_string().c_str());
 
+	// XXX maybe FIXME: don't we need to push and pop the solution stack?
+	// solution_push();
+	if (not tree_compare(term, grnd, CALL_SOLN))
+	{
+		logmsg("iiii NO solution for term:", term);
+		logmsg("iiii NOT solved by:", grnd);
+		// solution_pop();
+		return false;
+	}
+
 	// We have not yet reached the IdenticalLink. So keep going.
 	if (not term->getParent()->isIdentical())
 		return explore_term_branches(term, grnd, clause);
-
-	// Store the proposed grounding. We need it below.
-	var_grounding[term->getHandle()] = grnd;
 
 	// Search for one term in the link that is grounded.
 	Handle vterm;
@@ -2492,7 +2499,10 @@ logger().info("duuuude the gside %s\n", gterm->to_string().c_str());
 		var_grounding[side] = gterm;
 	}
 
-	// TODO perhaps not top-level?
+	// IdenticalLinks are neccessarily evaluatable, and thus are
+	// neccessarily embedded in an evaluatable clause, which we can
+	// evaluate from the top. So pass this on for completion.
+	// XXX I'm confused. Is this right? The unit tests pass ...
 	return clause_accept(clause, grnd);
 }
 
