@@ -2419,6 +2419,24 @@ bool PatternMatchEngine::explore_clause_evaluatable(const PatternTermPtr& term,
 	return false;
 }
 
+/**
+ * IdenticalLinks are a form of equality, stating that all fo the
+ * "sides" (all of the elements of the outgoing set; there may be more
+ * than two) must be identical. During search, two cases arise:
+ * either the sides are already grounded, or they are not. If they're
+ * grounded already, then obviously the grounding is rejected if they
+ * are not identical.  If one side is not grounded, but another side
+ * is, then the IdenticalLink can be treated as an assignment from the
+ * grounded side to the ungrounded side. This is what is implemented
+ * here: both run-time checking and assignment.
+ *
+ * Note that some assignments can be done statically, at pattern compile
+ * time, but not all cases can be handled at compile time.  An example
+ * of an assignment that cannot be done at compile time: `x = (a or b)`
+ * where `(a or b)` is a ChoiceLink. The choice is obviously not known
+ * until pattern run-time.  Thus, run-time assignment is more general
+ * than static analysis at pattern compile time.
+ */
 bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
                                                   const Handle& grnd,
                                                   const PatternTermPtr& clause)
