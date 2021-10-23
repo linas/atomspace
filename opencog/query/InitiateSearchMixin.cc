@@ -285,7 +285,7 @@ const PatternTermSeq& InitiateSearchMixin::get_clause_list(void)
 	//
 	// FYI, At this time, identities are marked as being evaluatable
 	// (because they can be evaluated) but they also behave like
-	// concrete clauses, sice onf of their terms may be groundable.
+	// concrete clauses, since one of their terms may be groundable.
 	bool try_optionals = true;
 	for (const PatternTermPtr& m : _pattern->pmandatory)
 	{
