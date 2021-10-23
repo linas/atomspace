@@ -165,6 +165,9 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 	}
 
 	// Ignore all dynamically-evaluatable links up front.
+	// However, we are allowed to start inside of IdenticalLinks.
+	// XXX TODO We could start inside an evaluatable, but it would
+	// be better to try elsewhere, first. Special-case Identical.
 	if (ptm->hasEvaluatable() and not ptm->isIdentical())
 		return Handle::UNDEFINED;
 
@@ -191,6 +194,9 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 
 		if (s)
 		{
+			if (sbr->isIdentical())
+				continue;
+
 			// Each ChoiceLink is potentially disconnected from the rest
 			// of the graph. Assume the worst case, explore them all.
 			if (CHOICE_LINK == t)
