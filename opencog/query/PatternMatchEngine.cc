@@ -2435,10 +2435,13 @@ grnd->to_string().c_str());
 	if (not term->getParent()->isIdentical())
 		return explore_term_branches(term, grnd, clause);
 
-	const HandleSeq& ioset = clause->getHandle()->getOutgoingSet();
+	// Store the proposed grounding. We need it below.
+	var_grounding[term->getHandle()] = grnd;
 
+	// Search for one term in the link that is grounded.
 	Handle vterm;
 	Handle gterm;
+	const HandleSeq& ioset = clause->getHandle()->getOutgoingSet();
 	for (const Handle& side : ioset)
 	{
 		auto gnd = var_grounding.find(side);
@@ -2450,10 +2453,11 @@ grnd->to_string().c_str());
 		}
 	}
 
+	// Something must be grounded, else we're confused.
 	OC_ASSERT(nullptr != gterm, "Internal Error!");
 
 	// Proposed groundings may have ungrounded variables in them.
-	// Reject these.
+	// Reject these. Typically, these are self-groundings.
 	const auto& it = _pat->clause_variables.find(clause);
 	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
 	if (any_free_in_tree(gterm, it->second)) return false;
@@ -2488,6 +2492,7 @@ logger().info("duuuude the gside %s\n", gterm->to_string().c_str());
 		var_grounding[side] = gterm;
 	}
 
+	// TODO perhaps not top-level?
 	return clause_accept(clause, grnd);
 }
 
