@@ -106,7 +106,7 @@ bool is_connected(const Handle& cl, const HandleSet& cur_vars)
 {
 printf("duuude is_connected examine clause=%s\n", cl->to_string().c_str());
 	// The likely case.
-	if	(any_unquoted_in_tree(cl, cur_vars)) return true;
+	if (any_unquoted_in_tree(cl, cur_vars)) return true;
 
 	// Unsual case: clause has no variables in it!
 	// This will connect to anything.
