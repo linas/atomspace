@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/core/DefineLink.h>
@@ -718,26 +720,30 @@ static PatternTermPtr root_of_term(const Handle& term,
 }
 
 // We need to know the term corresponding to the given Handle.
-// It must be some term underneath the root. If it shows up several
-// times, then just take the first occurance...
-PatternTermPtr InitiateSearchMixin::term_of_handle(const Handle& h,
+// It must be some term underneath the root. Find the shallowest
+// location. Ideally, find a location that is NOT in a ChoiceLink.
+// If it shows up in several locations under a ChoiceLink, then
+// return all of them, as all of them need to be explored.
+PatternTermSeq InitiateSearchMixin::term_of_handle(const Handle& h,
                                      const PatternTermPtr& root)
 {
-	if (h == root->getQuote()) return root;
+	if (h == root->getQuote()) return PatternTermSeq({root});
 
 	// Pseudo-but-not-really-breadth-first search.
+	PatternTermSeq seq;
 	for (const PatternTermPtr& ptm : root->getOutgoingSet())
 	{
-		if (h == ptm->getQuote()) return ptm;
+		if (h == ptm->getQuote()) seq.push_back(ptm);
 	}
+	if (0 < seq.size()) return seq;
 
 	// If we are here, then recurse.
 	for (const PatternTermPtr& ptm : root->getOutgoingSet())
 	{
-		PatternTermPtr term = term_of_handle(h, ptm);
-		if (PatternTerm::UNDEFINED != term) return term;
+		PatternTermSeq seq = term_of_handle(h, ptm);
+		if (0 < seq.size()) return seq;
 	}
-	return PatternTerm::UNDEFINED;
+	return PatternTermSeq();
 }
 
 /**
@@ -789,7 +795,9 @@ bool InitiateSearchMixin::setup_deep_type_search(const PatternTermSeq& clauses)
 		for (const Handle& hs : start_set) start_list.emplace_back(hs);
 
 		_root = root;
-		_starter_term = term_of_handle(var, root);
+		PatternTermSeq stseq = term_of_handle(var, root);
+		OC_ASSERT(1 == stseq.size(), "Not implemented!");
+		_starter_term = stseq[0];
 		_search_set = start_list;
 
 		// We only need enough startng points to get started;
@@ -822,7 +830,9 @@ bool InitiateSearchMixin::setup_deep_type_search(const PatternTermSeq& clauses)
 		if (NOTYPE == t) continue;
 
 		_root = root;
-		_starter_term = term_of_handle(var, root);
+		PatternTermSeq stseq = term_of_handle(var, root);
+		OC_ASSERT(1 == stseq.size(), "Not implemented!");
+		_starter_term = stseq[0];
 		_as->get_handles_by_type(_search_set, t);
 		if (0 < _search_set.size()) return true;
 	}
@@ -967,9 +977,15 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 				if (0 < fa.least_holders.size())
 				{
 					_root = cl;
-					_starter_term = term_of_handle(*fa.least_holders.begin(), cl);
+
+					PatternTermSeq stseq;
 					if (all_clauses_are_evaluatable)
-						_starter_term = term_of_handle(var, cl);
+						stseq = term_of_handle(var, cl);
+					else
+						stseq = term_of_handle(*fa.least_holders.begin(), cl);
+
+					OC_ASSERT(1 == stseq.size(), "Not implemented!");
+					_starter_term = stseq[0];
 					count = num;
 					ptypes = typeset;
 					DO_LOG({LAZY_LOG_FINE << "New minimum count of "
@@ -1037,7 +1053,9 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 			if (some_var == _variables->varset.end())
 				throw FatalErrorException(TRACE_INFO,
 					"Internal Error: There were no variables!");
-			_starter_term = term_of_handle(*some_var, _root);
+			PatternTermSeq stseq = term_of_handle(*some_var, _root);
+			OC_ASSERT(1 == stseq.size(), "Not implemented!");
+			_starter_term = stseq[0];
 		}
 	}
 

@@ -151,7 +151,9 @@ return;
 			{
 				Choice ch;
 				ch.clause = root;
-				ch.start_term = term_of_handle(v, root);
+				PatternTermSeq stseq = term_of_handle(v, root);
+				OC_ASSERT(1 == stseq.size(), "Not implemented!");
+				ch.start_term = stseq[0];
 				_next_choices.emplace_back(ch);
 				return;
 			}
@@ -386,7 +388,9 @@ logger().info("duuuuude known choicey");
 		{
 			Choice ch;
 			ch.clause = unsolved_clause;
-			ch.start_term = term_of_handle(joint, alt);
+			PatternTermSeq stseq = term_of_handle(joint, alt);
+			OC_ASSERT(1 == stseq.size(), "Not implemented!");
+			ch.start_term = stseq[0];
 			_next_choices.emplace_back(ch);
 		}
 
@@ -397,9 +401,11 @@ logger().info("duuuuude known choicey");
 	{
 		Choice ch;
 		ch.clause = unsolved_clause;
-		ch.start_term = term_of_handle(joint, unsolved_clause);
+		PatternTermSeq stseq = term_of_handle(joint, unsolved_clause);
 logger().info("duuuuude regular choicey termy=%s",
 ch.start_term->to_string().c_str());
+		OC_ASSERT(1 == stseq.size(), "Not implemented!");
+		ch.start_term = stseq[0];
 		_next_choices.emplace_back(ch);
 	}
 	return true;
