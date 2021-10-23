@@ -724,13 +724,11 @@ PatternTermPtr InitiateSearchMixin::term_of_handle(const Handle& h,
                                      const PatternTermPtr& root)
 {
 	if (h == root->getQuote()) return root;
-	// if (h == root->getHandle()) return root;
 
 	// Pseudo-but-not-really-breadth-first search.
 	for (const PatternTermPtr& ptm : root->getOutgoingSet())
 	{
 		if (h == ptm->getQuote()) return ptm;
-		// if (h == ptm->getHandle()) return ptm;
 	}
 
 	// If we are here, then recurse.
