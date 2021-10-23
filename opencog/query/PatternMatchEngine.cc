@@ -2422,6 +2422,10 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
                                                   const Handle& grnd,
                                                   const PatternTermPtr& clause)
 {
+	// We have not yet reached the IdenticalLink. So keep going.
+	if (not term->getParent()->isIdentical())
+		return explore_term_branches(term, grnd, clause);
+
 	logmsg("Clause is identity; perform identification");
 
 logger().info("duuuude do the identity dance at %s\n",
@@ -2440,10 +2444,6 @@ grnd->to_string().c_str());
 		// solution_pop();
 		return false;
 	}
-
-	// We have not yet reached the IdenticalLink. So keep going.
-	if (not term->getParent()->isIdentical())
-		return explore_term_branches(term, grnd, clause);
 
 	// Search for one term in the link that is grounded.
 	Handle vterm;
