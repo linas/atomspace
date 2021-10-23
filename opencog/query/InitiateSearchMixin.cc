@@ -724,26 +724,28 @@ static PatternTermPtr root_of_term(const Handle& term,
 // location. Ideally, find a location that is NOT in a ChoiceLink.
 // If it shows up in several locations under a ChoiceLink, then
 // return all of them, as all of them need to be explored.
+void term_of_handle_rec(const Handle& h,
+                        const PatternTermPtr& root,
+                        PatternTermSeq& seq)
+{
+	// Pseudo-but-not-really-breadth-first search.
+	for (const PatternTermPtr& ptm : root->getOutgoingSet())
+	{
+		if (h == ptm->getQuote()) seq.push_back(ptm);
+	}
+
+	for (const PatternTermPtr& ptm : root->getOutgoingSet())
+		term_of_handle_rec(h, ptm, seq);
+}
+
 PatternTermSeq InitiateSearchMixin::term_of_handle(const Handle& h,
                                      const PatternTermPtr& root)
 {
 	if (h == root->getQuote()) return PatternTermSeq({root});
 
-	// Pseudo-but-not-really-breadth-first search.
 	PatternTermSeq seq;
-	for (const PatternTermPtr& ptm : root->getOutgoingSet())
-	{
-		if (h == ptm->getQuote()) seq.push_back(ptm);
-	}
-	if (0 < seq.size()) return seq;
-
-	// If we are here, then recurse.
-	for (const PatternTermPtr& ptm : root->getOutgoingSet())
-	{
-		PatternTermSeq seq = term_of_handle(h, ptm);
-		if (0 < seq.size()) return seq;
-	}
-	return PatternTermSeq();
+	term_of_handle_rec(h, root, seq);
+	return seq;
 }
 
 /**

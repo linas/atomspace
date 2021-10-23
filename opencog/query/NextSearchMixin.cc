@@ -84,6 +84,7 @@ void InitiateSearchMixin::pop(void)
 bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
                                           PatternTermPtr& joint)
 {
+logger().info("duuuuude enter get_next_clause choices=%lu\n", _next_choices.size());
 	if (0 == _next_choices.size())
 	{
 logger().info("duuuuude no next choice\n");
@@ -125,7 +126,8 @@ return;
 	if (_pattern->have_evaluatables)
 	{
 		if (get_next_thinnest_clause(var_grounding, true, false)) {
-logger().info("duuuude yahoo return vrom eval thin\n");
+logger().info("duuuude yahoo return vrom eval thin nch=%lu\n",
+_next_choices.size());
 return;
 }
 	}
@@ -399,14 +401,17 @@ logger().info("duuuuude known choicey");
 	}
 	else
 	{
-		Choice ch;
-		ch.clause = unsolved_clause;
 		PatternTermSeq stseq = term_of_handle(joint, unsolved_clause);
-		OC_ASSERT(1 == stseq.size(), "Not implemented!");
-		ch.start_term = stseq[0];
+logger().info("duuuuude regular choice size=%d", stseq.size());
+		for (const PatternTermPtr& stm : stseq)
+		{
+			Choice ch;
+			ch.clause = unsolved_clause;
+			ch.start_term = stm;
 logger().info("duuuuude regular choicey termy=%s",
 ch.start_term->to_string().c_str());
-		_next_choices.emplace_back(ch);
+			_next_choices.emplace_back(ch);
+		}
 	}
 	return true;
 }
