@@ -26,6 +26,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/FindUtils.h> // XXX
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchEngine.h"
@@ -2448,7 +2449,13 @@ grnd->to_string().c_str());
 
 	// Proposed groundings may have ungrounded variables in them.
 	// Reject these.
-	// if (not is_clause_grounded(gterm)) return false;
+	// XXX nowhere else do we use FindUtils ... so fix this?
+	const auto& it = _pat->clause_variables.find(clause);
+	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
+	for (const Handle& hvar : it->second)
+	{
+		if (is_free_in_tree(gterm, hvar)) return false;
+	}
 
 printf("duuuude the vside %s\n", vterm->to_string().c_str());
 printf("duuuude the gside %s\n", gterm->to_string().c_str());
