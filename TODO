@@ -18,15 +18,16 @@ Reading-list TODO:
   those probabilities over time."
 
 
-* document Log2Link
-* demo for dot product
-* unit test for dot product acumultate
+* document Log2Link DONE
+* demo for dot product  DONE
+* unit test for dot product acumultate DONE
+* ChoiceLink/IdenticalLink DONE
+* atomspace smart pointer  DONE
+* atomspace multi-children  DONE
+
 * slides into README
 * slides into blog post
 * dot product into fast matrix
-* ChoiceLink/IdenticalLink
-* atomspace smart pointer
-* atomspace multi-children
 * atomspace multi-search.
 
 * empahsize: generalization is what the voting algorithm does
@@ -102,6 +103,10 @@ PhD thesis
 anna patterson
 constructible duality logic
 
-algeraic mind 1996 Sciece paper
+algeraic mind 1996 Science paper
 
 programming with galois connections
+
+tell ben: negation is orthogonal compliment
+tell ben: vast literature on query optimization
+   (static terms and langauge)
