@@ -26,7 +26,6 @@ ADD_LIBRARY (atomcore
 	ScopeLink.cc
 	SleepLink.cc
 	StateLink.cc
-	TimeLink.cc
 	TypeChoice.cc
 	TypedAtomLink.cc
 	TypedVariableLink.cc
@@ -74,7 +73,6 @@ INSTALL (FILES
 	ScopeLink.h
 	SleepLink.h
 	StateLink.h
-	TimeLink.h
 	TypeChoice.h
 	TypedAtomLink.h
 	TypedVariableLink.h

@@ -1,5 +1,5 @@
 /*
- * TimeLink.cc
+ * opencog/atoms/reduct/TimeLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *
@@ -29,7 +29,7 @@
 using namespace opencog;
 
 TimeLink::TimeLink(const HandleSeq&& oset, Type t)
-	: FunctionLink(std::move(oset), t)
+	: NumericOutputLink(std::move(oset), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, TIME_LINK))

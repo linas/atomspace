@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/TimeLink.h
+ * opencog/atoms/reduct/TimeLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_TIME_LINK_H
 #define _OPENCOG_TIME_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericOutLink.h>
 
 namespace opencog
 {
@@ -34,7 +34,7 @@ namespace opencog
 /// The TimeLink returns a NumberNode holding the current time.
 /// At this time, it takes no argumets.
 ///
-class TimeLink : public FunctionLink
+class TimeLink : public NumericOutLink
 {
 public:
 	TimeLink(const HandleSeq&&, Type=TIME_LINK);
