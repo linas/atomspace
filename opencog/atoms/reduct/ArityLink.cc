@@ -24,6 +24,7 @@
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/core/NumberNode.h>
 
 #include "ArityLink.h"
 

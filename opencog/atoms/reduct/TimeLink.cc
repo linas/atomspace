@@ -29,7 +29,7 @@
 using namespace opencog;
 
 TimeLink::TimeLink(const HandleSeq&& oset, Type t)
-	: NumericOutputLink(std::move(oset), t)
+	: NumericOutLink(std::move(oset), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, TIME_LINK))
