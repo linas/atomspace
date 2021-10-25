@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_VALUE_OF_LINK_H
 #define _OPENCOG_VALUE_OF_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericOutLink.h>
 
 namespace opencog
 {
@@ -34,7 +34,7 @@ namespace opencog
 /// The ValueOfLink returns the value on the indicated atom (first
 /// argument) at the indicated key (second argument).
 ///
-class ValueOfLink : public FunctionLink
+class ValueOfLink : public NumericOutLink
 {
 public:
 	ValueOfLink(const HandleSeq&&, Type=VALUE_OF_LINK);

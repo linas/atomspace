@@ -22,13 +22,12 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/FunctionLink.h>
 #include "ValueOfLink.h"
 
 using namespace opencog;
 
 ValueOfLink::ValueOfLink(const HandleSeq&& oset, Type t)
-	: FunctionLink(std::move(oset), t)
+	: NumericOutLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, VALUE_OF_LINK))
 	{
