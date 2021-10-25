@@ -1,5 +1,5 @@
 /*
- * ArityLink.cc
+ * opencog/atoms/reduct/ArityLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *
@@ -24,14 +24,13 @@
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
-#include <opencog/atoms/core/NumberNode.h>
 
 #include "ArityLink.h"
 
 using namespace opencog;
 
 ArityLink::ArityLink(const HandleSeq&& oset, Type t)
-	: FunctionLink(std::move(oset), t)
+	: NumericOutLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, ARITY_LINK))
 	{

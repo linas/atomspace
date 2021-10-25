@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/ArityLink.h
+ * opencog/atoms/reduct/ArityLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_ARITY_LINK_H
 #define _OPENCOG_ARITY_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericOutLink.h>
 
 namespace opencog
 {
@@ -44,7 +44,7 @@ namespace opencog
 ///
 ///     NumberNode 2
 ///
-class ArityLink : public FunctionLink
+class ArityLink : public NumericOutLink
 {
 public:
 	ArityLink(const HandleSeq&&, Type = ARITY_LINK);
