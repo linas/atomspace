@@ -24,11 +24,20 @@ Reading-list TODO:
 * ChoiceLink/IdenticalLink DONE
 * atomspace smart pointer  DONE
 * atomspace multi-children  DONE
+* atomspace multi-search.
+  Say (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz")) DONE
+
+* tell ben: negation is orthogonal compliment DONE
+* tell ben: vast literature on query optimization DONE
+   (static terms and langauge)
+
+---------------------
+* King-Man+Woman interpreceted as linear logic, not as set theory
+  email to Ben, title Short: Logical negation is vector space compliments!
 
 * slides into README
 * slides into blog post
 * dot product into fast matrix
-* atomspace multi-search.
 
 * empahsize: generalization is what the voting algorithm does
 * keywords: novelty
@@ -81,10 +90,6 @@ Reducing the entropy as the expresion reduces
 
 post talk slides on linkedin and tag eray
 
-hyperon achitecture - and pattern matcher
-if variable is matched, then perform search for y
-else do not.
-
 During traversal, cut search off in certain directions if
 some probability is too low...
 
@@ -107,6 +112,16 @@ algeraic mind 1996 Science paper
 
 programming with galois connections
 
-tell ben: negation is orthogonal compliment
-tell ben: vast literature on query optimization
-   (static terms and langauge)
+---------
+hyperon achitecture - and pattern matcher
+if variable is matched, then perform search for y
+else do not.
+
+(Get
+  (Present (Variable "x")
+      (DoStuff (... (Variable"X"))))
+  (Absent (Variable "x")
+      (OtherStuff ..)))
+
+More generally, inline rewriting!?
+Open note to Alexy
