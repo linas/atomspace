@@ -712,6 +712,15 @@ EXCLUSIVE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 // return true, else return false. This is a crisp binary true/false.
 SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 
+// ChainLink allows recursive pattern matching. If any portion of the
+// arguments to the chain are grounded, then the chain can be entered
+// and explored, which might result in the grounding of it's other
+// arguments. If none of the arguments can be grounded, then it is
+// effectively a VirtualLink, whose value will be unknown, until
+// arguments are plugged in, and the thing is evaluated (with a
+// resulting crisp true/false value).
+CHAIN_LINK <- PATTERN_LINK,VIRTUAL_LINK
+
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
 
