@@ -43,3 +43,7 @@ experimental and very incomplete.  The demos explore the limits of what
 is actually possible.
 
 * `sexpr-query.scm`         -- Working with s-expressions.
+
+Another way to think of this stuff is as a way of creating DSL's --
+data-specific langauges. Got some data? Got some app? Plaster it into
+this kind of system, and bingo - search engine ... rule engine, etc.
