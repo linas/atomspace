@@ -505,6 +505,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	if (record_literal(clause))
 		return;
 
+printf("duuuude term tree clause=\n%s\n", clause->to_full_string().c_str());
 	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 
@@ -969,10 +970,19 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	// Recurse down to the tips. ... after the evaluatable markup below.
 	if (h->is_link())
 	{
+		bool chk_cnst =
+			(PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t);
+
+		chk_cnst = chk_cnst and not parent->hasAnyEvaluatable();
+printf("duuude chck=%d\n", chk_cnst);
+
 		for (const Handle& ho: h->getOutgoingSet())
 		{
-			if ((PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t)
-			    and is_constant(_variables.varset, ho)) continue;
+			if (chk_cnst and is_constant(_variables.varset, ho)) 
+{
+printf("duuude this was const:=%s\n", ho->to_string().c_str());
+continue;
+}
 			PatternTermPtr po(ptm->addOutgoingTerm(ho));
 			make_term_tree_recursive(root, po);
 		}
