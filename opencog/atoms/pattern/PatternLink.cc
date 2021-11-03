@@ -439,7 +439,7 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 /// TermMatchMixin, which gives the boolean operators thier classical
 /// logic interpretation. In principle, other interpretations are
 /// possible (e.g. linear logic, or any number of the modal logics),
-/// but these are not currently supported in this code base. Supporting
+/// but these are not currently implemented in this code base. Supporting
 /// probably requires a "LinearLogicPatternLink" which will borrow much
 /// of the code below, but not all, and work with a LinearTermMixin
 /// callback class to complete the matching process.
