@@ -28,6 +28,8 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/PutLink.h>
 
 #include "BindLink.h"
 #include "DualLink.h"
@@ -426,6 +428,27 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 	return false;
 }
 
+Handle PatternLink::reduce_putlink(const Handle& hput)
+{
+	if (PUT_LINK != hput->get_type()) return hput;
+
+	PutLinkPtr plp(PutLinkCast(hput));
+	ValuePtr vp(plp->execute(nullptr));
+printf("duuuude reduced ptulin %s\n", vp->to_string().c_str());
+	Handle red(HandleCast(vp));
+	if (nullptr == red) return hput;
+
+	if (LAMBDA_LINK != red->get_type()) return red;
+
+// XXX This is just plain wrong. We need to look at the lambda
+// variables, and if any of them are the variables in the search,
+// we need to strip them out. If they'er all variables, then
+// return only the body.
+	LambdaLinkPtr llp(LambdaLinkCast(red));
+printf("duuuude lmbda body is %s\n", llp->get_body()->to_string().c_str());
+	return llp->get_body();
+}
+
 /// Unpack the clauses.
 ///
 /// The predicate is either an AndLink of clauses to be satisfied, or a
@@ -445,18 +468,19 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 /// callback class to complete the matching process.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
-	_pat.body = hbody;
+	_pat.body = reduce_putlink(hbody);
 
 	// A collection of clauses, all of which must be satisfied.
-	if (AND_LINK == hbody->get_type())
+	if (AND_LINK == _pat.body->get_type())
 	{
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 
-		const HandleSeq& oset = hbody->getOutgoingSet();
+		const HandleSeq& oset = _pat.body->getOutgoingSet();
 
 		// De-duplicate repeated clauses in the search pattern.
 		HandleSet dedupe;
 		for (const Handle& ho : oset)
+			// dedupe.insert(reduce_putlink(ho));
 			dedupe.insert(ho);
 
 		for (const Handle& ho : dedupe)
@@ -477,7 +501,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 	// Fish out the PresentLink's, and add them to the
 	// list of clauses to be grounded.
-	PatternTermPtr clause(make_term_tree(hbody));
+	PatternTermPtr clause(make_term_tree(reduce_putlink(_pat.body)));
 	if (record_literal(clause))
 		return;
 
@@ -491,7 +515,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// of the clause-walking will run the PresentLink before
 	// running the sequential. So that's a bug.
 	if (not unbundle_clauses_rec(clause, connectives) and
-	    not is_constant(_variables.varset, hbody))
+	    not is_constant(_variables.varset, _pat.body))
 	{
 		_pat.pmandatory.push_back(clause);
 

@@ -123,6 +123,7 @@ protected:
 	bool unbundle_clauses_rec(const PatternTermPtr&,
 	                          const TypeSet&,
 	                          bool reverse=false);
+	Handle reduce_putlink(const Handle&);
 
 	void locate_defines(const PatternTermSeq& clauses);
 	void validate_variables(HandleSet& vars,
