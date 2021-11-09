@@ -52,43 +52,43 @@
 ;
 ; The definition below is explained in detail in `recursive.scm`
 ;
-(Define
-	(DefinedPredicate "recursive relation")                 ;; Step 1.
-	(Lambda
-		(VariableList (Variable "this") (Variable "that"))   ;; Step 2.
-		(SequentialOr                                        ;; Step 3.
-			(Present
-				(Inheritance (Variable "this") (Variable "that"))) ;; Step 4.
-			(Satisfaction
-				(Variable "middle")                            ;; Step 5.
-				(And
-					(Present                                    ;; Step 6.
-						(Inheritance (Variable "this") (Variable "middle")))
-					(Put                                        ;; Step 7.
-						(DefinedPredicate "recursive relation")
-						(List (Variable "middle") (Variable "that"))))))))
-
-; Let's test it out. Does it work? The query below returns (stv 1 1)
-; that is, 'logical-true', because the inheritance chain between 'Ben'
-; and 'animal' is finite in length.
-(cog-evaluate!
-	(Evaluation
-		(DefinedPredicate "recursive relation")
-		(List (Concept "Ben") (Concept "animal"))))
-
-; If we try to verify that 'Ben' isn't 'foobar', there is a problem: the
-; attempted transitive closure never ends, because 'foobar' cannot be
-; found in the chain.  Running the below results in an error message
-; (currently, the error is about a "Transient space memleak!") This is
-; because, at eash step through the inheritance chain, a temporary
-; AtomSpace is created, to be used as a scratchpad (a Kripke frame, to
-; be formal). Eventually, one runs out of room for this infinite regress
-; of scratchpads, and an error results.
-(cog-evaluate!
-	(Evaluation
-		(DefinedPredicate "recursive relation")
-		(List (Concept "Ben") (Concept "foobar"))))
-
+;;;(Define
+;;;	(DefinedPredicate "recursive relation")                 ;; Step 1.
+;;;	(Lambda
+;;;		(VariableList (Variable "this") (Variable "that"))   ;; Step 2.
+;;;		(SequentialOr                                        ;; Step 3.
+;;;			(Present
+;;;				(Inheritance (Variable "this") (Variable "that"))) ;; Step 4.
+;;;			(Satisfaction
+;;;				(Variable "middle")                            ;; Step 5.
+;;;				(And
+;;;					(Present                                    ;; Step 6.
+;;;						(Inheritance (Variable "this") (Variable "middle")))
+;;;					(Put                                        ;; Step 7.
+;;;						(DefinedPredicate "recursive relation")
+;;;						(List (Variable "middle") (Variable "that"))))))))
+;;;
+;;;; Let's test it out. Does it work? The query below returns (stv 1 1)
+;;;; that is, 'logical-true', because the inheritance chain between 'Ben'
+;;;; and 'animal' is finite in length.
+;;;(cog-evaluate!
+;;;	(Evaluation
+;;;		(DefinedPredicate "recursive relation")
+;;;		(List (Concept "Ben") (Concept "animal"))))
+;;;
+;;;; If we try to verify that 'Ben' isn't 'foobar', there is a problem: the
+;;;; attempted transitive closure never ends, because 'foobar' cannot be
+;;;; found in the chain.  Running the below results in an error message
+;;;; (currently, the error is about a "Transient space memleak!") This is
+;;;; because, at eash step through the inheritance chain, a temporary
+;;;; AtomSpace is created, to be used as a scratchpad (a Kripke frame, to
+;;;; be formal). Eventually, one runs out of room for this infinite regress
+;;;; of scratchpads, and an error results.
+;;;;(cog-evaluate!
+;;;;	(Evaluation
+;;;;		(DefinedPredicate "recursive relation")
+;;;;		(List (Concept "Ben") (Concept "foobar"))))
+;;;
 ; ----------
 
 (Define
@@ -107,11 +107,20 @@
 						(DefinedPredicate "inf regress")
 						(List (Variable "middle") (Variable "that"))))))))
 
-(cog-evaluate!
+; (cog-evaluate!
+(define co
 	(Evaluation
 		(DefinedPredicate "inf regress")
 		(List (Concept "Ben") (Concept "foobar"))))
 
+
+(use-modules (opencog logger))
+(cog-logger-set-stdout! #t)
+(cog-logger-set-sync! #t)
+(cog-logger-set-timestamp! #f)
+(cog-logger-set-level! "FINE")
+
+; (cog-evaluate! co)
 ; ----------
 ; That's All Folks!  The End!
 
