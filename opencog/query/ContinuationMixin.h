@@ -33,28 +33,6 @@ namespace opencog {
 
 class AtomSpace;
 
-/**
- * Callback mixin class, used to provide continuations for infinite
- * recursion. It provides a short-circuit path from deep within the
- * search to the conclusion of the search.
- */
-class ContinuationMixin : 
-	public InitiateSearchMixin
-{
-	public:
-		ContinuationMixin(AtomSpace* as) :
- InitiateSearchMixin(as)
-		{}
-
-		virtual void set_pattern(const Variables& vars,
-		                         const Pattern& pat)
-		{
-			InitiateSearchMixin::set_pattern(vars, pat);
-		}
-
-	protected:
-};
-
 } // namespace opencog
 
 #endif // _OPENCOG_CONTINUATION_MIXIN_H
