@@ -30,7 +30,9 @@
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/query/ContinuationMixin.h>
+#include <opencog/query/InitiateSearchMixin.h>
+#include <opencog/query/TermMatchMixin.h>
+#include <opencog/query/SatisfyMixin.h>
 
 namespace opencog {
 
