@@ -557,7 +557,7 @@ DUAL_LINK <- SATISFYING_LINK
 // PutLink: they plug in the arguments, and take over execution of the
 // pattern search at that point. (Caution: this may be a misleading name
 // for what this link does. I can't think of a better name.)
-CONTINUATION_LINK <- PUT_LINK
+// CONTINUATION_LINK <- PUT_LINK
 
 // ==============================================================
 // Basic Knowledge-Representation types.
