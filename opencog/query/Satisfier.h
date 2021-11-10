@@ -46,7 +46,8 @@ namespace opencog {
  */
 
 class Satisfier :
-	public ContinuationMixin
+	public ContinuationMixin,
+	public SatisfyMixin
 {
 	public: // Arghhh. OpenPsi accesses these directly...
 		Handle _pattern_body;
@@ -96,7 +97,8 @@ class Satisfier :
  */
 
 class SatisfyingSet :
-	public ContinuationMixin
+	public ContinuationMixin,
+	public SatisfyMixin
 {
 	protected:
 		AtomSpace* _as;
