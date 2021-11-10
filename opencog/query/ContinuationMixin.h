@@ -39,20 +39,17 @@ class AtomSpace;
  * search to the conclusion of the search.
  */
 class ContinuationMixin : 
-	public InitiateSearchMixin,
-	public TermMatchMixin
+	public InitiateSearchMixin
 {
 	public:
 		ContinuationMixin(AtomSpace* as) :
- InitiateSearchMixin(as),
-			TermMatchMixin(as)
+ InitiateSearchMixin(as)
 		{}
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
 		{
 			InitiateSearchMixin::set_pattern(vars, pat);
-			TermMatchMixin::set_pattern(vars, pat);
 		}
 
 	protected:

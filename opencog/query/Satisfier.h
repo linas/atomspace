@@ -46,7 +46,8 @@ namespace opencog {
  */
 
 class Satisfier :
-	public ContinuationMixin,
+	public InitiateSearchMixin,
+	public TermMatchMixin,
 	public SatisfyMixin
 {
 	public: // Arghhh. OpenPsi accesses these directly...
@@ -55,7 +56,8 @@ class Satisfier :
 
 	public:
 		Satisfier(AtomSpace* as) :
-			ContinuationMixin(as),
+			InitiateSearchMixin(as),
+			TermMatchMixin(as),
 			_result(TruthValue::FALSE_TV()) {}
 
 		DECLARE_PE_MUTEX;
@@ -67,7 +69,8 @@ class Satisfier :
 		                         const Pattern& pat)
 		{
 			_varseq = vars.varseq;
-			ContinuationMixin::set_pattern(vars, pat);
+			InitiateSearchMixin::set_pattern(vars, pat);
+			TermMatchMixin::set_pattern(vars, pat);
 			_have_variables = not vars.varseq.empty();
 			_pattern_body = pat.body;
 		}
@@ -97,7 +100,8 @@ class Satisfier :
  */
 
 class SatisfyingSet :
-	public ContinuationMixin,
+	public InitiateSearchMixin,
+	public TermMatchMixin,
 	public SatisfyMixin
 {
 	protected:
@@ -108,7 +112,8 @@ class SatisfyingSet :
 
 	public:
 		SatisfyingSet(AtomSpace* as) :
-			ContinuationMixin(as),
+			InitiateSearchMixin(as),
+			TermMatchMixin(as),
 			_as(as), max_results(SIZE_MAX) {}
 
 		size_t max_results;
@@ -117,7 +122,8 @@ class SatisfyingSet :
 		                         const Pattern& pat)
 		{
 			_varseq = vars.varseq;
-			ContinuationMixin::set_pattern(vars, pat);
+			InitiateSearchMixin::set_pattern(vars, pat);
+			TermMatchMixin::set_pattern(vars, pat);
 		}
 
 		// Return true if a satisfactory grounding has been
