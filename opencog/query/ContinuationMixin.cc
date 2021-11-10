@@ -37,19 +37,4 @@ using namespace opencog;
 #endif
 
 
-/**
- * Exception thrown for continuations
- */
-class ContinuationException : public SilentException
-{
-public:
-    ContinuationException(void) {}
-};
-
-class RewindException : public SilentException
-{
-public:
-    RewindException(void) {}
-};
-
 /* ===================== END OF FILE ===================== */
