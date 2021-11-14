@@ -10,7 +10,7 @@ There are several files here:
 
 * The [connectors-and-variables.pdf](connectors-and-variables.pdf) file.
   It is complementary to the above, repeating some material. It is meant to
-  provide a more detailed footing. To avoid a snowball of ever-increaing
+  provide a more detailed footing. To avoid a snowball of ever-increasing
   length, it is split into bite-sized chapters. The chapters are currently,
   in serial order:
 
@@ -38,3 +38,8 @@ There are several files here:
    storing graphs, than graph databases are. The representational
    differences are minor, but the side effects are major. This is a
    pre-req for understanding sheaf stores.
+
+    * [lg-sat-equality.pdf](lg-sat-equality.pdf) sketches how Boolean
+   SAT solving algorithms work, and how the Link Grammar parser is a
+   generalization of these, and how the Theory of Equality should be
+   understood in this setting.
