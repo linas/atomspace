@@ -27,6 +27,7 @@
 
 #if HAVE_FOLLY
 #include <folly/container/F14Set.h>
+#include <folly/concurrency/ConcurrentHashMap.h>
 #else
 #include <set>
 #endif
@@ -55,11 +56,14 @@ namespace opencog
 #if HAVE_FOLLY_XXX
 typedef folly::F14ValueSet<Handle> AtomSet;
 #else
-typedef std::unordered_set<Handle> AtomSet;
+// typedef std::unordered_set<Handle> AtomSet;
+typedef folly::ConcurrentHashMap<Handle, Handle> AtomSet;
 #endif
 
-#define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-#define TYPE_INDEX_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+// #define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+// #define TYPE_INDEX_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+#define TYPE_INDEX_SHARED_LOCK
+#define TYPE_INDEX_UNIQUE_LOCK
 
 /**
  * Implements a vector of AtomSets; each AtomSet is a hash table of
@@ -95,8 +99,8 @@ class TypeIndex
 			AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_UNIQUE_LOCK;
 			auto iter = s.find(h);
-			if (s.end() != iter) return *iter;
-			s.insert(h);
+			if (s.end() != iter) return iter->first;
+			s.insert(h, h);
 			return Handle::UNDEFINED;
 		}
 
@@ -113,7 +117,7 @@ class TypeIndex
 			TYPE_INDEX_SHARED_LOCK;
 			auto iter = s.find(h);
 			if (s.end() == iter) return Handle::UNDEFINED;
-			return *iter;
+			return iter->first;
 		}
 
 		// How many atoms are ther of type t?
@@ -153,8 +157,9 @@ class TypeIndex
 			TYPE_INDEX_UNIQUE_LOCK;
 			for (auto& s : _idx)
 			{
-				for (auto& h : s)
+				for (auto& pr : s)
 				{
+					const Handle& h(pr.first);
 					h->_atom_space = nullptr;
 
 					// We installed the incoming set; we remove it too.

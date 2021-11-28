@@ -56,8 +56,8 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 
 	TYPE_INDEX_SHARED_LOCK;
 	const AtomSet& s(_idx.at(type));
-	for (const Handle& h : s)
-		hseq.push_back(h);
+	for (const auto& pr : s)
+		hseq.push_back(pr.first);
 
 	// Not subclassing? We are done!
 	if (not subclass) return;
@@ -67,8 +67,8 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 		if (t == type or not _nameserver.isA(t, type)) continue;
 
 		const AtomSet& s(_idx.at(t));
-		for (const Handle& h : s)
-			hseq.push_back(h);
+		for (const auto& pr : s)
+			hseq.push_back(pr.first);
 	}
 }
 
@@ -92,8 +92,9 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 
 	TYPE_INDEX_SHARED_LOCK;
 	const AtomSet& s(_idx.at(type));
-	for (const Handle& h : s)
+	for (const auto& pr : s)
 	{
+		const Handle& h(pr.first);
 		if (h->isIncomingSetEmpty(cas))
 			hseq.push_back(h);
 	}
@@ -106,9 +107,12 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 		if (t == type or not _nameserver.isA(t, type)) continue;
 
 		const AtomSet& s(_idx.at(t));
-		for (const Handle& h : s)
+		for (const auto& pr : s)
+		{
+			const Handle& h(pr.first);
 			if (h->isIncomingSetEmpty(cas))
 				hseq.push_back(h);
+		}
 	}
 }
 
