@@ -31,6 +31,8 @@
 #include <set>
 #endif
 
+#include <cds/container/ellen_bintree_set_dhp.h>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
@@ -55,11 +57,14 @@ namespace opencog
 #if HAVE_FOLLY_XXX
 typedef folly::F14ValueSet<Handle> AtomSet;
 #else
-typedef std::unordered_set<Handle> AtomSet;
+// typedef std::unordered_set<Handle> AtomSet;
+typedef cds::container::EllenBinTreeSet<cds::gc::DHP, Handle, Handle> AtomSet;
 #endif
 
-#define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-#define TYPE_INDEX_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+// #define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+// #define TYPE_INDEX_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+#define TYPE_INDEX_SHARED_LOCK
+#define TYPE_INDEX_UNIQUE_LOCK
 
 /**
  * Implements a vector of AtomSets; each AtomSet is a hash table of
@@ -94,8 +99,13 @@ class TypeIndex
 		{
 			AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_UNIQUE_LOCK;
+#if 0
 			auto iter = s.find(h);
 			if (s.end() != iter) return *iter;
+#endif
+Handle ha;
+s.find(h, [&](const Handle& n, const Handle& k) { ha=n; });
+if (ha) return ha;
 			s.insert(h);
 			return Handle::UNDEFINED;
 		}
@@ -107,13 +117,18 @@ class TypeIndex
 			s.erase(h);
 		}
 
-		Handle findAtom(const Handle& h) const
+		Handle findAtom(const Handle& h)
 		{
-			const AtomSet& s(_idx.at(h->get_type()));
+			AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_SHARED_LOCK;
+#if 0
 			auto iter = s.find(h);
 			if (s.end() == iter) return Handle::UNDEFINED;
 			return *iter;
+#endif
+Handle ha;
+s.find(h, [&](const Handle& n, const Handle& k) { ha=n; });
+return ha;
 		}
 
 		// How many atoms are ther of type t?
@@ -150,6 +165,7 @@ class TypeIndex
 
 		void clear(void)
 		{
+#if 0
 			TYPE_INDEX_UNIQUE_LOCK;
 			for (auto& s : _idx)
 			{
@@ -162,6 +178,7 @@ class TypeIndex
 				}
 				s.clear();
 			}
+#endif
 		}
 
 		void get_handles_by_type(HandleSeq&, Type, bool subclass) const;
