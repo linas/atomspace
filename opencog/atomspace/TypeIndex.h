@@ -32,6 +32,7 @@
 #endif
 
 #include <cds/container/ellen_bintree_set_dhp.h>
+#include <cds/container/skip_list_set_dhp.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
@@ -59,6 +60,7 @@ typedef folly::F14ValueSet<Handle> AtomSet;
 #else
 // typedef std::unordered_set<Handle> AtomSet;
 typedef cds::container::EllenBinTreeSet<cds::gc::DHP, Handle, Handle> AtomSet;
+// typedef cds::container::SkipListSet<cds::gc::DHP, Handle, Handle> AtomSet;
 #endif
 
 // #define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
