@@ -115,8 +115,8 @@ bool fnd = false;
 auto iter = s.find(h);
 if (s.end() != iter) fnd=true;
 lck.unlock();
-printf("duuuude fnd=%d for this=%p h=%p s=%p\n%s\n",
-fnd, this, h.get(), &s, h->to_string().c_str());
+printf("duuuude fnd=%d for this=%p h=%p s=xp\n%s\n",
+fnd, this, h.get(), /* &s, */ h->to_string().c_str());
 }
 		}
 
