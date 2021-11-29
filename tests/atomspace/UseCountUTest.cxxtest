@@ -52,7 +52,6 @@ private:
     int n_threads;
     int n_removal_threads;
     int num_atoms;
-    bool spinwait;
     std::vector<int> rm_cnt;
     std::vector<int> rm_cycles;
 
