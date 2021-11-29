@@ -176,6 +176,8 @@ public:
         std::cout << "Final anchor use count=" << final_use_count << std::endl;
         size_t fsize = atomSpace->get_size();
         std::cout << "Final atomspace size: " << fsize << std::endl;
+std::cout << "duuude as=\n" << atomSpace->to_string() << std::endl;
+std::cout << "duuude inset=\n" << oc_to_string(anchor->getIncomingSet()) << std::endl;
 
         std::cout << "Total addded: " << __totalAdded << std::endl;
         std::cout << "Total removed: " << __totalRemoved << std::endl;

@@ -439,7 +439,9 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     handle->remove();
     handle->setAtomSpace(nullptr);
 
+handle->pre = true;
     typeIndex.removeAtom(handle);
+handle->post = true;
 
     return true;
 }

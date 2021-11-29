@@ -90,7 +90,7 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 	// allocations and copies whenever the allocated size is exceeded.
 	hseq.reserve(initial_size + size_of_append);
 
-	TYPE_INDEX_SHARED_LOCK;
+//	TYPE_INDEX_SHARED_LOCK;
 	const AtomSet& s(_idx.at(type));
 	for (const Handle& h : s)
 	{
@@ -108,7 +108,18 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 		const AtomSet& s(_idx.at(t));
 		for (const Handle& h : s)
 			if (h->isIncomingSetEmpty(cas))
+{
+Handle hc = findAtom(h);
+printf("duuude type=%s this=%p h=%p s=%p\n", nameserver().getTypeName(t).c_str(), this, 
+&s, h.get());
+if (nullptr == hc) {
+printf("duuuude cannt find xxxxxxxxxxxxxxxxxxxxxxxx h=%s\n", h->to_string().c_str());
+} else
+{
+printf("duuuude findable h=%s\n", h->to_string().c_str());
+}
 				hseq.push_back(h);
+}
 	}
 }
 

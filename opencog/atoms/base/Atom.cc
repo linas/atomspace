@@ -506,6 +506,12 @@ std::string Atom::id_to_string() const
     if (_atom_space) ss << _atom_space->get_uuid();
     else ss << "-1";
     ss << "]";
+ss << " marked " << _marked_for_removal.load();
+ss << " pre " << pre;
+ss << " lpre " << lpre;
+ss << " lpost " << lpost;
+ss << " post " << post;
+ss << " cnt " << std::to_string(cnt);
     return ss.str();
 }
 

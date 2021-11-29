@@ -58,7 +58,8 @@ typedef folly::F14ValueSet<Handle> AtomSet;
 typedef std::unordered_set<Handle> AtomSet;
 #endif
 
-#define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+// #define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+#define TYPE_INDEX_SHARED_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
 #define TYPE_INDEX_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
 
 /**
@@ -92,8 +93,8 @@ class TypeIndex
 		// Else, return nullptr
 		Handle insertAtom(const Handle& h)
 		{
-			AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_UNIQUE_LOCK;
+			AtomSet& s(_idx.at(h->get_type()));
 			auto iter = s.find(h);
 			if (s.end() != iter) return *iter;
 			s.insert(h);
@@ -102,15 +103,27 @@ class TypeIndex
 
 		void removeAtom(const Handle& h)
 		{
-			AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_UNIQUE_LOCK;
-			s.erase(h);
+			AtomSet& s(_idx.at(h->get_type()));
+h->lpre = true;
+			size_t n = s.erase(h);
+h->cnt = (int8_t) n;
+h->lpost = true;
+if (0 == n)
+{
+bool fnd = false;
+auto iter = s.find(h);
+if (s.end() != iter) fnd=true;
+lck.unlock();
+printf("duuuude fnd=%d for this=%p h=%p s=%p\n%s\n",
+fnd, this, h.get(), &s, h->to_string().c_str());
+}
 		}
 
 		Handle findAtom(const Handle& h) const
 		{
-			const AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_SHARED_LOCK;
+			const AtomSet& s(_idx.at(h->get_type()));
 			auto iter = s.find(h);
 			if (s.end() == iter) return Handle::UNDEFINED;
 			return *iter;
@@ -119,8 +132,8 @@ class TypeIndex
 		// How many atoms are ther of type t?
 		size_t size(Type t) const
 		{
-			const AtomSet& s(_idx.at(t));
 			TYPE_INDEX_SHARED_LOCK;
+			const AtomSet& s(_idx.at(t));
 			return s.size();
 		}
 

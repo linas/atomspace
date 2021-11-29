@@ -166,6 +166,13 @@ protected:
     mutable std::atomic_bool _marked_for_removal;
     mutable std::atomic_bool _checked;
 
+public:
+mutable bool pre;
+mutable bool post;
+mutable bool lpre;
+mutable bool lpost;
+mutable int8_t cnt;
+protected:
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
     mutable ContentHash _content_hash;
@@ -192,6 +199,11 @@ protected:
       : Value(t),
         _marked_for_removal(false),
         _checked(false),
+pre(false),
+post(false),
+lpre(false),
+lpost(false),
+cnt(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
     {}
