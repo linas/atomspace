@@ -114,9 +114,14 @@ if (0 == n)
 bool fnd = false;
 auto iter = s.find(h);
 if (s.end() != iter) fnd=true;
+bool olock = lck.owns_lock();
 lck.unlock();
-printf("duuuude fnd=%d for this=%p h=%p s=%p\n%s\n",
-fnd, this, h.get(), &s, h->to_string().c_str());
+bool refnd = false;
+Handle rf = findAtom(h);
+if (nullptr != rf) refnd=true;
+
+printf("duuuude fnd=%d refnd=%d owns=%d for this=%p h=%p s=%p\n%s\n",
+fnd, refnd, olock, this, h.get(), &s, h->to_string().c_str());
 }
 		}
 

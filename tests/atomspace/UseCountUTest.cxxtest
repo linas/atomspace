@@ -163,6 +163,7 @@ public:
                 std::thread(&UseCountUTest::threadedLinkAdd, this, i, num_atoms));
         }
 
+for (std::thread& t : thread_pool) t.join();
         // Remove lotsa links, using only 3 threads
         for (int i=0; i < n_removal_threads; i++) {
             thread_pool.push_back(
@@ -176,6 +177,7 @@ public:
         std::cout << "Final anchor use count=" << final_use_count << std::endl;
         size_t fsize = atomSpace->get_size();
         std::cout << "Final atomspace size: " << fsize << std::endl;
+std::cout << "duuude =================================\n";
 std::cout << "duuude as=\n" << atomSpace->to_string() << std::endl;
 std::cout << "duuude inset=\n" << oc_to_string(anchor->getIncomingSet()) << std::endl;
 
