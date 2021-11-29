@@ -58,8 +58,8 @@ typedef folly::F14ValueSet<Handle> AtomSet;
 typedef std::unordered_set<Handle> AtomSet;
 #endif
 
-// #define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-#define TYPE_INDEX_SHARED_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+#define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+// #define TYPE_INDEX_SHARED_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
 #define TYPE_INDEX_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
 
 /**
@@ -115,8 +115,8 @@ bool fnd = false;
 auto iter = s.find(h);
 if (s.end() != iter) fnd=true;
 lck.unlock();
-printf("duuuude fnd=%d for this=%p h=%p s=xp\n%s\n",
-fnd, this, h.get(), /* &s, */ h->to_string().c_str());
+printf("duuuude fnd=%d for this=%p h=%p s=%p\n%s\n",
+fnd, this, h.get(), &s, h->to_string().c_str());
 }
 		}
 
