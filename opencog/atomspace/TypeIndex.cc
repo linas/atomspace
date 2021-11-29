@@ -111,7 +111,7 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 {
 Handle hc = findAtom(h);
 printf("duuude type=%s this=%p h=%p s=%p\n", nameserver().getTypeName(t).c_str(), this, 
-&s, h.get());
+h.get(), &s);
 if (nullptr == hc) {
 printf("duuuude cannt find xxxxxxxxxxxxxxxxxxxxxxxx h=%s\n", h->to_string().c_str());
 } else
