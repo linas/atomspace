@@ -163,7 +163,7 @@ public:
                 std::thread(&UseCountUTest::threadedLinkAdd, this, i, num_atoms));
         }
 
-for (std::thread& t : thread_pool) t.join();
+// for (std::thread& t : thread_pool) t.join();
         // Remove lotsa links, using only 3 threads
         for (int i=0; i < n_removal_threads; i++) {
             thread_pool.push_back(
@@ -172,6 +172,8 @@ for (std::thread& t : thread_pool) t.join();
 
         // Wait for it all to come together.
         for (std::thread& t : thread_pool) t.join();
+
+threadedLinkRemove(0);
 
         long int final_use_count = AtomPtr(anchor).use_count();
         std::cout << "Final anchor use count=" << final_use_count << std::endl;
