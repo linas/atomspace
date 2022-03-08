@@ -96,8 +96,13 @@ void StateLink::install()
 	bool swapped = false;
 	const Handle& alias = get_alias();
 	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
-	for (const Handle& defl : defs)
+	for (const auto& ind : defs)
 	{
+#if USE_BARE_BACKPOINTER
+		const Handle defl(ind->get_handle());
+#else // USE_BARE_BACKPOINTER
+		const Handle& defl(ind);
+#endif // USE_BARE_BACKPOINTER
 		if (defl.get() == this) continue;
 		if (defl->getOutgoingAtom(0) != alias) continue;
 		if (defl->getAtomSpace() != getAtomSpace()) continue;

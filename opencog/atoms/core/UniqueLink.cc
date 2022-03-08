@@ -52,7 +52,7 @@ void UniqueLink::init(bool allow_open)
 
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(_type);
-	for (const Handle& def : defs)
+	for (const auto& def : defs)
 	{
 		if (def->getOutgoingAtom(0) != alias) continue;
 
@@ -98,8 +98,13 @@ Handle UniqueLink::get_unique_nt(const Handle& alias, Type type,
 	// in deeper atomspaces.
 	Handle shallowest;
 	int depth = INT_MAX;
-	for (const Handle& defl : defs)
+	for (const auto& ind : defs)
 	{
+#if USE_BARE_BACKPOINTER
+			const Handle defl(ind->get_handle());
+#else // USE_BARE_BACKPOINTER
+			const Handle& defl(ind);
+#endif // USE_BARE_BACKPOINTER
 		if (defl->getOutgoingAtom(0) != alias) continue;
 		if (disallow_open)
 		{
