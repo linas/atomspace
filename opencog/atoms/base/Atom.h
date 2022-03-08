@@ -542,13 +542,13 @@ public:
 #if USE_BARE_POINTER
 
 #define ATOM_PTR_DECL(CNAME)                                \
-    typedef const CNAME * CNAME##Ptr;                       \
+    typedef std::shared_ptr<CNAME> CNAME##Ptr;              \
     static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
-        { return (CNAME##Ptr)h.get(); }                     \
+        { return std::dynamic_pointer_cast<CNAME>(h->get_vhandle()); } \
     static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
-        { return (CNAME *) a.get(); }                       \
+        { return std::dynamic_pointer_cast<CNAME>(a->get_vhandle()); } \
     static inline Handle HandleCast(const CNAME##Ptr cp)    \
-        { return Handle(AtomPtr((Atom*)cp)); }
+        { return Handle(AtomPtr(cp.get())); }
 
 #define CREATE_DECL(CNAME)  (AtomPtr) std::make_shared<CNAME>
 
