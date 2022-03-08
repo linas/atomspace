@@ -64,7 +64,7 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 	}
 
 	// Create the satisfying set, and cache it.
-	Handle satset(createUnorderedLink(std::move(hs), SET_LINK));
+	Handle satset(HandleCast(createUnorderedLink(std::move(hs), SET_LINK)));
 
 #define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE

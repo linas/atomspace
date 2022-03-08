@@ -117,10 +117,10 @@ void PatternLink::setup_components(void)
 	_component_patterns.reserve(_num_comps);
 	for (size_t i = 0; i < _num_comps; i++)
 	{
-		Handle h(createPatternLink(_component_vars[i],
+		Handle h(HandleCast(createPatternLink(_component_vars[i],
 		                           _variables,
 		                           _components[i],
-		                           _pat.absents));
+		                           _pat.absents)));
 		_component_patterns.emplace_back(h);
 	}
 }
