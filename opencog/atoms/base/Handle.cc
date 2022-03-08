@@ -34,6 +34,7 @@ namespace opencog {
 const Handle Handle::UNDEFINED;
 const AtomPtr Handle::NULL_POINTER;
 
+#if USE_BARE_POINTER
 AtomPtr::AtomPtr(const ValuePtr& pa)
 {
 	if (pa->is_atom())
@@ -41,6 +42,13 @@ AtomPtr::AtomPtr(const ValuePtr& pa)
 	else
 		pat = nullptr;
 }
+
+Handle::operator std::shared_ptr<Value>() const noexcept
+{
+	return get()->get_vhandle();
+}
+
+#endif // USE_BARE_POINTER
 
 ContentHash Handle::value(void) const
 {

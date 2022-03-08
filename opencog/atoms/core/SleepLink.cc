@@ -70,7 +70,7 @@ ValuePtr SleepLink::execute(AtomSpace*as, bool silent)
 		}
 		else if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
 		{
-			time = nullptr;
+			time = Handle();
 			length = FloatValueCast(vp)->value().at(0);
 		}
 	}

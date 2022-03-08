@@ -374,14 +374,20 @@ public:
     virtual bool is_executable() const { return false; }
 
     /** Returns a handle holding "this". */
-    inline Handle get_handle() const {
 #ifdef USE_BARE_POINTER
+    inline Handle get_handle() const {
         return (Handle) this;
+    }
+    inline ValuePtr get_vhandle() const {
+        return ValuePtr(std::dynamic_pointer_cast<Value>(
+             const_cast<Atom*>(this)->shared_from_this()));
+    }
 #else // USE_BARE_POINTER
+    inline Handle get_handle() const {
         return Handle(std::dynamic_pointer_cast<Atom>(
              const_cast<Atom*>(this)->shared_from_this()));
-#endif // USE_BARE_POINTER
     }
+#endif // USE_BARE_POINTER
 
     /** Returns the TruthValue object of the atom. */
     TruthValuePtr getTruthValue() const;

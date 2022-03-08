@@ -134,6 +134,10 @@ public:
         return get();
     }
 
+#if USE_BARE_POINTER
+    operator std::shared_ptr<Value>() const noexcept;
+#endif // USE_BARE_POINTER
+
     // Allows expressions like "if(h)..." to work
     // when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
