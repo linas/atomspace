@@ -165,6 +165,11 @@ public:
         return get() != h.get();
     }
 
+#if USE_BARE_POINTER
+    bool operator==(const std::shared_ptr<Value>) const noexcept;
+    bool operator!=(const std::shared_ptr<Value>) const noexcept;
+#endif // USE_BARE_POINTER
+
     /**
      * Defer to Atom::operator< thus is content based.
      */

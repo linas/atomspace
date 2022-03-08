@@ -48,6 +48,16 @@ Handle::operator std::shared_ptr<Value>() const noexcept
 	return get()->get_vhandle();
 }
 
+bool Handle::operator==(const std::shared_ptr<Value> vp) const noexcept
+{
+	return get() == vp.get();
+}
+
+bool Handle::operator!=(const std::shared_ptr<Value> vp) const noexcept
+{
+	return get() != vp.get();
+}
+
 #endif // USE_BARE_POINTER
 
 ContentHash Handle::value(void) const
