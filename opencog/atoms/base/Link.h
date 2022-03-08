@@ -200,19 +200,9 @@ public:
     virtual bool operator<(const Atom&) const;
 };
 
-#if USE_BARE_POINTER
-typedef const Link* LinkPtr;
-static inline LinkPtr LinkCast(const Handle& h)
-    { return (LinkPtr) h.get(); }
-static inline LinkPtr LinkCast(const AtomPtr& a)
-    { return (Link*) a.get(); }
-#else // USE_BARE_POINTER
-typedef std::shared_ptr<Link> LinkPtr;
-static inline LinkPtr LinkCast(const Handle& h)
-    { return std::dynamic_pointer_cast<Link>(h); }
-static inline LinkPtr LinkCast(const AtomPtr& a)
-    { return std::dynamic_pointer_cast<Link>(a); }
-#endif // USE_BARE_POINTER
+#define LINK_PTR_DECL(CNAME)  ATOM_PTR_DECL(CNAME)
+
+LINK_PTR_DECL(Link);
 
 template< class... Args >
 Handle createLink( Args&&... args )
