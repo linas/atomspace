@@ -116,7 +116,7 @@ public:
 	RewriteLink(const RewriteLink &) = delete;
 	RewriteLink& operator=(const RewriteLink &) = delete;
 
-	void make_silent(bool s) { _silent = s; }
+	void make_silent(bool s) const { ((RewriteLink*) this)->_silent = s; }
 
 	/**
 	 * Perform a beta-reduction and optional alpha-conversion,

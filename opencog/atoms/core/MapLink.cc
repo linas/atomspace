@@ -50,7 +50,11 @@ void MapLink::init(void)
 		FreeVariables fv;
 		fv.find_variables(body);
 		Handle decl(createVariableSet(std::move(fv.varseq)));
+#if USE_BARE_POINTER
+		_pattern = (ScopeLinkPtr) (createScopeLink(std::move(decl), body)).get();
+#else
 		_pattern = createScopeLink(std::move(decl), body);
+#endif
 	}
 	_mvars = &_pattern->get_variables();
 	_varset = &_mvars->varset;
