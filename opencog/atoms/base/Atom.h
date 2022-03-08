@@ -548,7 +548,7 @@ public:
     static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
         { return std::dynamic_pointer_cast<CNAME>(a->get_vhandle()); } \
     static inline Handle HandleCast(const CNAME##Ptr cp)    \
-        { return Handle(AtomPtr(cp.get())); }
+        { return Handle(AtomPtr(std::dynamic_pointer_cast<Atom>(cp).get())); }
 
 #define CREATE_DECL(CNAME)  (AtomPtr) std::make_shared<CNAME>
 

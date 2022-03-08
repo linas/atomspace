@@ -60,7 +60,6 @@ void TypedVariableLink::init()
 			"Expecting type definition, got %s in\n%s",
 				nameserver().getTypeName(dtype).c_str(),
 				to_short_string().c_str());
-
 	_typech = createTypeChoice(HandleSeq({_outgoing[1]}),
 		TYPE_CHOICE, GLOB_NODE == _outgoing[0]->get_type());
 }
