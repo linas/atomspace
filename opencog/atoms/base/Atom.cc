@@ -367,6 +367,14 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
 void Atom::install() {}
 void Atom::remove() {}
 
+#if USE_BARE_BACKPOINTER
+   #define WEAKLY_DOH(HA,AP,WP,STMT) Handle HA(WP->get_handle()); const Atom* AP(WP); STMT;
+   #define WEAKLY_DON(AP,WP,STMT) const Atom* AP(WP); STMT;
+#else  // USE_BARE_BACKPOINTER
+   #define WEAKLY_DOH(HA,AP,WP,STMT) Handle HA(WP.lock()); if (HA) { const Handle& AP(HA); STMT; }
+   #define WEAKLY_DON(HA,AP,WP,STMT) Handle HA(WP.lock()); if (HA) { const Handle& AP(HA); STMT; }
+#endif // USE_BARE_BACKPOINTER
+
 bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return true;
@@ -377,7 +385,7 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
     {
         for (const WinkPtr& w : bucket.second)
         {
-            WEAKLY_DO(l, w, { if (not as or as->in_environ(l)) return false; })
+            WEAKLY_DO(h, w, { if (not as or as->in_environ(h)) return false; })
         }
     }
     return true;
@@ -396,7 +404,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
         {
             for (const WinkPtr& w : bucket.second)
             {
-                WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
+                WEAKLY_DO(h, w, { if (as->in_environ(h)) cnt++; })
             }
         }
         return cnt;
@@ -424,7 +432,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
         {
             for (const WinkPtr& w : bucket.second)
             {
-                WEAKLY_DO(l, w, { if (as->in_environ(l)) iset.emplace_back(l); })
+                WEAKLY_DOH(h, l, w, { if (as->in_environ(h)) iset.emplace_back(l); })
             }
         }
         return iset;
@@ -437,7 +445,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
     {
         for (const WinkPtr& w : bucket.second)
         {
-            WEAKLY_DO(l, w, { iset.emplace_back(l); });
+            WEAKLY_DON(l, w, { iset.emplace_back(l); });
         }
     }
     return iset;
@@ -458,14 +466,14 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
     if (as) {
         for (const WinkPtr& w : bucket->second)
         {
-            WEAKLY_DO(l, w, { if (as->in_environ(l)) result.emplace_back(l); })
+            WEAKLY_DOH(h, l, w, { if (as->in_environ(h)) result.emplace_back(l); })
         }
         return result;
     }
 
     for (const WinkPtr& w : bucket->second)
     {
-        WEAKLY_DO(l, w, { result.emplace_back(l); })
+        WEAKLY_DON(l, w, { result.emplace_back(l); })
     }
     return result;
 }
@@ -483,14 +491,14 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
     if (as) {
         for (const WinkPtr& w : bucket->second)
         {
-            WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
+            WEAKLY_DO(h, w, { if (as->in_environ(h)) cnt++; })
         }
         return cnt;
     }
 
     for (const WinkPtr& w : bucket->second)
     {
-        WEAKLY_DO(l, w, { cnt++; })
+        WEAKLY_DO(h, w, { cnt++; })
     }
     return cnt;
 }
