@@ -205,13 +205,9 @@ public:
 LINK_PTR_DECL(Link);
 
 template< class... Args >
-Handle createLink( Args&&... args )
+SharPtr createLink( Args&&... args )
 {
-#if USE_BARE_POINTER
-	Handle tmp(new Link(std::forward<Args>(args) ...));
-#else // USE_BARE_POINTER
-	Handle tmp(std::make_shared<Link>(std::forward<Args>(args) ...));
-#endif // USE_BARE_POINTER
+	SharPtr tmp(std::make_shared<Link>(std::forward<Args>(args) ...));
 	return classserver().factory(tmp);
 }
 

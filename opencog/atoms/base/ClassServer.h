@@ -108,7 +108,7 @@ public:
      * Convert the indicated Atom into a C++ instance of the
      * same type.
      */
-    Handle factory(const Handle&) const;
+    SharPtr factory(const SharPtr&) const;
 };
 
 ClassServer& classserver();
@@ -118,14 +118,13 @@ ClassServer& classserver();
 
 #define DEFINE_LINK_FACTORY(CNAME,CTYPE)                          \
                                                                   \
-Handle CNAME::factory(const Handle& base)                         \
+SharPtr CNAME::factory(const SharPtr& base)                       \
 {                                                                 \
    /* If it's castable, nothing to do. */                         \
    if (CNAME##Cast(base)) return base;                            \
                                                                   \
-   Handle h(HandleCast(create##CNAME(                             \
-                          std::move(base->getOutgoingSet()),      \
-                          base->get_type())));                    \
+   SharPtr h(create##CNAME(std::move(base->getOutgoingSet()),     \
+                           base->get_type()));                    \
    return h;                                                      \
 }                                                                 \
                                                                   \
@@ -138,11 +137,11 @@ static __attribute__ ((constructor)) void                         \
 
 #define DEFINE_NODE_FACTORY(CNAME,CTYPE)                          \
                                                                   \
-Handle CNAME::factory(const Handle& base)                         \
+SharPtr CNAME::factory(const SharPtr& base)                       \
 {                                                                 \
    if (CNAME##Cast(base)) return base;                            \
-   Handle h(HandleCast(create##CNAME(base->get_type(),            \
-                          std::move(base->get_name()))));         \
+   SharPtr h(create##CNAME(base->get_type(),                      \
+                           std::move(base->get_name())));         \
    return h;                                                      \
 }                                                                 \
                                                                   \

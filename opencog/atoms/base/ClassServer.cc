@@ -145,7 +145,7 @@ ClassServer::Validator* ClassServer::getValidator(Type t) const
 	return t < _validator.size() ? _validator[t] : nullptr;
 }
 
-Handle ClassServer::factory(const Handle& h) const
+SharPtr ClassServer::factory(const SharPtr& h) const
 {
 	Handle result;
 

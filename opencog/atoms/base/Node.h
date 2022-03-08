@@ -116,13 +116,9 @@ public:
 NODE_PTR_DECL(Node)
 
 template< class... Args >
-Handle createNode( Args&&... args )
+Sharptr createNode( Args&&... args )
 {
-#if USE_BARE_POINTER
-	Handle tmp(new Node(std::forward<Args>(args) ...));
-#else // USE_BARE_POINTER
-   Handle tmp(std::make_shared<Node>(std::forward<Args>(args) ...));
-#endif // USE_BARE_POINTER
+   SharPtr tmp(std::make_shared<Node>(std::forward<Args>(args) ...));
    return classserver().factory(tmp);
 }
 
