@@ -61,7 +61,23 @@ typedef size_t UUID;
 typedef uint64_t ContentHash;
 
 class Atom;
+class Value;
+#define USE_BARE_POINTER 1
+#ifdef USE_BARE_POINTER
+class AtomPtr
+{
+	const Atom* pat;
+public:
+	explicit AtomPtr() { pat = (const Atom*) nullptr; }
+	explicit AtomPtr(const Atom* atom) { pat = atom; }
+	explicit AtomPtr(const Value* pa) { pat = (const Atom*) pa; }
+	inline const Atom* get() const { return pat; }
+	Atom* operator->() const { return (Atom*) pat; }
+	const Atom& operator*() const { return *pat; }
+};
+#else // USE_BARE_POINTER
 typedef std::shared_ptr<Atom> AtomPtr;
+#endif // USE_BARE_POINTER
 
 //! Pointer to an Atom, providing extra utility/convenience methods.
 class Handle : public AtomPtr
@@ -76,10 +92,13 @@ private:
     static bool content_based_atoms_less(const Atom*, const Atom*);
 
     static const AtomPtr NULL_POINTER;
-
 public:
     static const ContentHash INVALID_HASH = std::numeric_limits<size_t>::max();
     static const Handle UNDEFINED;
+
+#ifdef USE_BARE_POINTER
+    explicit Handle(const Atom* atom) : AtomPtr(atom) {}
+#endif // USE_BARE_POINTER
 
     // Copy constructor
     explicit Handle(const AtomPtr& atom) : AtomPtr(atom) {}
@@ -107,7 +126,7 @@ public:
 
     // Cython can't access operator->() so we'll duplicate here.
     inline Atom* atom_ptr() {
-        return get();
+        return (Atom*) get();
     }
 
     inline const Atom* const_atom_ptr() const {

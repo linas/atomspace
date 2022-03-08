@@ -375,8 +375,12 @@ public:
 
     /** Returns a handle holding "this". */
     inline Handle get_handle() const {
+#ifdef USE_BARE_POINTER
+        return (Handle) this;
+#else // USE_BARE_POINTER
         return Handle(std::dynamic_pointer_cast<Atom>(
              const_cast<Atom*>(this)->shared_from_this()));
+#endif // USE_BARE_POINTER
     }
 
     /** Returns the TruthValue object of the atom. */
@@ -530,7 +534,13 @@ public:
 };
 
 static inline AtomPtr AtomCast(const ValuePtr& pa)
-    { return std::dynamic_pointer_cast<Atom>(pa); }
+{
+#if USE_BARE_POINTER
+    if (pa->is_atom()) { return (AtomPtr) pa.get(); } else { return AtomPtr(); }
+#else // USE_BARE_POINTER
+    return std::dynamic_pointer_cast<Atom>(pa);
+#endif // USE_BARE_POINTER
+}
 
 static inline AtomPtr AtomCast(const Handle& h)
     { return AtomPtr(h); }
