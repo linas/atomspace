@@ -84,8 +84,16 @@ public:
 NODE_PTR_DECL(NumberNode)
 #define createNumberNode CREATE_DECL(NumberNode)
 
-static inline NumberNodePtr NumberNodeCast(const ValuePtr& vp)
-    { return std::dynamic_pointer_cast<NumberNode>(vp); }
+#ifdef USE_BARE_POINTER
+	static inline NumberNodePtr NumberNodeCast(const ValuePtr& vp)
+	{
+		if (vp->is_node()) { return (NumberNode *) vp.get(); }
+		else { return (NumberNode *) nullptr; }
+	}
+#else // USE_BARE_POINTER
+	static inline NumberNodePtr NumberNodeCast(const ValuePtr& vp)
+		{ return std::dynamic_pointer_cast<NumberNode>(vp); }
+#endif // USE_BARE_POINTER
 
 // --------------------
 // Scalar multiplication and addition

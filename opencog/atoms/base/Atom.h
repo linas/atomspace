@@ -563,7 +563,7 @@ public:
 static inline AtomPtr AtomCast(const ValuePtr& pa)
 {
 #if USE_BARE_POINTER
-    if (pa->is_atom()) { return (AtomPtr) pa.get(); } else { return AtomPtr(); }
+    if (pa->is_atom()) { return AtomPtr(pa); } else { return AtomPtr(); }
 #else // USE_BARE_POINTER
     return std::dynamic_pointer_cast<Atom>(pa);
 #endif // USE_BARE_POINTER

@@ -34,6 +34,14 @@ namespace opencog {
 const Handle Handle::UNDEFINED;
 const AtomPtr Handle::NULL_POINTER;
 
+AtomPtr::AtomPtr(const ValuePtr& pa)
+{
+	if (pa->is_atom())
+		pat = (const Atom*) pa.get();
+	else
+		pat = nullptr;
+}
+
 ContentHash Handle::value(void) const
 {
     if (get()) return get()->get_hash();

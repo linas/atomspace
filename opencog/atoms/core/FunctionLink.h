@@ -79,10 +79,19 @@ public:
 };
 
 LINK_PTR_DECL(FunctionLink)
-static inline FunctionLinkPtr FunctionLinkCast(const ValuePtr& a)
-   { return std::dynamic_pointer_cast<FunctionLink>(a); }
-
 #define createFunctionLink CREATE_DECL(FunctionLink)
+
+#ifdef USE_BARE_POINTER
+	static inline FunctionLinkPtr FunctionLinkCast(const ValuePtr& vp)
+	{
+		if (vp->is_link()) { return (FunctionLinkPtr) vp.get(); }
+		else { return (FunctionLinkPtr) nullptr; }
+	}
+#else // USE_BARE_POINTER
+	static inline FunctionLinkPtr FunctionLinkCast(const ValuePtr& a)
+		{ return std::dynamic_pointer_cast<FunctionLink>(a); }
+#endif // USE_BARE_POINTER
+
 
 /** @}*/
 }

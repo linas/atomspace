@@ -71,7 +71,7 @@ class AtomPtr
 public:
 	explicit AtomPtr() { pat = (const Atom*) nullptr; }
 	explicit AtomPtr(const Atom* atom) { pat = atom; }
-	explicit AtomPtr(const Value* pa) { pat = (const Atom*) pa; }
+	explicit AtomPtr(const std::shared_ptr<Value>&);
 	inline const Atom* get() const { return pat; }
 	Atom* operator->() const { return (Atom*) pat; }
 	const Atom& operator*() const { return *pat; }
