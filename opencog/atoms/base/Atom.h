@@ -34,7 +34,7 @@
 #include <string>
 #include <unordered_set>
 
-#if HAVE_FOLLY
+#if XHAVE_FOLLY
 #include <folly/container/F14Set.h>
 #define USE_HASHABLE_WEAK_PTR 1
 #endif
@@ -169,7 +169,7 @@ typedef std::size_t Arity;
 typedef HandleSeq IncomingSet;
 typedef SigSlot<Handle, Handle> AtomPairSignal;
 
-#if HAVE_FOLLY
+#if XHAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
 typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 #else
@@ -533,12 +533,21 @@ public:
     virtual bool operator<(const Atom&) const = 0;
 };
 
+#if USE_BARE_POINTER
+#define ATOM_PTR_DECL(CNAME)                                \
+    typedef CNAME * CNAME##Ptr;                             \
+    static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
+        { return (CNAME##Ptr)h.get(); }                     \
+    static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
+        { return (CNAME *) a.get(); }
+#else // USE_BARE_POINTER
 #define ATOM_PTR_DECL(CNAME)                                \
     typedef std::shared_ptr<CNAME> CNAME##Ptr;              \
     static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
         { return std::dynamic_pointer_cast<CNAME>(h); }     \
     static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
         { return std::dynamic_pointer_cast<CNAME>(a); }
+#endif // USE_BARE_POINTER
 
 #define CREATE_DECL(CNAME)  std::make_shared<CNAME>
 

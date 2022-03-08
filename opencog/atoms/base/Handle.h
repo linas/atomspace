@@ -63,6 +63,7 @@ typedef uint64_t ContentHash;
 class Atom;
 class Value;
 #define USE_BARE_POINTER 1
+#define USE_BARE_BACKPOINTER 1
 #ifdef USE_BARE_POINTER
 class AtomPtr
 {
