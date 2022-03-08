@@ -49,7 +49,7 @@ void MapLink::init(void)
 		const Handle& body = _outgoing[0];
 		FreeVariables fv;
 		fv.find_variables(body);
-		Handle decl(createVariableSet(std::move(fv.varseq)));
+		Handle decl(HandleCast(createVariableSet(std::move(fv.varseq))));
 		_pattern = createScopeLink(std::move(decl), body);
 	}
 	_mvars = &_pattern->get_variables();
