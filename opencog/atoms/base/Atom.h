@@ -542,7 +542,7 @@ public:
 #if USE_BARE_POINTER
 
 #define ATOM_PTR_DECL(CNAME)                                \
-    typedef CNAME * CNAME##Ptr;                             \
+    typedef const CNAME * CNAME##Ptr;                       \
     static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
         { return (CNAME##Ptr)h.get(); }                     \
     static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
