@@ -550,7 +550,7 @@ public:
     static inline Handle HandleCast(const CNAME##Ptr cp)    \
         { return Handle(AtomPtr(std::dynamic_pointer_cast<Atom>(cp).get())); }
 
-#define CREATE_DECL(CNAME)  (AtomPtr) std::make_shared<CNAME>
+#define CREATE_DECL(CNAME)  std::make_shared<CNAME>
 
 #else // USE_BARE_POINTER
 
