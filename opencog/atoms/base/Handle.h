@@ -75,6 +75,7 @@ public:
 	inline const Atom* get() const { return pat; }
 	Atom* operator->() const { return (Atom*) pat; }
 	const Atom& operator*() const { return *pat; }
+	operator std::shared_ptr<Value>() const noexcept;
 };
 #else // USE_BARE_POINTER
 typedef std::shared_ptr<Atom> AtomPtr;
@@ -133,10 +134,6 @@ public:
     inline const Atom* const_atom_ptr() const {
         return get();
     }
-
-#if USE_BARE_POINTER
-    operator std::shared_ptr<Value>() const noexcept;
-#endif // USE_BARE_POINTER
 
     // Allows expressions like "if(h)..." to work
     // when h has a non-null pointer.

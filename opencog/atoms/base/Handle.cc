@@ -43,7 +43,7 @@ AtomPtr::AtomPtr(const ValuePtr& pa)
 		pat = nullptr;
 }
 
-Handle::operator std::shared_ptr<Value>() const noexcept
+AtomPtr::operator std::shared_ptr<Value>() const noexcept
 {
 	return get()->get_vhandle();
 }
