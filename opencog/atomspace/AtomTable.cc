@@ -182,18 +182,18 @@ Handle AtomSpace::getHandle(Type t, const HandleSeq&& seq) const
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else return nullptr.
-Handle AtomSpace::lookupHandle(const Handle& a) const
+SharPtr AtomSpace::lookupHandle(const SharPtr& a) const
 {
-    Handle h(typeIndex.findAtom(a));
+    SharPtr h(typeIndex.findAtom(a));
     if (h) return h;
 
-    for (const Handle& base: _environ)
+    for (const SharPtr& base: _environ)
     {
-        const Handle& found = AtomSpaceCast(base)->lookupHandle(a);
+        const SharPtr& found = AtomSpaceCast(base)->lookupHandle(a);
         if (found) return found;
     }
 
-    return Handle::UNDEFINED;
+    return SharPtr();
 }
 
 /// Ask the atom if it belongs to this Atomtable. If so, we're done.
@@ -235,7 +235,7 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::add(const Handle& orig, bool force)
+Handle AtomSpace::add(const SharPtr& orig, bool force)
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;

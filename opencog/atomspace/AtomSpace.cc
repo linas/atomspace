@@ -311,11 +311,11 @@ bool AtomSpace::in_environ(const Handle& atom) const
 
 // ====================================================================
 
-Handle AtomSpace::add_atom(const Handle& h)
+Handle AtomSpace::add_atom(const SharPtr& h)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return get_atom(h);
+    if (_read_only) return get_atom(HandleCast(h));
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;

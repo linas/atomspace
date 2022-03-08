@@ -109,7 +109,7 @@ class AtomSpace : public Atom
 
     Handle getHandle(Type, const std::string&&) const;
     Handle getHandle(Type, const HandleSeq&&) const;
-    Handle lookupHandle(const Handle&) const;
+    SharPtr lookupHandle(const SharPtr&) const;
 
     /**
      * Private: add an atom to the table. This skips the read-only
@@ -118,7 +118,7 @@ class AtomSpace : public Atom
      * The `force` flag forces the addition of this atom into the
      * atomtable, even if it is already in a parent atomspace.
      */
-    Handle add(const Handle&, bool force=false);
+    Handle add(const SharPtr&, bool force=false);
     Handle check(const Handle&, bool force=false);
 
     /**
@@ -252,7 +252,7 @@ public:
     Handle add_atom(const SharPtr&);
 #if USE_BARE_POINTER
     Handle add_atom(const AtomPtr& a)
-        { return add_atom(std::dynamic_pointer_cast<Atom>(a->get_vhandle())); }
+        { return HandleCast(add_atom(std::dynamic_pointer_cast<Atom>(a->get_vhandle()))); }
 #else
     Handle add_atom(const AtomPtr& a)
         { return add_atom(a->get_handle()); }
@@ -584,7 +584,7 @@ public:
     TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }
 
     // Not for public use! Only StorageNodes get to call this!
-    Handle storage_add_nocheck(const Handle& h) { return add(h); }
+    Handle storage_add_nocheck(const SharPtr& h) { return add(h); }
 };
 
 static inline AtomSpacePtr AtomSpaceCast(const ValuePtr& a)
