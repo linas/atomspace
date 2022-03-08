@@ -352,6 +352,11 @@ bool TypeChoice::is_type(const ValuePtr& vp) const
 	return true;
 }
 
+bool TypeChoice::is_type(const Handle& h) const
+{
+OC_ASSERT("Not implemented");
+}
+
 /// Perform typecheck, ignoring possible globbiness.
 bool TypeChoice::is_nonglob_type(const ValuePtr& vp) const
 {

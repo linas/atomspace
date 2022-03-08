@@ -86,6 +86,9 @@ public:
 
 	bool is_type(const ValuePtr&) const;
 	bool is_type(Type) const;
+#if USE_BARE_POINTER
+	bool is_type(const Handle&) const;
+#endif
 
 	bool is_untyped(bool) const;
 	bool is_equal(const TypeChoice&) const;
