@@ -632,7 +632,7 @@ Handle Variables::get_vardecl() const
 		if (_typemap.end() == tit)
 			vardecls.emplace_back(var);
 		else
-			vardecls.emplace_back(tit->second);
+			vardecls.emplace_back(HandleCast(tit->second));
 	}
 
 	if (vardecls.size() == 1)

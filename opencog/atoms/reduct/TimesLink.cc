@@ -31,7 +31,7 @@ TimesLink::TimesLink(const Handle& a, const Handle& b)
 
 void TimesLink::init(void)
 {
-	if (nullptr == one) one = createNumberNode(1);
+	if (nullptr == one) one = HandleCast(createNumberNode(1));
 	Type tscope = get_type();
 	if (not nameserver().isA(tscope, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
@@ -133,12 +133,12 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 		Handle divisor(HandleCast(vj)->getOutgoingAtom(1));
 		if (NUMBER_NODE == dividend->get_type())
 		{
-			Handle hprod(createNumberNode(times(vi, dividend)));
+			Handle hprod(HandleCast(createNumberNode(times(vi, dividend))));
 			return createDivideLink(hprod, divisor);
 		}
 		if (NUMBER_NODE == divisor->get_type())
 		{
-			Handle hquot(createNumberNode(divide(vi, divisor)));
+			Handle hquot(HandleCast(createNumberNode(divide(vi, divisor))));
 			if (content_eq(hquot, one))
 				return dividend;
 			return createTimesLink(hquot, dividend);

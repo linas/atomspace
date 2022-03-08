@@ -76,12 +76,12 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
 		Handle multiplicand(HandleCast(vj)->getOutgoingAtom(1));
 		if (NUMBER_NODE == multiplier->get_type())
 		{
-			Handle hquot(createNumberNode(divide(vi, multiplier)));
+			Handle hquot(HandleCast(createNumberNode(divide(vi, multiplier))));
 			return createDivideLink(hquot, multiplicand);
 		}
 		if (NUMBER_NODE == multiplicand->get_type())
 		{
-			Handle hquot(createNumberNode(divide(vi, multiplicand)));
+			Handle hquot(HandleCast(createNumberNode(divide(vi, multiplicand))));
 			return createDivideLink(hquot, multiplier);
 		}
 	}
@@ -93,14 +93,14 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
 		Handle multiplicand(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == multiplier->get_type())
 		{
-			Handle hquot(createNumberNode(divide(multiplier, vj)));
+			Handle hquot(HandleCast(createNumberNode(divide(multiplier, vj))));
 			if (content_eq(hquot, one))
 				return multiplicand;
 			return createTimesLink(multiplicand, hquot);
 		}
 		if (NUMBER_NODE == multiplicand->get_type())
 		{
-			Handle hquot(createNumberNode(divide(multiplicand, vj)));
+			Handle hquot(HandleCast(createNumberNode(divide(multiplicand, vj))));
 			if (content_eq(hquot, one))
 				return multiplier;
 			return createTimesLink(multiplier, hquot);

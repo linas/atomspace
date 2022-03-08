@@ -77,12 +77,12 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 		Handle addend(HandleCast(vj)->getOutgoingAtom(1));
 		if (NUMBER_NODE == augend->get_type())
 		{
-			Handle hdiff(createNumberNode(minus(vi, augend)));
+			Handle hdiff(HandleCast(createNumberNode(minus(vi, augend))));
 			return createMinusLink(hdiff, addend);
 		}
 		if (NUMBER_NODE == addend->get_type())
 		{
-			Handle hdiff(createNumberNode(minus(vi, addend)));
+			Handle hdiff(HandleCast(createNumberNode(minus(vi, addend))));
 			return createMinusLink(hdiff, augend);
 		}
 	}
@@ -94,14 +94,14 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 		Handle addend(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == augend->get_type())
 		{
-			Handle hdiff(createNumberNode(minus(augend, vj)));
+			Handle hdiff(HandleCast(createNumberNode(minus(augend, vj))));
 			if (content_eq(hdiff, zero))
 				return addend;
 			return createPlusLink(addend, hdiff);
 		}
 		if (NUMBER_NODE == addend->get_type())
 		{
-			Handle hdiff(createNumberNode(minus(addend, vj)));
+			Handle hdiff(HandleCast(createNumberNode(minus(addend, vj))));
 			if (content_eq(hdiff, zero))
 				return augend;
 			return createPlusLink(augend, hdiff);

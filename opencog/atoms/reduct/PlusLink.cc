@@ -32,7 +32,7 @@ PlusLink::PlusLink(const Handle& a, const Handle& b)
 
 void PlusLink::init(void)
 {
-	if (nullptr == zero) zero = createNumberNode(0);
+	if (nullptr == zero) zero = HandleCast(createNumberNode(0));
 
 	Type tscope = get_type();
 	if (not nameserver().isA(tscope, PLUS_LINK))
@@ -122,7 +122,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	Handle hvi(HandleCast(vi));
 	if (hvi and content_eq(hvi, HandleCast(vj)))
 	{
-		Handle two(createNumberNode("2"));
+		Handle two(HandleCast(createNumberNode("2")));
 		return createTimesLink(hvi, two) -> execute(as, silent);
 	}
 
@@ -140,13 +140,13 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		Handle subtrahend(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == minuend->get_type())
 		{
-			Handle hsum(createNumberNode(plus(vj, minuend)));
+			Handle hsum(HandleCast(createNumberNode(plus(vj, minuend))));
 			return createMinusLink(hsum, subtrahend);
 		}
 		if (NUMBER_NODE == subtrahend->get_type())
 		{
-			Handle hdiff(createNumberNode(
-				minus(vj, subtrahend)));
+			Handle hdiff(HandleCast(createNumberNode(
+				minus(vj, subtrahend))));
 			if (content_eq(hdiff, zero))
 				return minuend;
 			return createPlusLink(minuend, hdiff);
@@ -167,9 +167,9 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		Handle exx = HandleCast(vj)->getOutgoingAtom(0);
 
 		// Handle the (a+1) case described above.
-		if (vi == exx)
+		if (exx == vi)
 		{
-			Handle one(createNumberNode("1"));
+			Handle one(HandleCast(createNumberNode("1")));
 			rest.push_back(one);
 			do_add = true;
 		}

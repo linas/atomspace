@@ -62,7 +62,7 @@ TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 	if (2 == ary)
 		evex = _outgoing[1];
 	else if (3 == ary)
-		evex = createEvaluationLink(_outgoing[1], _outgoing[2]);
+		evex = HandleCast(createEvaluationLink(_outgoing[1], _outgoing[2]));
 
 	// Now, evaluate it.
 	if (evex->is_evaluatable())

@@ -320,7 +320,7 @@ static bool member(AtomSpace* as, const Handle& h, bool silent)
 
 	for (const Handle& hs: HandleCast(v1)->getOutgoingSet())
 	{
-		if (v0 == hs) return true;
+		if (hs == v0) return true;
 	}
 
 	return false;
