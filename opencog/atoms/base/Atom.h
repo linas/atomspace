@@ -534,22 +534,29 @@ public:
 };
 
 #if USE_BARE_POINTER
+
 #define ATOM_PTR_DECL(CNAME)                                \
     typedef CNAME * CNAME##Ptr;                             \
     static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
         { return (CNAME##Ptr)h.get(); }                     \
     static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
         { return (CNAME *) a.get(); }
+
+#define CREATE_DECL(CNAME)  new CNAME
+
 #else // USE_BARE_POINTER
+
 #define ATOM_PTR_DECL(CNAME)                                \
     typedef std::shared_ptr<CNAME> CNAME##Ptr;              \
     static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
         { return std::dynamic_pointer_cast<CNAME>(h); }     \
     static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
         { return std::dynamic_pointer_cast<CNAME>(a); }
-#endif // USE_BARE_POINTER
 
 #define CREATE_DECL(CNAME)  std::make_shared<CNAME>
+
+#endif // USE_BARE_POINTER
+
 
 static inline AtomPtr AtomCast(const ValuePtr& pa)
 {
