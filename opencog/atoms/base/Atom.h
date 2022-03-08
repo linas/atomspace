@@ -542,7 +542,7 @@ public:
     static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
         { return (CNAME *) a.get(); }                       \
     static inline Handle HandleCast(const CNAME##Ptr cp)    \
-        { return Handle(AtomPtr(cp)); }
+        { return Handle(AtomPtr((Atom*)cp)); }
 
 #define CREATE_DECL(CNAME)  new CNAME
 
