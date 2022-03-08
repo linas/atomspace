@@ -52,9 +52,9 @@ namespace opencog
 //    one failure is enough to say "not recommended." I don't need
 //    to be chasing obscure bugs.
 #if HAVE_FOLLY_XXX
-typedef folly::F14ValueSet<Handle> AtomSet;
+typedef folly::F14ValueSet<SharPtr> AtomSet;
 #else
-typedef std::unordered_set<Handle> AtomSet;
+typedef std::unordered_set<SharPtr> AtomSet;
 #endif
 
 #define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
@@ -87,31 +87,31 @@ class TypeIndex
 		TypeIndex(void);
 		void resize(void);
 
-		// Return a Handle, if it's already in the set.
+		// Return a SharPtr, if it's already in the set.
 		// Else, return nullptr
-		Handle insertAtom(const Handle& h)
+		SharPtr insertAtom(const SharPtr& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_UNIQUE_LOCK;
 			auto iter = s.find(h);
 			if (s.end() != iter) return *iter;
 			s.insert(h);
-			return Handle::UNDEFINED;
+			return SharPtr();
 		}
 
-		bool removeAtom(const Handle& h)
+		bool removeAtom(const SharPtr& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_UNIQUE_LOCK;
 			return 1 == s.erase(h);
 		}
 
-		Handle findAtom(const Handle& h) const
+		SharPtr findAtom(const SharPtr& h) const
 		{
 			const AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_SHARED_LOCK;
 			auto iter = s.find(h);
-			if (s.end() == iter) return Handle::UNDEFINED;
+			if (s.end() == iter) return SharPtr();
 			return *iter;
 		}
 

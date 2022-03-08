@@ -77,6 +77,7 @@ public:
 	const Atom& operator*() const { return *pat; }
 	operator std::shared_ptr<Value>() const noexcept;
 };
+typedef std::shared_ptr<Atom> SharPtr;
 #else // USE_BARE_POINTER
 typedef std::shared_ptr<Atom> AtomPtr;
 #endif // USE_BARE_POINTER

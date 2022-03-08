@@ -249,9 +249,14 @@ public:
      * Add an atom to the Atom Table.  If the atom already exists
      * then that is returned.
      */
-    Handle add_atom(const Handle&);
+    Handle add_atom(const SharPtr&);
+#if USE_BARE_POINTER
+    Handle add_atom(const AtomPtr& a)
+        { return add_atom(std::dynamic_pointer_cast<Atom>(a->get_vhandle())); }
+#else
     Handle add_atom(const AtomPtr& a)
         { return add_atom(a->get_handle()); }
+#endif
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
