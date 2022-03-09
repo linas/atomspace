@@ -204,7 +204,12 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 				Choice ch;
 				ch.clause = _curr_clause;
 				ch.start_term = sbr;
+#if USE_BARE_BACKPOINTER
+				IncomingSet is = get_incoming_set(s, sbr->getQuote()->get_type());
+				for (const Atom* ap: is) ch.search_set.emplace_back(ap->get_handle());
+#else
 				ch.search_set = get_incoming_set(s, sbr->getQuote()->get_type());
+#endif
 				_start_choices.push_back(ch);
 			}
 			else
@@ -366,8 +371,14 @@ bool InitiateSearchMixin::setup_neighbor_search(const PatternTermSeq& clauses)
 		if (_starter_term->getHandle()->is_link())
 		{
 			// XXX ?? Why incoming set ???
+#if USE_BARE_BACKPOINTER
+			IncomingSet is = get_incoming_set(best_start,
+			                              _starter_term->getHandle()->get_type());
+			for (const Atom* ap: is) ch.search_set.emplace_back(ap->get_handle());
+#else
 			ch.search_set = get_incoming_set(best_start,
 			                              _starter_term->getHandle()->get_type());
+#endif
 		}
 		else
 		{

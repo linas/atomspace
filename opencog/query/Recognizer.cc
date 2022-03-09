@@ -64,7 +64,11 @@ bool Recognizer::do_search(PatternMatchCallback& pmc, const Handle& top)
 	size_t sz = iset.size();
 	for (size_t i = 0; i < sz; i++)
 	{
+#if USE_BARE_POINTER
+		Handle h(iset[i]->get_handle());
+#else
 		Handle h(iset[i]);
+#endif
 		dbgprt("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr\n");
 		dbgprt("Loop candidate (%lu - %s):\n%s\n", _cnt++,
 		       top->to_short_string().c_str(),

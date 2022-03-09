@@ -437,8 +437,12 @@ void JoinLink::principal_filter(Traverse& trav,
 	containers.insert(h);
 
 	IncomingSet is(trav.jcb->get_incoming_set(h));
-	for (const Handle& ih: is)
+	for (const auto& ih: is)
+#if USE_BARE_BACKPOINTER
+		principal_filter(trav, containers, ih->get_handle());
+#else // USE_BARE_BACKPOINTER
 		principal_filter(trav, containers, ih);
+#endif // USE_BARE_BACKPOINTER
 }
 
 void JoinLink::principal_filter_map(Traverse& trav,
@@ -457,8 +461,12 @@ void JoinLink::principal_filter_map(Traverse& trav,
 	trav.top_map.insert({h, base});
 
 	IncomingSet is(trav.jcb->get_incoming_set(h));
-	for (const Handle& ih: is)
+	for (const auto& ih: is)
+#if USE_BARE_BACKPOINTER
+		principal_filter_map(trav, base, containers, ih->get_handle());
+#else // USE_BARE_BACKPOINTER
 		principal_filter_map(trav, base, containers, ih);
+#endif // USE_BARE_BACKPOINTER
 }
 
 /* ================================================================= */
@@ -595,8 +603,12 @@ void JoinLink::find_top(Traverse& trav, const Handle& h) const
 		return;
 	}
 
-	for (const Handle& ih: is)
+	for (const auto& ih: is)
+#if USE_BARE_BACKPOINTER
+		find_top(trav, ih->get_handle());
+#else  // USE_BARE_BACKPOINTER
 		find_top(trav, ih);
+#endif // USE_BARE_BACKPOINTER
 }
 
 /* ================================================================= */

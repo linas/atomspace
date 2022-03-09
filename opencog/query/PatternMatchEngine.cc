@@ -1371,7 +1371,11 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			                      << " at term=" << parent->to_string()
 			                      << " propose=" << iset[i]->to_string();})
 
+#if USE_BARE_BACKPOINTER
+			found = explore_type_branches(parent, iset[i]->get_handle(), clause);
+#else
 			found = explore_type_branches(parent, iset[i], clause);
+#endif
 			if (found) break;
 		}
 
@@ -1395,7 +1399,11 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		_perm_odo.clear();
 		perm_push();
 		_perm_go_around = false;
+#if USE_BARE_BACKPOINTER
+		found = explore_odometer(parent, iset[i]->get_handle(), clause);
+#else
 		found = explore_odometer(parent, iset[i], clause);
+#endif
 		perm_pop();
 
 		if (found) break;
@@ -1443,7 +1451,11 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 		// different way (e.g. backtracking from another branchpoint).
 		auto saved_glob_state = _glob_state;
 
+#if USE_BARE_BACKPOINTER
+		found = explore_glob_branches(parent, iset[i]->get_handle(), clause);
+#else
 		found = explore_glob_branches(parent, iset[i], clause);
+#endif
 
 		// Restore the saved state, for the next go-around.
 		_glob_state = saved_glob_state;
