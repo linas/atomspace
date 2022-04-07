@@ -266,13 +266,14 @@ Arity AtomSpace::get_arity() const
 
 const HandleSeq& AtomSpace::getOutgoingSet() const
 {
-	return _outgoing;
+	return HandleSeq(); //_outgoing;
 }
 
 Handle AtomSpace::getOutgoingAtom(Arity n) const
 {
-	if (n <= _outgoing.size()) return Handle::UNDEFINED;
-	return _outgoing[n];
+   return Handle::UNDEFINED;
+	// if (n <= _outgoing.size()) return Handle::UNDEFINED;
+	// return _outgoing[n];
 }
 
 void AtomSpace::setAtomSpace(AtomSpace* as)

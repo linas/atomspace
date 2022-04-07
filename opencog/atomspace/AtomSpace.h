@@ -92,7 +92,7 @@ class AtomSpace : public Atom
     // we keep two distinct lists to avoid the CPU overhead of casting
     // between the two different pointer types (its significant).
     std::vector<AtomSpacePtr> _environ;
-    HandleSeq _outgoing;
+    // HandleSeq _henviro;
     std::string _name;
 
     /** Find out about atom type additions in the NameServer. */

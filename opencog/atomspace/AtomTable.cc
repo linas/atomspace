@@ -93,7 +93,7 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
 {
     if (parent) {
         _environ.push_back(AtomSpaceCast(parent->shared_from_this()));
-        _outgoing.push_back(HandleCast(parent->shared_from_this()));
+        // _outgoing.push_back(HandleCast(parent->shared_from_this()));
     }
     init();
 }
@@ -107,7 +107,7 @@ AtomSpace::AtomSpace(AtomSpacePtr& parent) :
 {
     if (nullptr != parent) {
         _environ.push_back(parent);
-        _outgoing.push_back(HandleCast(parent));
+        // _outgoing.push_back(HandleCast(parent));
     }
 
     init();
@@ -120,7 +120,7 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     _transient(false),
     _nameserver(nameserver())
 {
-    _outgoing = bases;
+    // _outgoing = bases;
     for (const Handle& base : bases)
     {
         _environ.push_back(AtomSpaceCast(base));
@@ -148,7 +148,7 @@ void AtomSpace::ready_transient(AtomSpace* parent)
 
     // Set the new parent environment and holder atomspace.
     _environ.push_back(AtomSpaceCast(parent->shared_from_this()));
-    _outgoing.push_back(HandleCast(parent->shared_from_this()));
+    // _outgoing.push_back(HandleCast(parent->shared_from_this()));
 }
 
 void AtomSpace::clear_transient()
@@ -162,7 +162,7 @@ void AtomSpace::clear_transient()
 
     // Clear the  parent environment and holder atomspace.
     _environ.clear();
-    _outgoing.clear();
+    // _outgoing.clear();
 }
 
 void AtomSpace::clear_all_atoms()
