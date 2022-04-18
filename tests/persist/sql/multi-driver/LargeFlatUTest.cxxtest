@@ -397,7 +397,7 @@ void LargeFlatUTest::do_test_atomspace(void)
 		check_space(i, _as, "verify-add");
 
 	/* Push all atoms out to the SQL DB */
-	store->store_atomspace();
+	store->store_atomspace(_as);
 
 	/* Extract atoms from the AtomSpace. This does not delete them from
 	 * the SQL storage, though; to do that, they must be deleted, not

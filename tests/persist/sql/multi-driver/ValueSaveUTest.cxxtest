@@ -498,7 +498,7 @@ void ValueSaveUTest::do_test_load_by_type()
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
-	store->fetch_all_atoms_of_type(CONCEPT_NODE);
+	store->fetch_all_atoms_of_type(CONCEPT_NODE, as);
 	store->barrier();
 
 	// Seven: 4 ConceptNodes, the PredicateNode "*-TruthValueKey-*"
@@ -669,7 +669,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	// The B-nodes are added after the fetch. In either case,
 	// there should not be any values fetched for either A or B;
 	// only the values on the C-links should be fetched.
-	store->fetch_all_atoms_of_type(LIST_LINK);
+	store->fetch_all_atoms_of_type(LIST_LINK, as);
 	store->barrier();
 	TSM_ASSERT("Wrong number of Atoms fetched!", as->get_size() == 15);
 
@@ -874,7 +874,7 @@ void ValueSaveUTest::do_test_link_by_type_quoted()
 	// The B-nodes are added after the fetch. In either case,
 	// there should not be any values fetched for either A or B;
 	// only the values on the C-links should be fetched.
-	store->fetch_all_atoms_of_type(LIST_LINK);
+	store->fetch_all_atoms_of_type(LIST_LINK, as);
 	store->barrier();
 
 	printf ("fetched %lu atoms, expecting 15\n", as->get_size());

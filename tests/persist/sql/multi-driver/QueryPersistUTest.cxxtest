@@ -219,7 +219,7 @@ void QueryPersistUTest::setup_data(void)
 		setTruthValue(SimpleTruthValue::createTV(0.33, 300));
 
 	/* Push all atoms out to the SQL DB */
-	store->store_atomspace();
+	store->store_atomspace(_as);
 	store->barrier();
 
 	store->close();

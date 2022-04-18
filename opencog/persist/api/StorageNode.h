@@ -140,6 +140,8 @@ public:
 	 * Use the backing store to store entire AtomSpace.
 	 */
 	void store_atomspace(AtomSpace*);
+	void store_atomspace(const AtomSpacePtr& asp) {
+		store_atomspace((AtomSpace*) asp.get()); }
 
 	/**
 	 * Return the DAG of all AtomSpaces in the backing store.

@@ -484,7 +484,7 @@ void DeleteUTest::do_test_remove(void)
         check_space(i, _as, "verify-add");
 
     /* Push all atoms out to storage */
-    store->store_atomspace();
+    store->store_atomspace(_as);
 
     printf("Initial Atomspace size=%lu expect=%d\n", _as->get_size(), 7*idx+1);
     TSM_ASSERT("Initial unexpected atomspace size",
@@ -597,7 +597,7 @@ void DeleteUTest::do_test_recurse(void)
         check_space(i, _as, "verify-add");
 
     /* Push all atoms out to the SQL DB */
-    store->store_atomspace();
+    store->store_atomspace(_as);
 
     /* Perform recursive extract of some nodes.
      * This should result in thier being removed from the atomspace,

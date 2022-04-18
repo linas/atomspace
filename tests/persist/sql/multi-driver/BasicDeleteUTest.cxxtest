@@ -306,7 +306,7 @@ void BasicDeleteUTest::test_key_deletion(void)
 
 	// We expect 5 keys, including the truth-value key.
 	printf("Loading the atomspace ...\n");
-	store->load_atomspace();
+	store->load_atomspace(as);
 	TS_ASSERT_EQUALS(as->get_size(), 5);
 
 	// Verify that there are only two keys
@@ -384,7 +384,7 @@ void BasicDeleteUTest::test_key_corruption(void)
 
 	// We expect 4 keys, including the truth-value key.
 	printf("Loading the atomspace ...\n");
-	store->load_atomspace();
+	store->load_atomspace(as);
 
 	HandleSeq hset;
 	as->get_root_set_by_type(hset, ATOM, true);
@@ -428,7 +428,7 @@ void BasicDeleteUTest::test_key_corruption(void)
 
 	// We expect 7 keys, including the truth-value key.
 	printf("Loading the atomspace ...\n");
-	store->load_atomspace();
+	store->load_atomspace(as);
 
 	hset.clear();
 	as->get_root_set_by_type(hset, ATOM, true);
