@@ -341,10 +341,8 @@ fflush(stdout);
 
 SchemeEval::SchemeEval(AtomSpacePtr& as)
 {
-printf("duude enter SchemeEval(ptr) ctor tid=%d this=%p as=%p\n", gettid(), this, as);
-if(as) {
+printf("duude enter SchemeEval(ptr) ctor tid=%d this=%p as=%p\n", gettid(), this, as.get());
 printf("duuude ctor ptr-as use-count=%lu\n", as.use_count());
-}
 fflush(stdout);
 	init_only_once();
 	_atomspace = (AtomSpace*) as.get();
@@ -1294,8 +1292,12 @@ void SchemeEval::set_scheme_as(AtomSpacePtr& as)
 
 void SchemeEval::init_scheme(void)
 {
+printf("duude enter init_scheme tid=%d\n", gettid());
+fflush(stdout);
 	// XXX FIXME only a subset is needed.
 	SchemeEval sch;
+printf("duude exit init_scheme tid=%d, that=%p \n", gettid(), &sch);
+fflush(stdout);
 }
 
 extern "C" {
