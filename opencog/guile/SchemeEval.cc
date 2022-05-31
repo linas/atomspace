@@ -49,6 +49,8 @@ using namespace opencog;
 
 static std::mutex init_mtx;
 
+FILE* fh = nullptr;
+
 /**
  * This init is called once for every time that this class
  * is instantiated -- i.e. it is a per-instance initializer.
@@ -263,12 +265,12 @@ static SCM throw_thunk = SCM_EOL;
 
 void* c_wrap_init_only_once(void* p)
 {
-printf("duude enter cwrap_niit_only_once tid=%d\n", gettid());
-fflush(stdout);
+fprintf(fh, "duude enter cwrap_niit_only_once tid=%d\n", gettid());
+fflush(fh);
 	throw_thunk = scm_c_make_gsubr("cog-throw-user-interrupt",
 		0, 0, 0, ((scm_t_subr) throw_except));
-printf("duude exit cwrap_niit_only_once tid=%d\n", gettid());
-fflush(stdout);
+fprintf(fh, "duude exit cwrap_niit_only_once tid=%d\n", gettid());
+fflush(fh);
 	return nullptr;
 }
 
@@ -276,12 +278,12 @@ static volatile bool done_with_init = false;
 
 static void immortal_thread(void)
 {
-printf("duude enter immortal tid=%d\n", gettid());
-fflush(stdout);
+fprintf(fh, "duude enter immortal tid=%d\n", gettid());
+fflush(fh);
 	scm_with_guile(c_wrap_init_only_once, NULL);
 	set_thread_name("atoms:immortal");
-printf("duude immortal done with guile init tid=%d\n", gettid());
-fflush(stdout);
+fprintf(fh, "duude immortal done with guile init tid=%d\n", gettid());
+fflush(fh);
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
@@ -295,8 +297,8 @@ fflush(stdout);
 // process.
 static void init_only_once(void)
 {
-printf("duude enter init_only_once done=%d\n", done_with_init);
-fflush(stdout);
+fprintf(fh, "duude enter init_only_once done=%d\n", done_with_init);
+fflush(fh);
 	if (done_with_init) return;
 
 	// Enter initialization only once. All other threads spin, until
@@ -310,48 +312,53 @@ fflush(stdout);
 	// https://github.com/opencog/atomspace/issues/1054
 	if (not eval_is_inited.test_and_set())
 	{
-printf("duude init_only_once gonna make immortal me=%d\n", gettid());
-fflush(stdout);
+fprintf(fh, "duude init_only_once gonna make immortal me=%d\n", gettid());
+fflush(fh);
 		new std::thread(immortal_thread);
-printf("duude init_only_once done make immortal me=%d\n", gettid());
-fflush(stdout);
+fprintf(fh, "duude init_only_once done make immortal me=%d\n", gettid());
+fflush(fh);
 	}
 
 	while (not done_with_init) { usleep(1000); }
-printf("duude return from init_only_once me=%d\n", gettid());
-fflush(stdout);
+fprintf(fh, "duude return from init_only_once me=%d\n", gettid());
+fflush(fh);
 }
 
 SchemeEval::SchemeEval(AtomSpace* as)
 {
-printf("duude enter SchemeEval() ctor tid=%d this=%p as=%p\n", gettid(), this, as);
+if (nullptr == fh)
+fh = fopen ("/storage/emulated/0/Download/datomspace-test.txt", "a+");
+fprintf(fh, "duude enter SchemeEval() ctor tid=%d this=%p as=%p\n", gettid(), this, as);
 if(as) {
-printf("duuude ctor as use-count=%lu\n", as->Atom::get_handle().use_count());
+fprintf(fh, "duuude ctor as use-count=%lu\n", as->Atom::get_handle().use_count());
 }
-fflush(stdout);
+fflush(fh);
 	init_only_once();
 	_atomspace = as;
 
-printf("duude in SchemeEval() ctor before wrap_init this=%p\n", this);
-fflush(stdout);
+fprintf(fh, "duude in SchemeEval() ctor before wrap_init this=%p\n", this);
+fflush(fh);
 	scm_with_guile(c_wrap_init, this);
-printf("duude in SchemeEval() ctor after wrap_init this=%p\n", this);
-fflush(stdout);
+fprintf(fh, "duude in SchemeEval() ctor after wrap_init this=%p\n", this);
+fflush(fh);
 }
 
 SchemeEval::SchemeEval(AtomSpacePtr& as)
 {
-printf("duude enter SchemeEval(ptr) ctor tid=%d this=%p as=%p\n", gettid(), this, as.get());
-printf("duuude ctor ptr-as use-count=%lu\n", as.use_count());
-fflush(stdout);
+if (nullptr == fh)
+fh = fopen ("/storage/emulated/0/Download/datomspace-test.txt", "a+");
+
+fprintf(fh, "duude enter SchemeEval(ptr) ctor tid=%d this=%p as=%p\n", gettid(), this, as.get());
+fprintf(fh, "duuude ctor ptr-as use-count=%lu\n", as.use_count());
+fflush(fh);
 	init_only_once();
 	_atomspace = (AtomSpace*) as.get();
 
-printf("duude in SchemeEval() ctor before wrap_init this=%p\n", this);
-fflush(stdout);
+fprintf(fh, "duude in SchemeEval() ctor before wrap_init this=%p\n", this);
+fflush(fh);
 	scm_with_guile(c_wrap_init, this);
-printf("duude in SchemeEval() ctor after wrap_init this=%p\n", this);
-fflush(stdout);
+fprintf(fh, "duude in SchemeEval() ctor after wrap_init this=%p\n", this);
+fflush(fh);
 }
 
 /* This should be called once for every new thread. */
@@ -371,9 +378,9 @@ void SchemeEval::per_thread_init(void)
 
 SchemeEval::~SchemeEval()
 {
-printf("duude enter SchemeEval dtor tid=%d this=%p as=%p\n", gettid(), this, _atomspace);
+fprintf(fh, "duude enter SchemeEval dtor tid=%d this=%p as=%p\n", gettid(), this, _atomspace);
 	scm_with_guile(c_wrap_finish, this);
-printf("duude exit SchemeEval dtor tid=%d this=%p\n", gettid(), this);
+fprintf(fh, "duude exit SchemeEval dtor tid=%d this=%p\n", gettid(), this);
 }
 
 /* ============================================================== */
@@ -1292,12 +1299,12 @@ void SchemeEval::set_scheme_as(AtomSpacePtr& as)
 
 void SchemeEval::init_scheme(void)
 {
-printf("duude enter init_scheme tid=%d\n", gettid());
-fflush(stdout);
+fprintf(fh, "duude enter init_scheme tid=%d\n", gettid());
+fflush(fh);
 	// XXX FIXME only a subset is needed.
 	SchemeEval sch;
-printf("duude exit init_scheme tid=%d, that=%p \n", gettid(), &sch);
-fflush(stdout);
+fprintf(fh, "duude exit init_scheme tid=%d, that=%p \n", gettid(), &sch);
+fflush(fh);
 }
 
 extern "C" {
