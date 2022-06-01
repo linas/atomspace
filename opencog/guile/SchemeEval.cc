@@ -327,7 +327,7 @@ fflush(fh);
 SchemeEval::SchemeEval(AtomSpace* as)
 {
 if (nullptr == fh)
-fh = fopen ("/storage/emulated/0/Download/datomspace-test.txt", "a+");
+fh = fopen ("datomspace-test.txt", "a+");
 fprintf(fh, "duude enter SchemeEval() ctor tid=%d this=%p as=%p\n", gettid(), this, as);
 if(as) {
 fprintf(fh, "duuude ctor as use-count=%lu\n", as->Atom::get_handle().use_count());
@@ -346,7 +346,7 @@ fflush(fh);
 SchemeEval::SchemeEval(AtomSpacePtr& as)
 {
 if (nullptr == fh)
-fh = fopen ("/storage/emulated/0/Download/datomspace-test.txt", "a+");
+fh = fopen ("datomspace-test.txt", "a+");
 
 fprintf(fh, "duude enter SchemeEval(ptr) ctor tid=%d this=%p as=%p\n", gettid(), this, as.get());
 fprintf(fh, "duuude ctor ptr-as use-count=%lu\n", as.use_count());
