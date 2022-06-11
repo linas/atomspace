@@ -55,6 +55,10 @@ public:
 		: Value(LINK_VALUE)
 	{ for (const ValuePtr& v: vset) _value.emplace_back(v); }
 
+	// This ctor must be public, as the JSON decoders use it.
+	LinkValue(Type t, const ValueSeq& vlist)
+		: Value(t), _value(vlist) {}
+
 	virtual ~LinkValue() {}
 
 	const std::vector<ValuePtr>& value() const { update(); return _value; }

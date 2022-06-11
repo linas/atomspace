@@ -50,6 +50,10 @@ public:
 	StringValue(const std::vector<std::string>& v)
 		: Value(STRING_VALUE), _value(v) {}
 
+	// This ctor must be public, as the JSON decoders use it.
+	StringValue(Type t, const std::vector<std::string>& v)
+		: Value(t), _value(v) {}
+
 	virtual ~StringValue() {}
 
 	const std::vector<std::string>& value() const { return _value; }

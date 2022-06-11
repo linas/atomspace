@@ -46,13 +46,14 @@ protected:
 	virtual void update() const {}
 
 	FloatValue(Type t) : Value(t) {}
-public: // XXX should be protected...
-	FloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
-
 public:
+
 	FloatValue(double v) : Value(FLOAT_VALUE) { _value.push_back(v); }
 	FloatValue(const std::vector<double>& v)
 		: Value(FLOAT_VALUE), _value(v) {}
+
+	// This ctor must be public, as the JSON decoders use it.
+	FloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
 
 	virtual ~FloatValue() {}
 
