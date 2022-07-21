@@ -118,6 +118,10 @@ Boolean satisfiability (Boolean SAT) can be understood
 \end_layout
 
 \begin_layout Standard
+See post in lnk grammar that inspired this.
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 btprint "btPrintCited"
