@@ -37,7 +37,6 @@ ValuePtr BoolOpLink::execute(AtomSpace* as, bool silent)
 		createBoolValue(true);
 	}
 
-printf("duuuude %s\n", to_short_string().c_str());
 	ValuePtr vp = _outgoing[0]->execute(as, silent);
 	if (1 == sz) return vp;
 

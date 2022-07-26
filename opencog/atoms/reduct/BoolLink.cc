@@ -38,7 +38,6 @@ ValuePtr BoolLink::execute(AtomSpace* as, bool silent)
 		throw InvalidParamException(TRACE_INFO, "NotLink expects an argument");
 	}
 
-printf("duuuude %s\n", to_short_string().c_str());
 	ValuePtr vp = _outgoing[0]->execute(as, silent);
 	if (1 == sz and NOT_LINK != get_type()) return vp;
 
