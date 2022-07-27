@@ -559,13 +559,17 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	_temp_aspace->clear();
 	try
 	{
+printf("duuude try to eval this: %s\n",
+gvirt->to_short_string().c_str());
 		bool crispy = EvaluationLink::crisp_eval_scratch(_as, gvirt, _temp_aspace, true);
+printf("duuude got %d\n", crispy);
 		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded crisp-tv="
 		                      << crispy << std::endl;})
 		return crispy;
 	}
 	catch (const SilentException& ex)
 	{
+printf("duuude catcy so false\n");
 		// The do_evaluate()/do_eval_scratch() above can throw if
 		// it is given ungrounded expressions. It can be given
 		// ungrounded expressions if no grounding was found, and

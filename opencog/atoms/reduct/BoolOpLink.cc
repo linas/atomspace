@@ -37,6 +37,14 @@ ValuePtr BoolOpLink::execute(AtomSpace* as, bool silent)
 		createBoolValue(true);
 	}
 
+	// Unfortunately, there are many places where this link is used
+	// in a casual manner, purely as a declarative, and yet people
+	// wish to execute it in those contexts. This is arguably just
+	// an outright fail. But, to keep the peace, we'll allow this
+	// usage for now.
+	if (not _outgoing[0]->is_executable())
+		return shared_from_this();
+
 	ValuePtr vp = _outgoing[0]->execute(as, silent);
 	if (1 == sz) return vp;
 
