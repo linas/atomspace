@@ -21,8 +21,8 @@ class SparseUTest :  public CxxTest::TestSuite
 		SparseUTest(void)
 		{
 			logger().set_level(Logger::DEBUG);
-			// logger().set_level(Logger::FINE);
-			logger().set_print_to_stdout_flag(true);
+			logger().set_level(Logger::FINE);
+			// logger().set_print_to_stdout_flag(true);
 			logger().set_timestamp_flag(false);
 			logger().set_sync_flag(true);
 		}
@@ -44,16 +44,16 @@ class SparseUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void) { }
 
-		void test_glob(void);
-		void test_palin(void);
-		void test_palin_dab(void);
+		void xtest_glob(void);
+		void xtest_palin(void);
+		void xtest_palin_dab(void);
 
-		void test_glob_ord(void);
-		void test_palin_ord(void);
+		void xtest_glob_ord(void);
+		void xtest_palin_ord(void);
 
-		void test_chem_bad(void);
-		void test_chem_inf(void);
-		void test_chem_good(void);
+		void xtest_chem_bad(void);
+		void xtest_chem_inf(void);
+		void xtest_chem_good(void);
 		void test_chem_order(void);
 };
 
@@ -76,7 +76,7 @@ void SparseUTest::setUp(void)
 // ================================================================
 
 // Unordered links with a glob in it
-void SparseUTest::test_glob(void)
+void SparseUTest::xtest_glob(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -106,7 +106,7 @@ void SparseUTest::test_glob(void)
 // ================================================================
 
 // Unordered links with a palindrome glob in it
-void SparseUTest::test_palin(void)
+void SparseUTest::xtest_palin(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -127,7 +127,7 @@ void SparseUTest::test_palin(void)
 // ================================================================
 
 // Unordered links with a palindrome glob in it
-void SparseUTest::test_palin_dab(void)
+void SparseUTest::xtest_palin_dab(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -148,7 +148,7 @@ void SparseUTest::test_palin_dab(void)
 // ================================================================
 
 // Unordered links with a glob in it
-void SparseUTest::test_glob_ord(void)
+void SparseUTest::xtest_glob_ord(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -169,7 +169,7 @@ void SparseUTest::test_glob_ord(void)
 // ================================================================
 
 // Unordered links with a palindrome glob in it
-void SparseUTest::test_palin_ord(void)
+void SparseUTest::xtest_palin_ord(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -190,7 +190,7 @@ void SparseUTest::test_palin_ord(void)
 // ================================================================
 
 // Unordered links emulating a chemical reaction
-void SparseUTest::test_chem_bad(void)
+void SparseUTest::xtest_chem_bad(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -212,7 +212,7 @@ void SparseUTest::test_chem_bad(void)
 // ================================================================
 
 // Unordered links emulating a chemical reaction
-void SparseUTest::test_chem_good(void)
+void SparseUTest::xtest_chem_good(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -234,7 +234,7 @@ void SparseUTest::test_chem_good(void)
 // ================================================================
 
 // This should not go into an inf loop.
-void SparseUTest::test_chem_inf(void)
+void SparseUTest::xtest_chem_inf(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
