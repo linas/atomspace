@@ -46,6 +46,34 @@
 			(and (<= 4.0 rn) (<= rn 8.0))))
 	(iota 30))
 
+; -----------------------------------------------
+; Test SineLink
+
+(define pi 3.14159265358979)
+
+(test-assert "sine n pi"
+	(equal? (Number 0 0 0 0 0)
+		(cog-execute! (Sine (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi))))))
+
+(define (npih n) (* n 0.5 pi))
+
+(test-assert "sine n pi-half"
+	(equal? (Number 1 -1 1 -1 1)
+		(cog-execute! (Sine (Number
+			(npih 1) (npih 3) (npih 5) (npih 7) (npih 9))))))
+
+; -----------------------------------------------
+; Test Heaviside and SineLink
+
+(for-each
+	(lambda (n)
+		(define sn (cog-execute! (Heaviside (Sine (Number n)))))
+
+		(define wv (modulo (floor (/ n pi)) 2))
+		(test-assert "square-wave" (equal? sn wv))
+	)
+	(iota 70))
+
 (test-end tname)
 
 (opencog-test-end)
