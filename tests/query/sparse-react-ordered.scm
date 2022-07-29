@@ -56,6 +56,7 @@
 				(SBo (Variable "$hydroxO1") (Variable "hydroxy moiety"))
 				(Glob "rest of hydroxy")
 			)
+			(Not (Identical (Variable "$hydroxH1") (Variable "hydroxy moiety")))
 
 			; The above will match the OH's in both groups.
 			; They should be kept distinct.
