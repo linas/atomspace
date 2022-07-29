@@ -21,6 +21,8 @@ namespace opencog
  * The HeavisideLink implements the arithmetic operation of "greater
  * than" on a component-by-component level. That is,
  *    Heaviside (a, b, c) (d, e, f) is just (a>d,  b>e, c>f).
+ * where the comparison is 1.0 if true, else 0.0.
+ * That is, it returns a FloatValue
  */
 class HeavisideLink : public NumericFunctionLink
 {
@@ -29,7 +31,6 @@ protected:
 
 public:
 	HeavisideLink(const Handle& a);
-	HeavisideLink(const Handle& a, const Handle& b);
 	HeavisideLink(const HandleSeq&&, Type=HEAVISIDE_LINK);
 
 	HeavisideLink(const HeavisideLink&) = delete;

@@ -8,6 +8,7 @@ ADD_LIBRARY (clearbox
 	BoolOpLink.cc
 	DivideLink.cc
 	FoldLink.cc
+	FloorLink.cc
 	HeavisideLink.cc
 	ImpulseLink.cc
 	Log2Link.cc
@@ -18,6 +19,7 @@ ADD_LIBRARY (clearbox
 	PlusLink.cc
 	PowLink.cc
 	RandomNumber.cc
+	SineLink.cc
 	TimesLink.cc
 )
 
@@ -41,6 +43,7 @@ INSTALL (FILES
 	ArithmeticLink.h
 	BoolOpLink.h
 	DivideLink.h
+	FloorLink.h
 	FoldLink.h
 	HeavisideLink.h
 	ImpulseLink.h
@@ -52,6 +55,7 @@ INSTALL (FILES
 	PlusLink.h
 	PowLink.h
 	RandomNumber.h
+	SineLink.h
 	TimesLink.h
 	DESTINATION "include/opencog/atoms/reduct"
 )

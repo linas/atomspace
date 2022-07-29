@@ -839,11 +839,17 @@ HEAVISIDE_LINK <- NUMERIC_FUNCTION_LINK
 // Replacing false, true by 0.0 and 1.0
 IMPULSE_LINK <- FUNCTION_LINK,BOOLEAN_INPUT_LINK,CRISP_INPUT_LINK,NUMERIC_OUTPUT_LINK
 
+// Truncate to integer (floor)
+FLOOR_LINK <- NUMERIC_FUNCTION_LINK
+
 // Logarithm base2
 LOG2_LINK <- NUMERIC_FUNCTION_LINK
 
 // Power x**y
 POW_LINK <- NUMERIC_FUNCTION_LINK
+
+// Trigonometric Sine function
+SINE_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return uniformly distributed random number between two limits.
 RANDOM_NUMBER_LINK <- NUMERIC_FUNCTION_LINK
