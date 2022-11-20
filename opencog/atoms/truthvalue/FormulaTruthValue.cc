@@ -30,24 +30,47 @@
 
 using namespace opencog;
 
+void FormulaTruthValue::init(void)
+{
+	_type = FORMULA_TRUTH_VALUE;
+	_lambda = false;
+
+	// If there is exactly  one argument, it will be used to get an STV
+	// in one way or another.
+	if (1 == _formula.size()) return;
+
+	// If there are exactly two arguments, and they are both executable,
+	// i.e. both can be treated as formulas, then assume they are meant
+	// to produce the strength and the confidence, respectively.
+	if (2 == _formula.size() and
+	    _formula[0]->is_executable() and _formula[1]->is_executable())
+   {
+			return;
+	}
+
+	// If we are here, there are two or more arguments. Assume that the
+	// first is a lambda, and the rest are arguments to the lambda.
+	_lambda = true;
+}
+
 FormulaTruthValue::FormulaTruthValue(const Handle& h)
 	: SimpleTruthValue(0, 0), _formula({h}), _as(h->getAtomSpace())
 {
-	_type = FORMULA_TRUTH_VALUE;
+	init();
 	update();
 }
 
 FormulaTruthValue::FormulaTruthValue(const Handle& stn, const Handle& cnf)
 	: SimpleTruthValue(0, 0), _formula({stn, cnf}), _as(stn->getAtomSpace())
 {
-	_type = FORMULA_TRUTH_VALUE;
+	init();
 	update();
 }
 
 FormulaTruthValue::FormulaTruthValue(const HandleSeq&& seq)
 	: SimpleTruthValue(0, 0), _formula(seq), _as(seq[0]->getAtomSpace())
 {
-	_type = FORMULA_TRUTH_VALUE;
+	init();
 	update();
 }
 
@@ -58,21 +81,18 @@ void FormulaTruthValue::update(void) const
 {
 	// If there are two formulas, they produce the strength and
 	// the confidence, respectively.  We ignore more than two formulas.
-	if (1 < _formula.size())
+	if (not _lambda and 2 == _formula.size())
 	{
 		for (size_t i=0; i<2; i++)
 		{
 			const Handle& fo = _formula[i];
-			if (not fo->is_executable())
-				throw SyntaxException(TRACE_INFO,
-					"Formula needs to be executable; got %s",
-						fo->to_string().c_str());
-
 			ValuePtr vp = fo->execute(_as);
+
 			if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
 				throw SyntaxException(TRACE_INFO,
 					"Expecting FloatValue, got %s",
 						vp->to_string().c_str());
+
 			_value[i] = FloatValueCast(vp)->value()[0];
 		}
 		return;
