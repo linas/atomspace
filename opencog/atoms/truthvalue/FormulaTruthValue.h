@@ -26,7 +26,6 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
-// #include <opencog/atoms/value/FormulaStream.h>
 
 namespace opencog
 {
@@ -42,7 +41,6 @@ protected:
 	virtual void update(void) const;
 	HandleSeq _formula;
 	AtomSpace* _as;
-	bool _lambda;
 
 public:
 	FormulaTruthValue(const Handle&);

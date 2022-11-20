@@ -24,6 +24,8 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
+#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include "FormulaTruthValue.h"
@@ -33,7 +35,6 @@ using namespace opencog;
 void FormulaTruthValue::init(void)
 {
 	_type = FORMULA_TRUTH_VALUE;
-	_lambda = false;
 
 	// If there is exactly  one argument, it will be used to get an STV
 	// in one way or another.
@@ -50,7 +51,36 @@ void FormulaTruthValue::init(void)
 
 	// If we are here, there are two or more arguments. Assume that the
 	// first is a lambda, and the rest are arguments to the lambda.
-	_lambda = true;
+	// Reduce on the spot.
+	if (nameserver().isA(_formula[0]->get_type(), LAMBDA_LINK))
+	{
+		LambdaLinkPtr lambda = LambdaLinkCast(_formula[0]);
+		HandleSeq args = _formula;
+		args.erase(args.begin());
+		_formula.resize(1);
+		_formula[0] = lambda->beta_reduce(args);
+		return;
+	}
+
+	// Same as above, but its a function.
+	if (nameserver().isA(_formula[0]->get_type(), FUNCTION_LINK))
+	{
+		HandleSeq args = _formula;
+		args.erase(args.begin());
+		_formula.resize(1);
+
+		FunctionLinkPtr flp = FunctionLinkCast(_formula[0]);
+		const FreeVariables& fvars = flp->get_vars();
+		if (fvars.empty())
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a FunctionLink with arguments");
+
+		_formula[0] = fvars.substitute_nocheck(_formula[0], args);
+		return;
+	}
+
+	throw SyntaxException(TRACE_INFO,
+		"Multiple arguments: expecting the first to be a Lambda or Function");
 }
 
 FormulaTruthValue::FormulaTruthValue(const Handle& h)
@@ -80,8 +110,8 @@ FormulaTruthValue::~FormulaTruthValue()
 void FormulaTruthValue::update(void) const
 {
 	// If there are two formulas, they produce the strength and
-	// the confidence, respectively.  We ignore more than two formulas.
-	if (not _lambda and 2 == _formula.size())
+	// the confidence, respectively.
+	if (2 == _formula.size())
 	{
 		for (size_t i=0; i<2; i++)
 		{
