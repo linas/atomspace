@@ -113,6 +113,12 @@ strength_t FormulaTruthValue::get_mean() const
 	return _value[MEAN];
 }
 
+confidence_t FormulaTruthValue::get_confidence() const
+{
+	// No update! User must ask for mean first!
+	return _value[CONFIDENCE];
+}
+
 std::string FormulaTruthValue::to_string(const std::string& indent) const
 {
 	update();
