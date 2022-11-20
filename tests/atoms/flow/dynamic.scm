@@ -77,6 +77,13 @@
 		(DefinedPredicate "dynamic example")
 		(List (Concept "A") (Concept "B"))))
 
+(define j-implies-k (Implication (Concept "J") (Concept "K")))
+(cog-set-tv!
+	(Implication (Concept "J") (Concept "K"))
+	(FormulaTruthValue
+		(DefinedPredicate "dynamic example")
+		(List (Concept "A") (Concept "B"))))
+
 ; -------------------------------------------------------------
 ; for DynamicUTest::test_formula_stream()
 (define foo (Concept "foo"))
