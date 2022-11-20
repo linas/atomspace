@@ -91,7 +91,31 @@ TruthValuePtr SetTVLink::eval_direct(AtomSpace* as, bool silent)
 /// and return that.
 TruthValuePtr SetTVLink::make_formula(AtomSpace* as, bool silent)
 {
-	return SimpleTruthValue(1,0);
+	HandleSeq args = _outgoing;
+	args.erase(args.begin()); // drop the target
+	args.erase(args.begin()); // drop the function
+
+	Handle fun = _outgoing[1];
+	Type ftype = fun->get_type();
+	if (LAMBDA_LINK == ftype)
+	{
+		LambdaLinkPtr lamba = LambdaLinkCast(fun);
+		fun = lambda->beta_reduce(args);
+	}
+
+	else if (nameserver().isA(ftype, FUNCTION_LINK))
+	{
+		// The FunctionLink presumably has free variables in it.
+		// Reduce them with the provided arguments.
+		FunctionLinkPtr flp(FunctionLinkCast(fun));
+		const FreeVariables& fvars = flp->get_vars();
+		if (not fvars.empty())
+			fun = fvars.substitute_nocheck(fun, args);
+	}
+
+	// Make sure the newly-minted function has a home.
+	fun = as->add_atom(fun);
+	return createFormulaTruthValue(fun);
 }
 
 TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
