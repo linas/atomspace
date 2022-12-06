@@ -1,5 +1,5 @@
 /*
- * DoExecLink.cc
+ * ReducibleLink.cc
  *
  * Copyright (C) 2017, 2022 Linas Vepstas
  *
@@ -22,25 +22,25 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include "DoExecLink.h"
+#include "ReducibleLink.h"
 
 using namespace opencog;
 
-DoExecLink::DoExecLink(const HandleSeq&& oset, Type t)
+ReducibleLink::ReducibleLink(const HandleSeq&& oset, Type t)
 	: Link(std::move(oset), t)
 {
-	if (not nameserver().isA(t, DO_EXEC_LINK))
+	if (not nameserver().isA(t, REDUCIBLE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an DoExecLink, got %s", tname.c_str());
+			"Expecting an ReducibleLink, got %s", tname.c_str());
 	}
 }
 
 // ---------------------------------------------------------------
 
 /// Execute everything, if possible.
-ValuePtr DoExecLink::execute(AtomSpace*as, bool silent)
+ValuePtr ReducibleLink::execute(AtomSpace*as, bool silent)
 {
 	// In principle, we should be calling Instantiator to
 	// perform the execution, so that e.g. PutLink gets
@@ -59,6 +59,6 @@ ValuePtr DoExecLink::execute(AtomSpace*as, bool silent)
 	return as->add_link(_type, std::move(oset));
 }
 
-DEFINE_LINK_FACTORY(DoExecLink, DO_EXEC_LINK)
+DEFINE_LINK_FACTORY(ReducibleLink, REDUCIBLE_LINK)
 
 /* ===================== END OF FILE ===================== */

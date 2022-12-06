@@ -9,7 +9,6 @@ ADD_LIBRARY (atomcore
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
-	DoExecLink.cc
 	FindUtils.cc
 	FreeLink.cc
 	FreeVariables.cc
@@ -23,6 +22,7 @@ ADD_LIBRARY (atomcore
 	PutLink.cc
 	Quotation.cc
 	RandomChoice.cc
+	ReducibleLink.cc
 	Replacement.cc
 	RewriteLink.cc
 	ScopeLink.cc
@@ -60,7 +60,6 @@ INSTALL (FILES
 	Context.h
 	DefineLink.h
 	DeleteLink.h
-	DoExecLink.h
 	FindUtils.h
 	FreeLink.h
 	FreeVariables.h
@@ -73,6 +72,7 @@ INSTALL (FILES
 	PutLink.h
 	Quotation.h
 	RandomChoice.h
+	ReducibleLink.h
 	Replacement.h
 	RewriteLink.h
 	ScopeLink.h

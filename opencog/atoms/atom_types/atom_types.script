@@ -163,6 +163,14 @@ EVALUATABLE_LINK <- VALUABLE_LINK
 // correctly.
 EXECUTABLE_LINK <- VALUABLE_LINK
 
+// The ReduceLink passes on a call to it's execute() method to the
+// Atoms that it wraps. This is used as a base-class to allow certain
+// Atom types to be pass-throughts. For example, SetLink: due to early
+// (and less-than-ideal) design decisions, many functions return
+// SetLinks, which makes for cumbersome handling. This simplifies that
+// situation. It's goal is to "reduce" its contents.
+REDUCIBLE_LINK <- EXECUTABLE_LINK
+
 // Crisp (scalar-valued) boolean-input link.  This link type forces
 // type-checking on it's "inputs" (it's outgoing set): they must be
 // EvaluatableLinks.
@@ -202,14 +210,6 @@ TYPE_OUTPUT_LINK <- VALUABLE_LINK
 // (e.g. the storage backends)
 ALPHA_CONVERTIBLE_LINK <- LINK
 
-// The DoExecLink passes on a call to it's execute() method to the
-// Atoms that it wraps. This is used as a base-class to allow certain
-// Atom types to be pass-throughts. For example, SetLink: due to early
-// (and less-than-ideal) design decisions, many functions return
-// SetLinks, which makes for cumbersome handling. This simplifies that
-// situation.
-DO_EXEC_LINK <- EXECUTABLE_LINK
-
 // ===========================================================
 // Basic boolean algebra and set-theory-inspired links.
 
@@ -220,7 +220,7 @@ COLLECTION_LINK <- LINK
 LIST_LINK <- ORDERED_LINK,COLLECTION_LINK
 
 // Unordered multi-set (Classical Set-Theory set)
-SET_LINK <- UNORDERED_LINK,COLLECTION_LINK,DO_EXEC_LINK
+SET_LINK <- UNORDERED_LINK,COLLECTION_LINK,REDUCIBLE_LINK
 
 // Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
 // These use probabilistic formulas to compute TruthValues.

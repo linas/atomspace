@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/DoExecLink.h
+ * opencog/atoms/core/ReducibleLink.h
  *
  * Copyright (C) 2017, 2022 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_DO_EXEC_LINK_H
-#define _OPENCOG_DO_EXEC_LINK_H
+#ifndef _OPENCOG_REDUCIBLE_LINK_H
+#define _OPENCOG_REDUCIBLE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
 
@@ -31,16 +31,16 @@ namespace opencog
  *  @{
  */
 
-/// The DoExecLink passes on a call to it's execute() method to 
+/// The ReducibleLink passes on a call to it's execute() method to 
 /// everything it wraps, and then returns the result, wrapped the
 /// same way.
 ///
-class DoExecLink : public Link
+class ReducibleLink : public Link
 {
 public:
-	DoExecLink(const HandleSeq&&, Type=DO_EXEC_LINK);
-	DoExecLink(const DoExecLink &) = delete;
-	DoExecLink& operator=(const DoExecLink &) = delete;
+	ReducibleLink(const HandleSeq&&, Type=REDUCIBLE_LINK);
+	ReducibleLink(const ReducibleLink &) = delete;
+	ReducibleLink& operator=(const ReducibleLink &) = delete;
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool);
@@ -48,10 +48,10 @@ public:
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(DoExecLink)
-#define createDoExecLink CREATE_DECL(DoExecLink)
+LINK_PTR_DECL(ReducibleLink)
+#define createReducibleLink CREATE_DECL(ReducibleLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_DO_EXEC_LINK_H
+#endif // _OPENCOG_REDUCIBLE_LINK_H
