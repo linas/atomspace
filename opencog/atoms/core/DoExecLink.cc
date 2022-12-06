@@ -40,7 +40,7 @@ DoExecLink::DoExecLink(const HandleSeq&& oset, Type t)
 // ---------------------------------------------------------------
 
 /// Execute everything, if possible.
-ValuePtr DeExecLink::execute(AtomSpace*as, bool silent)
+ValuePtr DoExecLink::execute(AtomSpace*as, bool silent)
 {
 	// In principle, we should be calling Instantiator to
 	// perform the execution, so that e.g. PutLink gets
