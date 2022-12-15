@@ -14,7 +14,6 @@ ADD_LIBRARY (atomcore
 	FreeLink.cc
 	FreeVariables.cc
 	FunctionLink.cc
-	ImplicationScopeLink.cc
 	LambdaLink.cc
 	NumberNode.cc
 	PrenexLink.cc
