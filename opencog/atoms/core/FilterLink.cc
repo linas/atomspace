@@ -66,31 +66,6 @@ void FilterLink::init(void)
 		_rewrite = RuleLinkCast(_pattern)->get_implicand()[0];
 	}
 
-	if (nameserver().isA(tscope, IMPLICATION_SCOPE_LINK))
-	{
-		_is_impl = true;
-		const HandleSeq& impl = _pattern->getOutgoingSet();
-		if (impl.size() < 2)
-			throw SyntaxException(TRACE_INFO,
-				"Expecting a RuleLink of at least size 2.");
-
-		// ImplicationScopeLinks have arity 2 only if they have no type
-		// constraints, else they have arity 3.  That is, an
-		// ImplicationLink is either P(x)->Q(x) or its T(x) P(x)->Q(x)
-		// where T(x) is the type constraints on the variables.
-		if (_pattern->get_body() == impl[0])
-		{
-			_rewrite = impl[1];
-		}
-		else if (_pattern->get_body() == impl[1])
-		{
-			if (impl.size() < 3)
-				throw SyntaxException(TRACE_INFO,
-					"Expecting ImplicationScopeLink of at least size 3.");
-			_rewrite = impl[2];
-		}
-	}
-
 	// Locate all GlobNodes in the pattern
 	FindAtoms fgn(GLOB_NODE, true);
 	fgn.search_set(_pattern->get_body());
