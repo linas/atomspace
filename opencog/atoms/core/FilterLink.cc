@@ -59,12 +59,8 @@ void FilterLink::init(void)
 	// RuleLinks are a special type of ScopeLink.  They specify a
 	// re-write that should be performed.  Viz, RuleLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
-	_is_impl = false;
 	if (nameserver().isA(tscope, RULE_LINK))
-	{
-		_is_impl = true;
-		_rewrite = RuleLinkCast(_pattern)->get_implicand()[0];
-	}
+		_rewrite = RuleLinkCast(_pattern)->get_implicand();
 
 	// Locate all GlobNodes in the pattern
 	FindAtoms fgn(GLOB_NODE, true);
@@ -317,11 +313,13 @@ Handle FilterLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	}
 
 	// Perform substitution, if it's an ImplicationScopeLink
-	if (_is_impl)
+	if (not _rewrite.empty())
 	{
+		// XXX what about _rewrite[1] etc ???
+		const Handle& impl = _rewrite[0];
 		// Beta reduce, and execute. No type-checking during
 		// beta-reduction; we've already done that.
-		Handle red(_mvars->substitute_nocheck(_rewrite, valseq));
+		Handle red(_mvars->substitute_nocheck(impl, valseq));
 		return HandleCast(inst.execute(red));
 	}
 
