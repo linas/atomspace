@@ -59,7 +59,8 @@ void FilterLink::init(void)
 	// re-write that should be performed.  Viz, RuleLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
 	_is_impl = false;
-	if (nameserver().isA(tscope, RULE_LINK))
+	// if (nameserver().isA(tscope, RULE_LINK))
+	if (nameserver().isA(tscope, IMPLICATION_SCOPE_LINK))
 	{
 		_is_impl = true;
 		const HandleSeq& impl = _pattern->getOutgoingSet();
