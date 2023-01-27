@@ -465,6 +465,7 @@ void Atom::keep_incoming_set()
     INCOMING_UNIQUE_LOCK;
     if (_incoming_set) return;
     _incoming_set = std::make_shared<InSet>();
+    nbytesi += sizeof(InSet);
 }
 
 /// Stop tracking the incoming set for this atom.
@@ -475,6 +476,7 @@ void Atom::drop_incoming_set()
     if (nullptr == _incoming_set) return;
     INCOMING_UNIQUE_LOCK;
     _incoming_set.reset();
+    nbytesi -= sizeof(InSet);
 }
 
 /// Add an atom to the incoming set.
