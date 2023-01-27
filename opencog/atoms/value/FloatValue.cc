@@ -41,7 +41,7 @@ void FloatValue::use(void)
 	nbytesd += _value.size() * sizeof(double);
 
 	size_t na = nallocs.load();
-#define REPORT_FREQ 10000
+#define REPORT_FREQ (512*1024)
 	if (0 == na%REPORT_FREQ)
 	{
 		logger().info("FloatValue %lu alloc %lu free %lu MiB val %lu MiB data",

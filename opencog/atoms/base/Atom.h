@@ -224,14 +224,7 @@ protected:
      *
      * @param The type of the atom.
      */
-    Atom(Type t)
-      : Value(t),
-        _absent(false),
-        _marked_for_removal(false),
-        _checked(false),
-        _content_hash(Handle::INVALID_HASH),
-        _atom_space(nullptr)
-    {}
+    Atom(Type t);
 
     Atom& operator=(const Atom& other) // copy assignment operator
         { return *this; }

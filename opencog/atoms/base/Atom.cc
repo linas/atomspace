@@ -24,12 +24,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <atomic>
 #include <set>
 #include <sstream>
 
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
+#include <opencog/util/Logger.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Atom.h>
@@ -47,8 +49,35 @@
 
 namespace opencog {
 
+static std::atomic_size_t nallocs(0);
+static std::atomic_size_t nfrees(0);
+static std::atomic_size_t nbytesv(0);
+static std::atomic_size_t nbytesi(0);
+
+Atom::Atom(Type t) :
+    Value(t),
+    _absent(false),
+    _marked_for_removal(false),
+    _checked(false),
+    _content_hash(Handle::INVALID_HASH),
+    _atom_space(nullptr)
+{
+	nallocs++;
+	nbytesv += sizeof(*this);
+
+#define REPORT_FREQ (1024*1024)
+	size_t na = nallocs.load();
+	if (0 == na%REPORT_FREQ)
+	{
+		logger().info("Atom %lu alloc %lu free %lu MiB val",
+			na, nfrees.load(), nbytesv.load() / (1024 * 1024));
+	}
+}
+
 Atom::~Atom()
 {
+	nfrees++;
+	nbytesv -= sizeof(*this);
     _atom_space = nullptr;
 
     // Disable for now. This assert has never tripped; there
