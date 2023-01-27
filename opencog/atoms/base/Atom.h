@@ -198,6 +198,7 @@ protected:
     mutable std::atomic_bool _absent;
     mutable std::atomic_bool _marked_for_removal;
     mutable std::atomic_bool _checked;
+    mutable bool _use_iset;
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
@@ -259,8 +260,7 @@ protected:
         // buckets (I tried).
         std::map<Type, WincomingSet> _iset;
     };
-    typedef std::shared_ptr<InSet> InSetPtr;
-    InSetPtr _incoming_set;
+    InSet _incoming_set;
     void keep_incoming_set();
     void drop_incoming_set();
 
@@ -484,9 +484,9 @@ public:
     template <typename OutputIterator> OutputIterator
     getIncomingIter(OutputIterator result) const
     {
-        if (nullptr == _incoming_set) return result;
+        if (not _use_iset) return result;
         INCOMING_SHARED_LOCK;
-        for (const auto& bucket : _incoming_set->_iset)
+        for (const auto& bucket : _incoming_set._iset)
         {
             for (const WinkPtr& w : bucket.second)
                 WEAKLY_DO(h, w, { *result = h; result ++; })
@@ -523,11 +523,11 @@ public:
     template <typename OutputIterator> OutputIterator
     getIncomingSetByType(OutputIterator result, Type type) const
     {
-        if (nullptr == _incoming_set) return result;
+        if (not _use_iset) return result;
         INCOMING_SHARED_LOCK;
 
-        const auto bucket = _incoming_set->_iset.find(type);
-        if (bucket == _incoming_set->_iset.cend()) return result;
+        const auto bucket = _incoming_set._iset.find(type);
+        if (bucket == _incoming_set._iset.cend()) return result;
 
         for (const WinkPtr& w : bucket->second)
             WEAKLY_DO(h, w, { *result = h; result ++; })

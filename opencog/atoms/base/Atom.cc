@@ -59,6 +59,7 @@ Atom::Atom(Type t) :
     _absent(false),
     _marked_for_removal(false),
     _checked(false),
+    _use_iset(false),
     _content_hash(Handle::INVALID_HASH),
     _atom_space(nullptr)
 {
@@ -455,17 +456,19 @@ void Atom::setAtomSpace(AtomSpace *tb)
 /// is called.  If this atom is added to any links before this call
 /// is made, those links won't show up in the incoming set.
 ///
-/// We don't automatically track incoming sets for two reasons:
-/// 1) std::set takes up 48 bytes
-/// 2) adding and removing uses up cpu cycles.
-/// Thus, if the incoming set isn't needed, then don't bother
-/// tracking it.
+/// This is a minor, perhaps pointless(?) performance optimization:
+/// adding and removing uses up cpu cycles.  If the incoming set isn't
+/// needed, then don't bother tracking it.  That said: the only time
+/// that the incoming set is not needed is when creating free-floating
+/// Atoms, that have not (yet) been added to any AtomSpace. But such
+/// floaters are transient; they are always quickly jammed into the
+/// AtomSpace, which promptly calls `keep_incoming_set()`. So, for
+/// all(?) practical purposes, we could just skip this. But ... well,
+/// its here, its been here for over a decade, its fully debugged, so
+/// whatever. It's not hurting us much.
 void Atom::keep_incoming_set()
 {
-    INCOMING_UNIQUE_LOCK;
-    if (_incoming_set) return;
-    _incoming_set = std::make_shared<InSet>();
-    nbytesi += sizeof(InSet);
+   _use_iset = true;
 }
 
 /// Stop tracking the incoming set for this atom.
@@ -473,26 +476,26 @@ void Atom::keep_incoming_set()
 /// be queried; it is erased.
 void Atom::drop_incoming_set()
 {
-    if (nullptr == _incoming_set) return;
+    if (not _use_iset) return;
     INCOMING_UNIQUE_LOCK;
-    _incoming_set.reset();
-    nbytesi -= sizeof(InSet);
+    _use_iset = false;
+    _incoming_set._iset.clear();
 }
 
 /// Add an atom to the incoming set.
 void Atom::insert_atom(const Handle& a)
 {
-    if (nullptr == _incoming_set) return;
+    if (not _use_iset) return;
     INCOMING_UNIQUE_LOCK;
 
     // Lower bound for mem consumption
     nbytesi += sizeof(WinkPtr) + sizeof(void*);
 
     Type at = a->get_type();
-    auto bucket = _incoming_set->_iset.find(at);
-    if (bucket == _incoming_set->_iset.end())
+    auto bucket = _incoming_set._iset.find(at);
+    if (bucket == _incoming_set._iset.end())
     {
-        auto pr = _incoming_set->_iset.emplace(
+        auto pr = _incoming_set._iset.emplace(
                    std::make_pair(at, WincomingSet()));
         bucket = pr.first;
     }
@@ -502,16 +505,16 @@ void Atom::insert_atom(const Handle& a)
 /// Remove an atom from the incoming set.
 void Atom::remove_atom(const Handle& a)
 {
-    if (nullptr == _incoming_set) return;
+    if (not _use_iset) return;
     INCOMING_UNIQUE_LOCK;
     Type at = a->get_type();
 
     // Lower bound for mem consumption
     nbytesi -= sizeof(WinkPtr) + sizeof(void*);
 
-    const auto bucket = _incoming_set->_iset.find(at);
+    const auto bucket = _incoming_set._iset.find(at);
 
-    OC_ASSERT(bucket != _incoming_set->_iset.end(), "No bucket!");
+    OC_ASSERT(bucket != _incoming_set._iset.end(), "No bucket!");
     size_t erc = bucket->second.erase(GET_PTR(a));
 
     // std::set is a "true set", in that it either contains something,
@@ -527,18 +530,18 @@ void Atom::remove_atom(const Handle& a)
 /// the incoming set. This is used to manage the StateLink.
 void Atom::swap_atom(const Handle& old, const Handle& neu)
 {
-    if (nullptr == _incoming_set) return;
+    if (not _use_iset) return;
     INCOMING_UNIQUE_LOCK;
 
     Type ot = old->get_type();
-    auto bucket = _incoming_set->_iset.find(ot);
+    auto bucket = _incoming_set._iset.find(ot);
     bucket->second.erase(GET_PTR(old));
 
     Type nt = neu->get_type();
-    bucket = _incoming_set->_iset.find(nt);
-    if (bucket == _incoming_set->_iset.end())
+    bucket = _incoming_set._iset.find(nt);
+    if (bucket == _incoming_set._iset.end())
     {
-        auto pr = _incoming_set->_iset.emplace(
+        auto pr = _incoming_set._iset.emplace(
                    std::make_pair(nt, WincomingSet()));
         bucket = pr.first;
     }
@@ -550,11 +553,10 @@ void Atom::remove() {}
 
 bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 {
-    if (nullptr == _incoming_set) return true;
-
+    if (not _use_iset) return true;
     INCOMING_SHARED_LOCK;
 
-    for (const auto& bucket : _incoming_set->_iset)
+    for (const auto& bucket : _incoming_set._iset)
     {
         for (const WinkPtr& w : bucket.second)
             WEAKLY_DO(l, w, { if (not as or as->in_environ(l) or nameserver().isA(_type, FRAME)) return false; })
@@ -564,7 +566,7 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 
 size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
-    if (nullptr == _incoming_set) return 0;
+    if (not _use_iset) return 0;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -579,7 +581,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 
         size_t cnt = 0;
         INCOMING_SHARED_LOCK;
-        for (const auto& bucket : _incoming_set->_iset)
+        for (const auto& bucket : _incoming_set._iset)
         {
             for (const WinkPtr& w : bucket.second)
                 WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
@@ -589,7 +591,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 
     size_t cnt = 0;
     INCOMING_SHARED_LOCK;
-    for (const auto& pr : _incoming_set->_iset)
+    for (const auto& pr : _incoming_set._iset)
         cnt += pr.second.size();
     return cnt;
 }
@@ -600,8 +602,8 @@ void Atom::getLocalInc(const AtomSpace* as, HandleSet& hs, Type t) const
     INCOMING_SHARED_LOCK;
     if (NOTYPE != t)
     {
-        const auto bucket = _incoming_set->_iset.find(t);
-        if (bucket == _incoming_set->_iset.cend()) return;
+        const auto bucket = _incoming_set._iset.find(t);
+        if (bucket == _incoming_set._iset.cend()) return;
         for (const WinkPtr& w : bucket->second)
             WEAKLY_DO(l, w, {
                 const Handle& local(as->lookupHandle(l));
@@ -611,7 +613,7 @@ void Atom::getLocalInc(const AtomSpace* as, HandleSet& hs, Type t) const
     }
 
     // If NOTYPE was given, then loop over all possibilities.
-    for (const auto& bucket : _incoming_set->_iset)
+    for (const auto& bucket : _incoming_set._iset)
     {
         for (const WinkPtr& w : bucket.second)
             WEAKLY_DO(l, w, {
@@ -653,7 +655,7 @@ void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs, Type t) const
 IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 {
     static IncomingSet empty_set;
-    if (nullptr == _incoming_set) return empty_set;
+    if (not _use_iset) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -677,7 +679,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
         // Prevent update of set while a copy is being made.
         INCOMING_SHARED_LOCK;
         IncomingSet iset;
-        for (const auto& bucket : _incoming_set->_iset)
+        for (const auto& bucket : _incoming_set._iset)
         {
             for (const WinkPtr& w : bucket.second)
                 WEAKLY_DO(l, w, { if (as->in_environ(l)) iset.emplace_back(l); })
@@ -688,7 +690,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
     // Prevent update of set while a copy is being made.
     INCOMING_SHARED_LOCK;
     IncomingSet iset;
-    for (const auto& bucket : _incoming_set->_iset)
+    for (const auto& bucket : _incoming_set._iset)
     {
         for (const WinkPtr& w : bucket.second)
             WEAKLY_DO(l, w, { iset.emplace_back(l); });
@@ -699,7 +701,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 {
     static IncomingSet empty_set;
-    if (nullptr == _incoming_set) return empty_set;
+    if (not _use_iset) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -719,8 +721,8 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
         // Lock to prevent updates of the set of atoms.
         INCOMING_SHARED_LOCK;
-        const auto bucket = _incoming_set->_iset.find(type);
-        if (bucket == _incoming_set->_iset.cend()) return empty_set;
+        const auto bucket = _incoming_set._iset.find(type);
+        if (bucket == _incoming_set._iset.cend()) return empty_set;
 
         IncomingSet result;
         for (const WinkPtr& w : bucket->second)
@@ -730,8 +732,8 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
     // Lock to prevent updates of the set of atoms.
     INCOMING_SHARED_LOCK;
-    const auto bucket = _incoming_set->_iset.find(type);
-    if (bucket == _incoming_set->_iset.cend()) return empty_set;
+    const auto bucket = _incoming_set._iset.find(type);
+    if (bucket == _incoming_set._iset.cend()) return empty_set;
 
     IncomingSet result;
     for (const WinkPtr& w : bucket->second)
@@ -741,7 +743,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
 size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
-    if (nullptr == _incoming_set) return 0;
+    if (not _use_iset) return 0;
 
     size_t cnt = 0;
 
@@ -757,8 +759,8 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
         }
 
         INCOMING_SHARED_LOCK;
-        const auto bucket = _incoming_set->_iset.find(type);
-        if (bucket == _incoming_set->_iset.cend()) return 0;
+        const auto bucket = _incoming_set._iset.find(type);
+        if (bucket == _incoming_set._iset.cend()) return 0;
 
         for (const WinkPtr& w : bucket->second)
             WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
@@ -766,8 +768,8 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
     }
 
     INCOMING_SHARED_LOCK;
-    const auto bucket = _incoming_set->_iset.find(type);
-    if (bucket == _incoming_set->_iset.cend()) return 0;
+    const auto bucket = _incoming_set._iset.find(type);
+    if (bucket == _incoming_set._iset.cend()) return 0;
 
     for (const WinkPtr& w : bucket->second)
         WEAKLY_DO(l, w, { cnt++; })
