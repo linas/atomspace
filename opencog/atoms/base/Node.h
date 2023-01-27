@@ -65,6 +65,7 @@ public:
     Node(const Node&) = delete;
     Node& operator=(const Node&) = delete;
 
+    virtual ~Node();
     virtual bool is_node() const { return true; }
     virtual bool is_link() const { return false; }
 

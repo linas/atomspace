@@ -88,7 +88,10 @@ SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 
 	SCM smob = scm_new_double_smob(cog_misc_tag, 0,0,0);
 	SCM_SET_SMOB_FLAGS(smob, COG_PROTOM);
+printf("duuude before pa.use=%ld %s\n", pa.use_count(),
+pa->to_short_string().c_str());
 	*(SCM_SMOB_VALUE_PTR_LOC(smob)) = pa;
+printf("duuude after pa.use=%ld\n", pa.use_count());
 
 	return smob;
 }
@@ -132,7 +135,10 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	if (nullptr == h->getAtomSpace() and
 	    not (ATOM_SPACE == h->get_type()))
 	{
+printf("duuude gone atom before pa.use=%ld %s\n", h.use_count(),
+h->to_short_string().c_str());
 		*(SCM_SMOB_VALUE_PTR_LOC(sh)) = nullptr;
+printf("duuude gone atom after pa.use=%ld\n", h.use_count());
 		scm_remember_upto_here_1(sh);
 		return Handle::UNDEFINED;
 	}

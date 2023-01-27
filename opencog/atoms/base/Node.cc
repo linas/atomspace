@@ -80,6 +80,11 @@ void Node::init()
 #endif // CHECK_UTF8
 }
 
+Node::~Node()
+{
+	printf("duuude goodby cruel world %s\n", _name.c_str());
+}
+
 /// Return a universally-unique string for each distinct node.
 /// It needs to be fast (because it is used in performance-critical
 /// code paths), it needs to be human-readable, and it must not have

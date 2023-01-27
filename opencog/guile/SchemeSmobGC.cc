@@ -28,7 +28,12 @@ size_t SchemeSmob::free_misc(SCM node)
 	switch (misctype)
 	{
 		case COG_PROTOM:
+printf("duuude free misc before use=%ld %s\n",
+SCM_SMOB_VALUE_PTR_LOC(node)->use_count(),
+(*(SCM_SMOB_VALUE_PTR_LOC(node)))->to_short_string().c_str());
 			*(SCM_SMOB_VALUE_PTR_LOC(node)) = nullptr;
+printf("duuude free misc after use=%ld\n",
+SCM_SMOB_VALUE_PTR_LOC(node)->use_count());
 			scm_remember_upto_here_1(node);
 			return 0;
 
