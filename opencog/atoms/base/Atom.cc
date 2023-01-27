@@ -69,8 +69,14 @@ Atom::Atom(Type t) :
 	size_t na = nallocs.load();
 	if (0 == na%REPORT_FREQ)
 	{
-		logger().info("Atom %lu alloc %lu free %lu MiB val",
-			na, nfrees.load(), nbytesv.load() / (1024 * 1024));
+		size_t nf = nfrees.load();
+		size_t nb = nbytesv.load();
+		logger().info("Atom alloc=%lu free=%lu diff=%lu size=%lu MiB avg=%lu B",
+			na, nf, na-nf, nb/(1024 * 1024), nb/(na-nf));
+
+		size_t nbi = nbytesi.load();
+		logger().info("Atom incsz=%lu MiB avg=%lu",
+			nbi/(1024 * 1024), nbi/(na-nf));
 	}
 }
 
@@ -468,8 +474,7 @@ void Atom::drop_incoming_set()
 {
     if (nullptr == _incoming_set) return;
     INCOMING_UNIQUE_LOCK;
-    // _incoming_set->_iset.clear();
-    _incoming_set = nullptr;
+    _incoming_set.reset();
 }
 
 /// Add an atom to the incoming set.
@@ -477,6 +482,9 @@ void Atom::insert_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
     INCOMING_UNIQUE_LOCK;
+
+    // Lower bound for mem consumption
+    nbytesi += sizeof(WinkPtr) + sizeof(void*);
 
     Type at = a->get_type();
     auto bucket = _incoming_set->_iset.find(at);
@@ -495,6 +503,9 @@ void Atom::remove_atom(const Handle& a)
     if (nullptr == _incoming_set) return;
     INCOMING_UNIQUE_LOCK;
     Type at = a->get_type();
+
+    // Lower bound for mem consumption
+    nbytesi -= sizeof(WinkPtr) + sizeof(void*);
 
     const auto bucket = _incoming_set->_iset.find(at);
 
