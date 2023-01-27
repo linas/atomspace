@@ -20,11 +20,63 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <atomic>
+
 #include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
+
+static std::atomic_size_t nallocs(0);
+static std::atomic_size_t nfrees(0);
+static std::atomic_size_t nbytesv(0);
+static std::atomic_size_t nbytesd(0);
+
+void FloatValue::use(void)
+{
+	nallocs++;
+	nbytesv += sizeof(*this);
+	nbytesd += _value.size() * sizeof(double);
+
+	size_t na = nallocs.load();
+#define REPORT_FREQ 10000
+	if (0 == na%REPORT_FREQ)
+	{
+		logger().info("FloatValue %lu alloc %lu free %lu MiB val %lu MiB data",
+			na, nfrees.load(), nbytesv.load() / (1024 * 1024),
+			nbytesd.load() / (1024 * 1024));
+	}
+}
+
+FloatValue::FloatValue(Type t) : Value(t)
+{
+	use();
+}
+
+FloatValue::FloatValue(double v) : Value(FLOAT_VALUE)
+{
+	_value.push_back(v);
+	use();
+}
+
+FloatValue::FloatValue(const std::vector<double>& v) : Value(FLOAT_VALUE), _value(v)
+{
+	use();
+}
+
+FloatValue::FloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v)
+{
+	use();
+}
+
+FloatValue::~FloatValue()
+{
+	nfrees++;
+	nbytesv -= sizeof(*this);
+	nbytesd -= _value.size() * sizeof(double);
+}
 
 ValuePtr FloatValue::value_at_index(size_t idx) const
 {

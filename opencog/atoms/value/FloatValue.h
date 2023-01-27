@@ -41,18 +41,18 @@ class FloatValue
 	: public Value
 {
 protected:
+	void use(void);
 	mutable std::vector<double> _value;
 
 	virtual void update() const {}
 
-	FloatValue(Type t) : Value(t) {}
+	FloatValue(Type t);
 public:
-	FloatValue(double v) : Value(FLOAT_VALUE) { _value.push_back(v); }
-	FloatValue(const std::vector<double>& v)
-		: Value(FLOAT_VALUE), _value(v) {}
-	FloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
+	FloatValue(double);
+	FloatValue(const std::vector<double>&);
+	FloatValue(Type, const std::vector<double>&);
 
-	virtual ~FloatValue() {}
+	virtual ~FloatValue();
 
 	const std::vector<double>& value() const { update(); return _value; }
 	size_t size() const { return _value.size(); }
