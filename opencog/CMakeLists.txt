@@ -8,6 +8,7 @@ DECLARE_GUILE_CONFIG_TARGET(SCM_CONFIG "opencog as-config" "ATOMSPACE_TEST")
 # dependencies: the later parts depend on, or may
 # someday depend on the earlier parts.
 #
+ADD_SUBDIRECTORY (alloc)
 ADD_SUBDIRECTORY (atoms)
 ADD_SUBDIRECTORY (atomspace)
 ADD_SUBDIRECTORY (eval)
