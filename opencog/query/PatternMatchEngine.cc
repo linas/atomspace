@@ -2500,29 +2500,13 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 
 		// Cache the result, so that it can be reused.
 		// See commentary on `explore_clause()` for more info.
-		HandleSeq key;
-		const HandleSeq& clvars(_pat->clause_variables.at(clause));
-		size_t cvsz = clvars.size();
-
-		// Clause contains just a single variable
-		if (1 == cvsz and
-			 _pat->cacheable_clauses.find(clause_root) !=
+		if (_pat->cacheable_clauses.find(clause_root) !=
 		    _pat->cacheable_clauses.end())
 		{
-			const Handle& jgnd(var_grounding.at(clvars[0]));
-			key = HandleSeq({clause_root, jgnd});
-		}
+//xxxxxxxxxxxxxxxxx
+			const Handle& hclause(clause->getHandle());
+			HandleSeq key = HandleSeq({hclause, hclause, hg});
 
-		// Clause contains two or more variables.
-		if (1 < cvsz and
-			 _pat->cacheable_multi.find(clause_root) !=
-		    _pat->cacheable_multi.end())
-		{
-			key = clause_grounding_key(clause_root, clvars);
-		}
-
-		if (0 < key.size())
-		{
 #ifdef QDEBUG
 			// The same clause can sometimes be grounded multiple
 			// times, but if the caching is valid, then it should
@@ -2866,24 +2850,6 @@ bool PatternMatchEngine::is_clause_grounded(const PatternTermPtr& clause) const
 	return true;
 }
 
-/// Return a lookup key for this clause.
-/// The `varseq` should be the variables in this clause
-/// as recorded in `_pat->clause_variables.find(clause)`
-HandleSeq PatternMatchEngine::clause_grounding_key(const Handle& clause,
-                                                   const HandleSeq& varseq) const
-{
-	static HandleSeq empty;
-	HandleSeq key({clause});
-	for (const Handle& hvar : varseq)
-	{
-		const auto& gv = var_grounding.find(hvar);
-		if (var_grounding.end() == gv)
-			return empty;
-		key.push_back(gv->second);
-	}
-	return key;
-}
-
 /**
  * Every clause in a pattern is one of two types:  it either
  * specifies a pattern to be matched, or it specifies an evaluatable
@@ -3096,26 +3062,14 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	if (pclause->isChoice())
 		return explore_clause_direct(term, grnd, pclause);
 
-	// Build the cache lookup key
-	HandleSeq key;
-
-	// Single-variable cache. Due to the way we are called, `term`
-	// is a subterm of the clause that contains a variable, and
-	// `grnd` is the grounding of that variable.
+	// If it is not cacheable, then explore directly.
 	const Handle& clause = pclause->getHandle();
-	if (_pat->cacheable_clauses.find(clause) != _pat->cacheable_clauses.end())
-		key = HandleSeq({clause, grnd});
-
-	// Multi-variable cache.
-	if (_pat->cacheable_multi.find(clause) != _pat->cacheable_multi.end())
-	{
-		const HandleSeq& varseq = _pat->clause_variables.at(pclause);
-		key = clause_grounding_key(clause, varseq);
-	}
-
-	// No key, nothing to look up.
-	if (0 == key.size())
+	if (_pat->cacheable_clauses.find(clause) == _pat->cacheable_clauses.end())
 		return explore_clause_direct(term, grnd, pclause);
+
+	// Positive cache. The `term` is a subterm of the clause,
+	// the `grnd` is the proposed grounding of that term.
+	HandleSeq key = HandleSeq({clause, term->getHandle(), grnd});
 
 	const auto& cac = _gnd_cache.find(key);
 	if (cac != _gnd_cache.end())
