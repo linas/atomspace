@@ -339,7 +339,7 @@ CONTINUATION_LINK <- EVALUATABLE_LINK
 // size, because the C++ EvaluationLink chews up an extra 120 Bytes to
 // store free variables (from FreeLink). So Edge is .. the same thing,
 // but slightly more RAM-efficient.
-EDGE_LINK <- ORDERED_LINK
+// EDGE_LINK <- ORDERED_LINK
 
 // ====================================================================
 // Connectors and sections.
