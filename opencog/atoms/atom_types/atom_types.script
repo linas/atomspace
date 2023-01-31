@@ -680,7 +680,7 @@ DUAL_LINK <- SATISFYING_LINK
 // EvaluationLinks record the result of evaluating a predicate.
 // That is, given some elements, they indicate whether the predicate is
 // true or false (or has some other TruthValue) on those elements.
-EVALUATION_LINK <- FREE_LINK,EDGE_LINK,EVALUATABLE_LINK
+EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
 
 // ==============================================================
 // Types and type constructors. Variables and other Atoms can be
