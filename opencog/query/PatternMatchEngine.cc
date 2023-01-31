@@ -3121,6 +3121,11 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	if (cac != _gnd_cache.end())
 	{
 		logmsg("Cache hit!");
+logger().info("duuude hitter term=%s", term->getHandle()->to_string().c_str());
+logger().info("duuude hitter gnd=%s", grnd->to_string().c_str());
+logger().info("duuude hitter clause=%s", pclause->getHandle()->to_string().c_str());
+logger().info("duuude hitter keysecond=%s", cac->second->to_string().c_str());
+logger().info("duuude hitter key=%s", oc_to_string(key).c_str());
 
 		// Record the clause grounding.
 		var_grounding[clause] = cac->second;
