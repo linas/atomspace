@@ -2463,13 +2463,23 @@ void PatternMatchEngine::cache_groundings(const PatternTermPtr& clause,
 	const Handle& hclause(clause->getHandle());
 	HandleSeq key = HandleSeq({hclause, hterm, htermg});
 
-#ifdef QDEBUG
+#if 1 // def QDEBUG
 	// The same clause can sometimes be grounded multiple
 	// times, but if the caching is valid, then it should
 	// always be grounded exactly the same way.
 	const auto& prev = _gnd_cache.find(key);
 	if (_gnd_cache.end() != prev)
-		OC_ASSERT(prev->second == vargnds, "Internal Error; mismatched cache grounding.");
+{
+if (prev->second != vargnds) {
+printf("duuude bad match.========= Clause = %s\n", hclause->to_string().c_str());
+printf("duuuude hterm = %s\n", hterm->to_string().c_str());
+printf("duuuude termg= %s\n", htermg->to_string().c_str());
+printf("duuude new cace=%s\n", oc_to_string(vargnds).c_str());
+printf("duuude old cace=%s\n", oc_to_string(prev->second).c_str());
+
+}
+		// OC_ASSERT(prev->second == vargnds, "Internal Error: mismatched cache grounding.");
+}
 #endif
 	_gnd_cache.insert({key, vargnds});
 
@@ -2540,10 +2550,17 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 
 			HandleSeq vargnds;
 			vargnds.reserve(cvsz); // the correct size.
+printf("duuude cvsize=%lu varg=%lu\n", cvsz, vargnds.capacity());
 			vargnds.push_back(hg);   // save the clause grounding itself.
 			for (const Handle& hvar : clvars)
 			{
 				const auto& gv = var_grounding.find(hvar);
+if (var_grounding.end() == gv)
+{
+printf("duuuude wtf!!! %s\n", hvar->to_string().c_str());
+printf("duuuude clause = %s\n", clause_root->to_string().c_str());
+printf("duuuude clauseg = %s\n", hg->to_string().c_str());
+}
 				vargnds.push_back(gv->second);
 			}
 
@@ -3108,6 +3125,9 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	if (cac != _gnd_cache.end())
 	{
 		logmsg("Cache hit!");
+printf("duude cache hit! %s\n", clause->to_string().c_str());
+printf("duude term is %s\n", term->getHandle()->to_string().c_str());
+printf("duude term gr is %s\n", grnd->to_string().c_str());
 
 		// Record the clause grounding.
 		var_grounding[clause] = cac->second[0];
@@ -3120,7 +3140,11 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 		const HandleSeq& clvars(_pat->clause_variables.at(pclause));
 		size_t cvsz = clvars.size();
 		for (size_t iv=0; iv<cvsz-1; iv++)
+{
+printf("duude cache var %s\n", clvars[iv]->to_string().c_str());
+printf("duude cache vrg %s\n", cac->second[iv+1]->to_string().c_str());
 			var_grounding[clvars[iv]] = cac->second[iv+1];
+}
 
 		return do_next_clause();
 	}
