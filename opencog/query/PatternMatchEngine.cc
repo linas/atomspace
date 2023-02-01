@@ -2503,9 +2503,21 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 		if (_pat->cacheable_clauses.find(clause_root) !=
 		    _pat->cacheable_clauses.end())
 		{
-//xxxxxxxxxxxxxxxxx
+			// Create a list of the variables grounded in this clause
+			const HandleSeq& clvars(_pat->clause_variables.at(clause));
+			size_t cvsz = clvars.size() + 1;
+
+			HandleSeq vargnds(cvsz); // the correct size.
+			vargnds.push_back(hg);   // save the clause grounding itself.
+			for (const Handle& hvar : clvars)
+			{
+				const auto& gv = var_grounding.find(hvar);
+				vargnds.push_back(gv->second);
+			}
+
 			const Handle& hclause(clause->getHandle());
 			HandleSeq key = HandleSeq({hclause, hclause, hg});
+//xxxxxxxxxxxxx
 
 #ifdef QDEBUG
 			// The same clause can sometimes be grounded multiple
@@ -2513,9 +2525,9 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 			// always be grounded exactly the same way.
 			const auto& prev = _gnd_cache.find(key);
 			if (_gnd_cache.end() != prev)
-				OC_ASSERT(prev->second == hg, "Internal Error");
+				OC_ASSERT(prev->second == vargnds, "Internal Error");
 #endif
-			_gnd_cache.insert({key, hg});
+			_gnd_cache.insert({key, vargnds});
 		}
 	}
 
@@ -3077,7 +3089,7 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 		logmsg("Cache hit!");
 
 		// Record the clause grounding.
-		var_grounding[clause] = cac->second;
+		var_grounding[clause] = cac->second[0];
 
 		// Copy variable groundings, which were stored in the key.
 		// Usually, this is not needed; however, if the variable
@@ -3087,7 +3099,7 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 		const HandleSeq& clvars(_pat->clause_variables.at(pclause));
 		size_t cvsz = clvars.size();
 		for (size_t iv=0; iv<cvsz; iv++)
-			var_grounding[clvars[iv]] = key[iv+1];
+			var_grounding[clvars[iv]] = cac->second[iv+1];
 
 		return do_next_clause();
 	}

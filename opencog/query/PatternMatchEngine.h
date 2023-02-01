@@ -200,7 +200,7 @@ private:
 	bool is_clause_grounded(const PatternTermPtr&) const;
 
 	// Positive and negative caches of clauses.
-	std::unordered_map<HandleSeq, Handle> _gnd_cache;
+	std::unordered_map<HandleSeq, HandleSeq> _gnd_cache;
 	std::unordered_set<HandleSeq> _nack_cache;
 
 	// -------------------------------------------
