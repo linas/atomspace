@@ -198,6 +198,8 @@ private:
 	// -------------------------------------------
 	// Methods that help avoid pointless searches
 	bool is_clause_grounded(const PatternTermPtr&) const;
+	void cache_groundings(const PatternTermPtr&, const HandleSeq&,
+	                      const PatternTermPtr&);
 
 	// Positive and negative caches of clauses.
 	std::unordered_map<HandleSeq, HandleSeq> _gnd_cache;

@@ -2448,6 +2448,38 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	return do_term_up(parent, hg, clause);
 }
 
+void PatternMatchEngine::cache_groundings(const PatternTermPtr& clause,
+                                          const HandleSeq& vargnds,
+                                          const PatternTermPtr& term)
+{
+	const Handle& hclause(clause->getHandle());
+
+	// XXX Shouldn't we be recording the pattern term,
+	// instead of the term handle???
+	const Handle& hterm(term->getHandle());
+
+	const auto& tgp = var_grounding.find(hterm);
+	OC_ASSERT(var_grounding.end() != tgp, "Internal Error; no term ground!");
+	const Handle& htermg = tgp->second;
+
+	HandleSeq key = HandleSeq({hclause, hterm, htermg});
+
+#ifdef QDEBUG
+	// The same clause can sometimes be grounded multiple
+	// times, but if the caching is valid, then it should
+	// always be grounded exactly the same way.
+	const auto& prev = _gnd_cache.find(key);
+	if (_gnd_cache.end() != prev)
+		OC_ASSERT(prev->second == vargnds, "Internal Error");
+#endif
+	_gnd_cache.insert({key, vargnds});
+
+	// Recuse to the subterms
+	const PatternTermSeq& subterms(term->getOutgoingSet());
+	for (const PatternTermPtr& subt : subterms)
+		cache_groundings(clause, vargnds, subt);
+}
+
 /// This is called when we've navigated to the top of a clause,
 /// and so it is fully grounded, and we're essentially done.
 /// However, let the callbacks have the final say on whether to
@@ -2515,19 +2547,9 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 				vargnds.push_back(gv->second);
 			}
 
+			// Record a cache hit for all terms in the clause.
 			const Handle& hclause(clause->getHandle());
-			HandleSeq key = HandleSeq({hclause, hclause, hg});
-//xxxxxxxxxxxxx
-
-#ifdef QDEBUG
-			// The same clause can sometimes be grounded multiple
-			// times, but if the caching is valid, then it should
-			// always be grounded exactly the same way.
-			const auto& prev = _gnd_cache.find(key);
-			if (_gnd_cache.end() != prev)
-				OC_ASSERT(prev->second == vargnds, "Internal Error");
-#endif
-			_gnd_cache.insert({key, vargnds});
+			cache_groundings(clause, vargnds, clause);
 		}
 	}
 
