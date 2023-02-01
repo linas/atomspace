@@ -2452,16 +2452,15 @@ void PatternMatchEngine::cache_groundings(const PatternTermPtr& clause,
                                           const HandleSeq& vargnds,
                                           const PatternTermPtr& term)
 {
-	const Handle& hclause(clause->getHandle());
-
 	// XXX Shouldn't we be recording the pattern term,
 	// instead of the term handle???
 	const Handle& hterm(term->getHandle());
 
 	const auto& tgp = var_grounding.find(hterm);
-	OC_ASSERT(var_grounding.end() != tgp, "Internal Error; no term ground!");
-	const Handle& htermg = tgp->second;
+	if (var_grounding.end() == tgp) return;
 
+	const Handle& htermg = tgp->second;
+	const Handle& hclause(clause->getHandle());
 	HandleSeq key = HandleSeq({hclause, hterm, htermg});
 
 #ifdef QDEBUG
@@ -2548,7 +2547,6 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 			}
 
 			// Record a cache hit for all terms in the clause.
-			const Handle& hclause(clause->getHandle());
 			cache_groundings(clause, vargnds, clause);
 		}
 	}
