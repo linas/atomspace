@@ -285,6 +285,8 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 			}
 			else
 			{
+printf("duude wtf %s\n", gnd->first->to_string().c_str());
+printf("seco %p\n", gnd->second.get());
 				std::size_t incoming_set_size = gnd->second->getIncomingSetSize();
 				thick_vars.insert(std::make_pair(incoming_set_size, v));
 			}

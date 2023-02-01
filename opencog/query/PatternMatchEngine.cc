@@ -2469,7 +2469,7 @@ void PatternMatchEngine::cache_groundings(const PatternTermPtr& clause,
 	// always be grounded exactly the same way.
 	const auto& prev = _gnd_cache.find(key);
 	if (_gnd_cache.end() != prev)
-		OC_ASSERT(prev->second == vargnds, "Internal Error");
+		OC_ASSERT(prev->second == vargnds, "Internal Error; mismatched cache grounding.");
 #endif
 	_gnd_cache.insert({key, vargnds});
 
@@ -2538,7 +2538,8 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 			const HandleSeq& clvars(_pat->clause_variables.at(clause));
 			size_t cvsz = clvars.size() + 1;
 
-			HandleSeq vargnds(cvsz); // the correct size.
+			HandleSeq vargnds;
+			vargnds.reserve(cvsz); // the correct size.
 			vargnds.push_back(hg);   // save the clause grounding itself.
 			for (const Handle& hvar : clvars)
 			{
@@ -3118,7 +3119,7 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 		// Tested by `CacheHitUTest`.
 		const HandleSeq& clvars(_pat->clause_variables.at(pclause));
 		size_t cvsz = clvars.size();
-		for (size_t iv=0; iv<cvsz; iv++)
+		for (size_t iv=0; iv<cvsz-1; iv++)
 			var_grounding[clvars[iv]] = cac->second[iv+1];
 
 		return do_next_clause();
