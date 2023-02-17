@@ -327,7 +327,7 @@ CONTINUATION_LINK <- EVALUATABLE_LINK
 // Basic Graph Theory
 //
 // An EdgeLink is used to represent labelled graph edges. The intended
-// use is to write graph edges as
+// use is to represent graph edges as
 //
 //      EdgeLink
 //         PredicateNode "some edge type" // Or a LexicalNode or BondNode
@@ -562,6 +562,22 @@ STATE_LINK <- UNIQUE_LINK
 // second definition into the AtomSpace will throw an exception.
 // Restricted to DefinedProcedure, DefinedSchema, etc.
 DEFINE_LINK <- UNIQUE_LINK
+
+// A UniqueEdgeLink is an EdgeLink for which the edge-label+first-vertex
+// is unique in an AtomSpace and all subframes of that AtomSpace. This
+// is, there can only ever be one
+// (UniqueEdge (Atom "foo") (List (Atom "bar") (Atom ...)))
+// for the given (foo, far) pair. Attempts to insert more than one into
+// an AtomSpace will not cause an error, but will instead return the
+// original association. UniqueEdges cannot be hidden by Frames.
+//
+// UniqueEdges are meant to be used for race-free, atomic, exclusive
+// declarations ("grants") of relationships. They can be used to issue
+// unique keys, indexes, lookups, tags, ... with guaranteed thread
+// safety.  They are similar to UniqueLinks, except that they have a
+// more user-friendly interface. They are more-or-less equivalent to
+// (UniqueLink (List (Atom "foo") (Atom "bar")) (Atom ...))
+UNIQUE_EDGE_LINK <- FREE_LINK,EDGE_LINK
 
 // The ScopeLink is used to identify an open term, i.e. a link
 // containing VariableNodes within it, and binding those variables.
@@ -1128,7 +1144,7 @@ PYTHON_AST <- FOREIGN_AST
 
 // ==============================================================
 // Assorted miscellaneous link types with an unclear future.
-//
+// Some of these need to be moved to the URE.
 
 // This is a marker used to avoid type-checking in the static type
 // checker. See `atoms/core/Checkers.cc`
