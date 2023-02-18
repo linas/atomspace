@@ -32,25 +32,41 @@ void DeleteLink::init(void)
 	FreeLink::init();
 }
 
+#ifdef THIS_WONT_WORK
+// This is stubbed out; it was part of an older design that attempted
+// to prevent fully-grounded delete links from even existing, i.e. of
+// making them self-destruct upon creation. Neat idea, but it won't
+// actually work, at least, not without adding some extra overhead into
+// the AtomSpace logic that would penalize all users. It's not worth
+// it; let grounded DeleteLinks exist, and make them disappear only
+// when executed.
 void DeleteLink::setAtomSpace(AtomSpace * as)
 {
+	Atom::setAtomSpace(as);
+
 	// The handleset must contain a variable in it, somewhere.
 	// If it doesn't, then the entire handleset is to be deleted
 	// (removed from the atomspace).
-	if (0 <= _vars.varseq.size())
-	{
-		Atom::setAtomSpace(as);
+	if (0 < _vars.varseq.size())
 		return;
-	}
 
 	for (const Handle& h : _outgoing)
 		as->extract_atom(h, true);
+
+	_outgoing.clear();
 }
+#endif
 
 ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 {
+	// Self-delete only when fully-grounded. Does not work if there
+	// are variables. The goal is to allow DeleteLinks to be used in
+	// query patterns (where they will have ... variables in them!)
+	if (0 < _vars.varseq.size())
+		return nullptr;
+
 	// In general, neither this link, nor it's outgoing set will be in
-	// any AtomSpace at all. So in order for the delete to be successful,
+	// any AtomSpace at all. So, in order for the delete to be successful,
 	// an AtomSpace to delete from must be explicitly specified. The
 	// reason the outgoing set is not in any AtomSpace is because this
 	// DeleteLink got assembled on the fly, usually by a PutLink, and
@@ -67,8 +83,7 @@ ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 
 		AtomSpace* oas = h->getAtomSpace();
 		if (nullptr == oas) oas = as;
-		if (oas)
-			oas->extract_atom(h, true);
+		oas->extract_atom(h, true);
 	}
 	return nullptr;
 }
