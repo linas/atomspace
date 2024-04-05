@@ -472,6 +472,16 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 	return substitute_scoped(term, make_sequence(vm), index);
 }
 
+ValuePtr FreeVariables::sub_values_nocheck(const Handle& term,
+                                           const ValueSeq& args,
+                                           bool silent) const
+{
+	// XXX Temporary hack.
+	HandleSeq hseq;
+	for (const ValuePtr& v : args) hseq.emplace_back(HandleCast(v));
+	return substitute_scoped(term, hseq, index);
+}
+
 bool FreeVariables::operator<(const FreeVariables& other) const
 {
 	return varseq < other.varseq;

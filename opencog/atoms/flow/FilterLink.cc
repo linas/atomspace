@@ -452,64 +452,31 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	       (not body->is_type(LINK_SIGNATURE_LINK))))
 		return vterm;
 
-	// Special case for Values. This is minimalist, and does not support
-	// RuleLink (see note below), which it should. It also assumes a
-	// very minimalist structure for the LinkSignature kind, which is
-	// also probably not correct. Someday, when users demand this, it
-	// should be fixed.
-	if (body->is_type(LINK_SIGNATURE_LINK))
-	{
-		if (valmap.size() == 1) return valmap.begin()->second;
-
-		Type kind = link_sig_kind(body);
-		if (LINK_VALUE == kind)
-		{
-			ValueSeq valseq;
-			for (const Handle& var : _mvars->varseq)
-			{
-				auto valpair = valmap.find(var);
-				valseq.emplace_back(valpair->second);
-			}
-			return createLinkValue(valseq);
-		}
-
-		// Fall through. Handle regular atoms.
-	}
-
-	// XXX FIXME. Everything below assumes we're working with Atoms not
-	// Values, and that the RuleLink only has Atoms (not Values) in it's
-	// rewrite. That's historically OK, but we do want to support the
-	// general case of LinkValues, someday. Just not today.
-
 	// Place the groundings into a sequence, for easy access.
-	HandleSeq valseq;
+	ValueSeq valseq;
 	for (const Handle& var : _mvars->varseq)
 	{
 		auto valpair = valmap.find(var);
-
-		// Can't ever happen.
-		// if (valmap.end() == valpair) return Handle::UNDEFINED;
-
-		valseq.emplace_back(HandleCast(valpair->second));
+		valseq.emplace_back(valpair->second);
 	}
 
 	// Perform substitution, if it's a RuleLink.
 	if (not _rewrite.empty())
 	{
-		HandleSeq rew;
+		ValueSeq rew;
 		// Beta reduce, and execute. No type-checking during
 		// beta-reduction; we've already done that, during matching.
 		for (const Handle& impl : _rewrite)
 		{
-			Handle red(_mvars->substitute_nocheck(impl, valseq));
-			if (red->is_executable())
-				rew.emplace_back(HandleCast(red->execute(scratch, silent)));
+			ValuePtr red(_mvars->sub_values_nocheck(impl, valseq));
+			if (red->is_atom() and HandleCast(red)->is_executable())
+				rew.emplace_back(HandleCast(red)->execute(scratch, silent));
 			else
 			{
 				// Consume quotations.
 				Type rty = red->get_type();
 				if (LOCAL_QUOTE_LINK == rty or DONT_EXEC_LINK == rty)
-					rew.emplace_back(red->getOutgoingAtom(0));
+					rew.emplace_back(HandleCast(red)->getOutgoingAtom(0));
 				else
 					rew.emplace_back(red);
 			}
@@ -523,7 +490,20 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// than one variable.
 	size_t nv = valseq.size();
 	if (1 < nv)
-		return scratch->add_link(LIST_LINK, std::move(valseq));
+	{
+		if (body->is_type(LINK_SIGNATURE_LINK))
+		{
+			Type kind = link_sig_kind(body);
+			if (LINK_VALUE == kind)
+				return createLinkValue(valseq);
+			// XXX do something else???
+			return Handle::UNDEFINED;
+		}
+		// Convert ValueSeq to HandleSeq
+		HandleSeq oset;
+		for (const ValuePtr& v : valseq) oset.emplace_back(HandleCast(v));
+		return scratch->add_link(LIST_LINK, std::move(oset));
+	}
 	else if (1 == nv)
 		return valseq[0];
 	return Handle::UNDEFINED;

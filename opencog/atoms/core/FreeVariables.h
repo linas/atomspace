@@ -138,6 +138,11 @@ struct FreeVariables : Replacement
 	                          const HandleMap&,
 	                          bool silent=false) const;
 
+	/// Like the above, but works with Values
+	ValuePtr sub_values_nocheck(const Handle&,
+	                            const ValueSeq&,
+	                            bool silent=false) const;
+
 	/// Comparison operator. Used to enable containers holding
 	/// this class.
 	bool operator<(const FreeVariables& other) const;
