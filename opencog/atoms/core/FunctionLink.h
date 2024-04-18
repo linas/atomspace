@@ -60,7 +60,7 @@ namespace opencog
  * Note that this class must NOT be used for user-defined functions;
  * users should use the LambdaLink for that.
  */
-class FunctionLink : public FreeLink
+class FunctionLink : public Link // FreeLink
 {
 protected:
 	static void check_type(Type t);

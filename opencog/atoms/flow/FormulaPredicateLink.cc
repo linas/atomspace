@@ -121,6 +121,7 @@ TruthValuePtr FormulaPredicateLink::apply(AtomSpace* as,
 				"Expecting a FunctionLink, got %s",
 				flh->to_string().c_str());
 
+#if 0
 		// If the FunctionLink has free variables in it,
 		// reduce them with the provided arguments.
 		FunctionLinkPtr flp(FunctionLinkCast(flh));
@@ -129,6 +130,7 @@ TruthValuePtr FormulaPredicateLink::apply(AtomSpace* as,
 		{
 			flh = fvars.substitute_nocheck(flh, cargs);
 		}
+#endif
 
 		// Expecting a FunctionLink without variables.
 		ValuePtr v(flh->execute(as, silent));
