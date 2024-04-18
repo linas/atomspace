@@ -179,17 +179,6 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 	if (sn->is_type(DEFINED_PROCEDURE_NODE))
 		sn = DefineLink::get_definition(sn);
 
-	if (sn->is_type(FUNCTION_LINK))
-	{
-		FunctionLinkPtr flp = FunctionLinkCast(sn);
-		const FreeVariables& vars = flp->get_vars();
-		const HandleSeq& oset(LIST_LINK == args->get_type() ?
-			args->getOutgoingSet(): HandleSeq{args});
-		Handle reduct = vars.substitute_nocheck(sn, oset, silent);
-		ValuePtr vp = reduct->execute(as, silent);
-		return vp;
-	}
-
 	if (LAMBDA_LINK == sn->get_type())
 	{
 		// Unpack and beta-reduce the Lambda link.
