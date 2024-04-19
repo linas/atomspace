@@ -8,6 +8,7 @@ ADD_LIBRARY (persist
 
 TARGET_LINK_LIBRARIES(persist
 	storage-types
+	atomio
 	atomspace
 	smob
 )
