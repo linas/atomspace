@@ -24,7 +24,6 @@
 #define _OPENCOG_I_O_NODE_H
 
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/sensory-types/sensory_types.h>
 
 namespace opencog
 {
