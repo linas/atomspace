@@ -456,6 +456,11 @@ TAG_NODE <- LEXICAL_NODE
 TAG_LINK <- ORDERED_LINK // <- MEMBER_LINK
 
 // ====================================================================
+// I/O subsystem
+
+I_O_NODE <- TAG_NODE
+
+// ====================================================================
 // Predicate-logic/lambda-calc/model-theory style links and nodes.
 // These embody some of the common and recurring themes from predicate
 // logic, model theory, term rewriting and lambda calculus. There is
