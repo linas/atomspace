@@ -32,7 +32,7 @@ using namespace opencog;
 // ====================================================================
 
 StorageNode::StorageNode(Type t, std::string uri) :
-	Node(t, uri)
+	IONode(t, uri)
 {
 	if (not nameserver().isA(t, STORAGE_NODE))
 		throw RuntimeException(TRACE_INFO, "Bad inheritance!");

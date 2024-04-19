@@ -45,7 +45,7 @@ public:
 	/**
 	 * Open a connection to the indicated URI.
 	 */
-	virtual void open(const std::string& flags) = 0;
+	virtual void open(void) = 0;
 
 	/**
 	 * Close an active connection.
@@ -97,7 +97,7 @@ public:
 	 * operations have completed.
 	 * NB: at this time, we don't distinguish barrier and flush.
 	 */
-	void barrier(AtomSpace* = nullptr);
+	virtual void barrier(AtomSpace* = nullptr);
 };
 
 NODE_PTR_DECL(IONode)
