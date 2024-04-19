@@ -458,6 +458,10 @@ TAG_LINK <- ORDERED_LINK // <- MEMBER_LINK
 // ====================================================================
 // I/O subsystem
 
+// What's the right base type for all IONodes?
+// LexicalNode, cause there's a collection of them.
+// TagNode cause above already calls them "data streams".
+// BondNode cause they are connector-like?
 I_O_NODE <- TAG_NODE
 
 // ====================================================================

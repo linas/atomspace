@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_STORAGE_NODE_H
 #define _OPENCOG_STORAGE_NODE_H
 
-#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/io/IONode.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/api/BackingStore.h>
 #include <opencog/persist/storage/storage_types.h>
@@ -35,7 +35,7 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class StorageNode : public Node, protected BackingStore
+class StorageNode : public IONode, protected BackingStore
 {
 	// The write-thru proxies need to call into the BackingStore
 	// directly. We declare them as friends.
@@ -53,47 +53,9 @@ public:
 	StorageNode(Type, std::string);
 	virtual ~StorageNode();
 
-
 	// ----------------------------------------------------------------
-	// Operations regarding the connection to the remote URI.
-	/**
-	 * Open a connection to the indicated URI.
-	 */
-	virtual void open(void) = 0;
-
-	/**
-	 * Close an active connection.
-	 */
-	virtual void close(void) = 0;
-
-	/**
-	 * Return true if the connection to the remote end appears to
-	 * be established and functioning.
-	 */
-	virtual bool connected(void) = 0;
-
-	/**
-	 * Initialize storage at the remote end. There must already be
-	 * an open connection to the remote end; and the remote end must
-	 * be vacant or empty.  For example: for an SQL server, this can
-	 * be used to create the database, the tables in the database for
-	 * the first time.
-	 */
-	virtual void create(void) = 0;
-
-	/**
-	 * Destroy the storage at the remote end. Empties the remote end of
-	 * data, and then undoes whaterver `create()` did. Remote ends might
-	 * not honor this request, e.g. if other clients have open
-	 * connections.
-	 */
-	virtual void destroy(void) = 0;
-
-	/**
-	 * Erase the entire contents of the remote end. Performs a bulk
-	 * deletion of all data.
-	 */
-	virtual void erase(void) = 0;
+	// Proxy operations regarding the connection to the remote URI.
+	// Maybe these should be moved to the IONode base class?
 
 	/**
 	 * For StorageNodes that support proxying, open the proxy for operation.

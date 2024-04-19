@@ -2,13 +2,10 @@
 // Script for automatic "storage atom type" generation. This defines
 // a collection of types suitable for defining distributed storage
 // interconnects.
-//
-// What's the right base type for all StorageNodes?
-// LexicalNode, cause there's a collection of them.
-// TagNode cause base AtomSpace already calls them "data streams".
-// BondNode cause they are connector-like?
-STORAGE_NODE <- TAG_NODE
-//
+
+// Base class, inherits open(), close() methods.
+STORAGE_NODE <- I_O_NODE
+
 // Specific storage nodes. Most of these are implemented in other git
 // repos, and not here. Look for git repos called "atomspace-xxx" for
 // approrpiate values of "xxx".
