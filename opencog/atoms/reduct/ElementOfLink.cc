@@ -97,7 +97,7 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		std::vector<ValuePtr> chopped;
 		for (double d : vindex)
 			chopped.push_back(lvec.at((int)(d+0.5)));
-		return createLinkValue(chopped);
+		return createLinkValue(std::move(chopped));
 	}
 
 	// If its a float value, it's a vector.

@@ -137,7 +137,7 @@ ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
 		std::vector<ValuePtr> chopped;
 		for (size_t i=0; i<len; i++)
 			if (vmask[i]) chopped.push_back(lvec[i]);
-		return createLinkValue(chopped);
+		return createLinkValue(std::move(chopped));
 	}
 
 	// A vector of strings

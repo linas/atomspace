@@ -88,7 +88,7 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 	if (stream->is_type(LINK_VALUE))
 	{
 		LinkValuePtr lvp = LinkValueCast(stream);
-      return createLinkValue(lvp->value());
+      return createLinkValue(ValueSeq(lvp->value()));
 	}
 
 	if (silent)

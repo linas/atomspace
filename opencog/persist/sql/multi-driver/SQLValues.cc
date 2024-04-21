@@ -519,7 +519,7 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 			p = strchr(p, ',');
 			if (p) p++;
 		}
-		return createLinkValue(lnkarr);
+		return createLinkValue(std::move(lnkarr));
 	}
 
 	// Well, it could be an atom!

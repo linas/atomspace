@@ -54,11 +54,11 @@ public:
 	LinkValue(const ValuePtr& vp)
 		: Value(LINK_VALUE) { _value.push_back(vp); }
 
-	LinkValue(const ValueSeq& vlist)
-		: Value(LINK_VALUE), _value(vlist) {}
+	LinkValue(const ValueSeq&& vlist)
+		: Value(LINK_VALUE), _value(std::move(vlist)) {}
 
-	LinkValue(Type t, const ValueSeq& vlist)
-		: Value(t), _value(vlist) {}
+	LinkValue(Type t, const ValueSeq&& vlist)
+		: Value(t), _value(std::move(vlist)) {}
 
 	LinkValue(const ValueSet& vset)
 		: Value(LINK_VALUE)
