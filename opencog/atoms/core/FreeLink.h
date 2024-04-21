@@ -45,7 +45,7 @@ protected:
 	void init(void);
 
 public:
-	FreeLink(const HandleSeq&&, Type=FREE_LINK);
+	FreeLink(HandleSeq&&, Type=FREE_LINK);
 	FreeLink(const FreeLink&) = delete;
 	FreeLink& operator=(const FreeLink&) = delete;
 	virtual ~FreeLink() {}

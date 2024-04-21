@@ -27,7 +27,7 @@
 
 using namespace opencog;
 
-FreeLink::FreeLink(const HandleSeq&& oset, Type t)
+FreeLink::FreeLink(HandleSeq&& oset, Type t)
     : Link(std::move(oset), t)
 {
 	if (FREE_LINK == t)
