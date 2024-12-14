@@ -394,6 +394,7 @@ Handle AtomSpace::add_atom(const Handle& h)
 
 Handle AtomSpace::add_node(Type t, std::string&& name)
 {
+printf("duuude wtf add >>%s<<\n", name.c_str());
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
     if (_read_only)

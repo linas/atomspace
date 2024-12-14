@@ -23,8 +23,8 @@ cdef class Atom(Value):
 
     @property
     def atomspace(self):
-        cdef cAtomSpace* a = self.get_c_handle().get().getAtomSpace()
-        return AtomSpace_factory(a)
+        cdef cValuePtr a = self.get_c_handle().get().getAtomSpace()
+        return AtomSpace_factoid(a)
 
     @property
     def name(self):

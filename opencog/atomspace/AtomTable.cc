@@ -71,6 +71,7 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _transient(transient),
     _nameserver(nameserver())
 {
+printf("duuude atomspace ctor %p\n", this);
     if (parent) {
         // Set the COW flag by default, for any Atomspace that sits on
         // top of another one. This provides a "common-sense" behavior
@@ -89,6 +90,7 @@ AtomSpace::AtomSpace(AtomSpacePtr& parent) :
     _transient(false),
     _nameserver(nameserver())
 {
+printf("duuude atomspace ctor %p\n", this);
     if (nullptr != parent) {
         // Set the COW flag by default; it seems like a simpler
         // default than setting it to be write-through.
@@ -107,6 +109,7 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     _transient(false),
     _nameserver(nameserver())
 {
+printf("duuude atomspace ctor %p\n", this);
     for (const Handle& base : bases)
     {
         _environ.push_back(AtomSpaceCast(base));
@@ -122,6 +125,7 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
 
 AtomSpace::~AtomSpace()
 {
+printf("duuude atomspace dtor %p\n", this);
     _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
     clear_all_atoms();
 }
@@ -245,6 +249,8 @@ Handle AtomSpace::check(const Handle& orig, bool force)
 {
     // If we have a version of this atom in this AtomSpace, return it.
     // If it was previously marked hidden, unhide it first.
+printf("duude this is %p\n", this);
+printf("duuude the orig is %s\n", orig->to_string().c_str());
     const Handle& hc(typeIndex.findAtom(orig));
     if (hc) {
         if (hc->isAbsent()) {

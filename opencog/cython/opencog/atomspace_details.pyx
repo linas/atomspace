@@ -39,22 +39,15 @@ cdef vector[cHandle] atom_list_to_vector(list lst):
     return handle_vector
 
 
-cdef AtomSpace_factory(cAtomSpace *to_wrap):
-    cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
-    instance.atomspace = to_wrap
-    # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap)
-    return instance
-
 cdef AtomSpace_factoid(cValuePtr to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.asp = to_wrap
-    instance.atomspace = <cAtomSpace*> to_wrap.get()
-    # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get())
+    print("Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get()))
     return instance
 
 cdef class AtomSpace(Value):
     # these are defined in atomspace.pxd:
-    #cdef cAtomSpace *atomspace
+    #cdef cValuePtr asp
     #cdef object parent_atomspace
 
     #def __cinit__(self):
@@ -65,11 +58,11 @@ cdef class AtomSpace(Value):
     # works, but is not very safe, and has a certain feeling of "ick"
     # about it.  But I can't find any better way.
     def __init__(self, long addr = 0, object parent=None):
+        print("duuude enter pythn atomspace store for addr=", addr)
         if (addr == 0) :
             self.asp = createAtomSpace(<cAtomSpace*> NULL)
-            self.atomspace = <cAtomSpace*> self.asp.get()
         else :
-            self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
+            self.asp = <cValuePtr> PyLong_AsVoidPtr(addr)
         self.parent_atomspace = parent
 
     def __richcmp__(as_1, as_2, int op):
@@ -78,8 +71,8 @@ cdef class AtomSpace(Value):
         cdef AtomSpace atomspace_1 = <AtomSpace>as_1
         cdef AtomSpace atomspace_2 = <AtomSpace>as_1
 
-        cdef cAtomSpace* c_atomspace_1 = atomspace_1.atomspace
-        cdef cAtomSpace* c_atomspace_2 = atomspace_2.atomspace
+        cdef cValuePtr c_atomspace_1 = atomspace_1.asp
+        cdef cValuePtr c_atomspace_2 = atomspace_2.asp
 
         is_equal = True
         if c_atomspace_1 != c_atomspace_2:
@@ -267,8 +260,8 @@ cdef class AtomSpace(Value):
         return result != result.UNDEFINED
 
 
-cdef api object py_atomspace(cAtomSpace* c_atomspace) with gil:
-    cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
+cdef api object py_atomspace(cValuePtr c_atomspace) with gil:
+    cdef AtomSpace atomspace = AtomSpace_factoid(c_atomspace)
     return atomspace
 
 cdef api object py_atom(const cHandle& h):
