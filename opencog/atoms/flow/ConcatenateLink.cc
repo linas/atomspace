@@ -51,7 +51,7 @@ ConcatenateLink::ConcatenateLink(const HandleSeq&& oset, Type t)
 ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
 {
 	int coff = 0;
-	Type otype = SET_LINK;
+	Type otype = LINK_VALUE;
 
 	// If there are two args, then the first one specifies the
 	// output type.
@@ -70,11 +70,28 @@ ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
 		otype = TypeNodeCast(_outgoing[0])->get_kind();
 	}
 
-	// If the given Atom is executable, then execute it.
-	// In effectively all cases, we expect it to be executable!
+	// If the given Atom is not executable, we deal with a the
+	// simplest case of just collapsing a plain link.
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
-		return as->add_link(otype, base);
+	{
+		// We expect a link. We can throw, or we can be silent!?
+		// I dunno. Flip a coin.
+		if (not base->is_link()) return base;
+		HandleSeq oset;
+		for (const Handle& oli : base->getOutgoingSet())
+		{
+			if (oli->is_link())
+			{
+				const HandleSeq& los = oli->getOutgoingSet();
+				oset.insert(oset.end(), los.begin(), los.end());
+			}
+			else
+				oset.push_back(oli);
+		}
+		if (0 == coff) otype = base->get_type();
+		return as->add_link(otype, std::move(oset));
+	}
 
 	ValuePtr vp = base->execute(as, silent);
 	if (vp->is_atom())
