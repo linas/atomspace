@@ -641,7 +641,7 @@ static bool crispy_eval_scratch(AtomSpace* as,
 		return tf;
 
 	throwSyntaxException(silent,
-		"Either incorrect or not implemented yet. Cannot evaluate %s",
+		"Either incorrect or not implemented yet (crisp). Cannot evaluate %s",
 		evelnk->to_string().c_str());
 
 	return false;
