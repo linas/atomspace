@@ -24,6 +24,7 @@
 #define _OPENCOG_COND_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {
@@ -42,6 +43,15 @@ public:
 	CondLink& operator=(const CondLink&) = delete;
 
 	virtual ValuePtr execute(AtomSpace*, bool);
+
+	// It is convenient to write CondLinks that return true/false
+	// or perhaps other TV's. So allow CndLinks to be evaluated.
+	virtual bool is_evaluatable() const { return true; }
+	virtual TruthValuePtr evaluate(AtomSpace* as, bool silent=false) {
+		TruthValuePtr tvp(TruthValueCast(execute(as, silent)));
+		if (tvp) return tvp;
+		return TruthValue::FALSE_TV();
+	}
 
 	static Handle factory(const Handle&);
 };
