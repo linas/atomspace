@@ -105,6 +105,9 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 			if (exps[i]->is_executable())
 				return exps[i]->execute(scratch, silent);
 
+			if (exps[i]->is_type(EVALUATABLE_LINK))
+				return ValueCast(EvaluationLink::do_evaluate(scratch, exps[i]));
+
 			// At this time, not every Atom type knows how to execute
 			// itself. So if the above didn't work, try again, forcing
 			// further reduction.
@@ -115,6 +118,10 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 
 	if (default_exp->is_executable())
 		return default_exp->execute(scratch, silent);
+
+	if (default_exp->is_type(EVALUATABLE_LINK))
+		return ValueCast(EvaluationLink::do_evaluate(scratch, default_exp));
+
 	Instantiator inst(scratch);
 	return inst.execute(default_exp);
 }
