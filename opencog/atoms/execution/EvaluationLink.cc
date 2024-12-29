@@ -610,6 +610,12 @@ static bool crispy_maybe(AtomSpace* as,
 	if (nameserver().isA(t, CRISP_OUTPUT_LINK) and
 	    evelnk->is_evaluatable())
 	{
+		return evelnk->bevaluate(scratch, silent);
+	}
+
+	// CondLink is evaluatable, but it cannot promise to be crisp.
+	if (COND_LINK == t)
+	{
 		TruthValuePtr tv(evelnk->evaluate(scratch, silent));
 		if (0.5 < tv->get_mean()) return true;
 		return false;
