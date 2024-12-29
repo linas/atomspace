@@ -93,15 +93,21 @@ CondLink::CondLink(const HandleSeq &&oset, Type t)
 
 ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 {
+printf("duuude enter cond link eec\n");
 	for (unsigned i = 0; i < conds.size(); ++i)
 	{
 		TruthValuePtr tvp(EvaluationLink::do_evaluate(scratch, conds[i]));
 
+if (tvp)
+printf("duuude cond %d is %s\n", i, tvp->to_string().c_str());
+else
+printf("duuude cond %d is null\n", i);
 		// If the do_evaluate worked, but the result is NOT a TV,
 		// then assume that a non-empty result is same as TRUE.
 		// Empty results cause do_evaluate() to return FALSE_TV.
 		if (nullptr == tvp or tvp->get_mean() > 0.5)
 		{
+printf("duuude happy joy for %d is exec %d\n", i, exps[i]->is_executable());
 			if (exps[i]->is_executable())
 				return exps[i]->execute(scratch, silent);
 
@@ -112,18 +118,29 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 			// itself. So if the above didn't work, try again, forcing
 			// further reduction.
 			Instantiator inst(scratch);
-			return inst.execute(exps[i]);
+			// return inst.execute(exps[i]);
+ValuePtr vp = inst.execute(exps[i]);
+printf("duuude insta vp=%s\n", vp->to_string().c_str());
+return vp;
 		}
 	}
 
+printf("duuude defaulting %d\n", default_exp->is_executable());
 	if (default_exp->is_executable())
-		return default_exp->execute(scratch, silent);
-
+{
+		// return default_exp->execute(scratch, silent);
+ValuePtr vp = default_exp->execute(scratch, silent);
+printf("duuude deful execy vp=%s\n", vp->to_string().c_str());
+return vp;
+}
 	if (default_exp->is_type(EVALUATABLE_LINK))
 		return ValueCast(EvaluationLink::do_evaluate(scratch, default_exp));
 
 	Instantiator inst(scratch);
-	return inst.execute(default_exp);
+	// return inst.execute(default_exp);
+ValuePtr vp= inst.execute(default_exp);
+printf("duuude defuloinsta vp=%s\n", vp->to_string().c_str());
+return vp;
 }
 
 DEFINE_LINK_FACTORY(CondLink, COND_LINK)
