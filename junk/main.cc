@@ -60,7 +60,8 @@ void use_dev(cl::Device ocldev)
 	cl::Event *event_handler = new cl::Event();
 	queue.enqueueNDRangeKernel(kernel,
 		cl::NullRange,
-		cl::NDRange(global_dim, 1, 1),
+		// cl::NDRange(global_dim, 1, 1),
+		cl::NDRange(16, 1, 1),
 		cl::NullRange,
 		nullptr, event_handler);
 
