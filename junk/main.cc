@@ -1,4 +1,6 @@
 
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS 1
+
 #define CL_HPP_MINIMUM_OPENCL_VERSION 200
 #define CL_HPP_TARGET_OPENCL_VERSION 300
 
@@ -31,13 +33,13 @@ void use_dev(cl::Device ocldev)
 printf("ping\n");
 
 	cl::CommandQueue queue(context, ocldev);
-#if 0
 	queue.enqueueTask(kernel);
 	queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf);
 
+printf("ping\n");
 	std::cout << "hello";
 	std::cin.get();
-#endif
+printf("pong\n");
 }
 
 int main(int argc, char* argv[])
