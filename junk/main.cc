@@ -1,4 +1,5 @@
 
+#define CL_HPP_MINIMUM_OPENCL_VERSION 200
 #define CL_HPP_TARGET_OPENCL_VERSION 300
 
 #include <CL/opencl.hpp>
@@ -14,15 +15,19 @@ int main(int argc, char* argv[])
 	cl::Platform ocl3plat;
 	for (const auto& plat : platforms)
 	{
-		std::string platname = plat.getInfo<CL_PLATFORM_VERSION>();
-		printf("Platform %s\n", platname.c_str());
+		std::string pname = plat.getInfo<CL_PLATFORM_NAME>();
+		std::string pvend = plat.getInfo<CL_PLATFORM_VENDOR>();
+		std::string pvers = plat.getInfo<CL_PLATFORM_VERSION>();
+		printf("Platform %s\n", pname.c_str());
+		printf("\tVendor %s\n", pvend.c_str());
+		printf("\tVersion %s\n", pvers.c_str());
 
 		std::vector<cl::Device> devices;
 		plat.getDevices(CL_DEVICE_TYPE_CPU, &devices);
 
 		printf("\tThis platform has %d devices\n", devices.size());
 
-		if (platname.find("OpenCL 3.") != std::string::npos)
+		if (pvers.find("OpenCL 3.") != std::string::npos)
 			ocl3plat = plat;
 	}
 

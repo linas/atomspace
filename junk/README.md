@@ -1,0 +1,6 @@
+
+
+Howto:
+install foobar
+
+clinfo
