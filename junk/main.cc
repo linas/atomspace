@@ -54,24 +54,31 @@ void use_dev(cl::Device ocldev)
 	cl::Kernel kernel(program, "HelloWorld", &err);
 	kernel.setArg(0, memBuf);
 
-	cl::Event *event_handler = new cl::Event();
-
 	// Launch
 	cl::CommandQueue queue(context, ocldev);
 
-#if 0
+	cl::Event *event_handler = new cl::Event();
 	queue.enqueueNDRangeKernel(kernel,
 		cl::NullRange,
-		cl::NDRange(
+		cl::NDRange(global_dim, 1, 1),
+		cl::NullRange,
+		nullptr, event_handler);
 
+	// this is deprecated API.
+	// queue.enqueueTask(kernel);
 
-	queue.enqueueTask(kernel);
-	queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf);
+	event_handler->wait();
+	printf("Done waiting on exec\n");
 
-printf("ping\n");
-	std::cin.get();
-printf("pong\n");
-#endif
+	// queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf);
+	queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf,
+		nullptr, event_handler);
+	event_handler->wait();
+	printf("Done waiting on read\n");
+
+	delete event_handler;
+
+	printf("pong >>%s<<\n", buf);
 }
 
 int main(int argc, char* argv[])
