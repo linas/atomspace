@@ -1,8 +1,8 @@
 
-// #define CL_USE_DEPRECATED_OPENCL_2_0_APIS
+#define CL_HPP_TARGET_OPENCL_VERSION 300
 
-#include<CL/cl.hpp>
-#include<iostream>
+#include <CL/opencl.hpp>
+#include <iostream>
 #include <fstream>
 
 int main() 
