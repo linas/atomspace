@@ -13,13 +13,13 @@ void use_dev(cl::Device ocldev)
 	printf("Using device %s\n", dname.c_str());
 	printf("\tVersion %s\n", dvers.c_str());
 
-#if 0
 	std::ifstream helloWorldFile("hello.cl");
 	std::string src(std::istreambuf_iterator<char>(helloWorldFile), (std::istreambuf_iterator<char>()));
 
-	cl::Program::Sources sources( 1, std::make_pair(src.c_str(), src.length() + 1));
+	cl::Program::Sources sources;
+	sources.push_back(src);
 
-	cl::Context context(device);
+	cl::Context context(ocldev);
 	cl::Program program(context, sources);
 
 	auto err = program.build("-cl-std=CL1.2");
@@ -28,8 +28,10 @@ void use_dev(cl::Device ocldev)
 	cl::Buffer memBuf(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, sizeof(buf));
 	cl::Kernel kernel(program, "HelloWorld", &err);
 	kernel.setArg(0, memBuf);
+printf("ping\n");
 
-	cl::CommandQueue queue(context, device);
+	cl::CommandQueue queue(context, ocldev);
+#if 0
 	queue.enqueueTask(kernel);
 	queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf);
 
