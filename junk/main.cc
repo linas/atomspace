@@ -16,6 +16,7 @@ int main()
 
     auto device = devices.front();
 
+#if 0
     std::ifstream helloWorldFile("hello.cl");
     std::string src(std::istreambuf_iterator<char>(helloWorldFile), (std::istreambuf_iterator<char>()));
 
@@ -37,4 +38,5 @@ int main()
 
     std::cout << "hello";
     std::cin.get();
+#endif
 }
