@@ -1,8 +1,7 @@
 
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS 1
-
 #define CL_HPP_MINIMUM_OPENCL_VERSION 200
 #define CL_HPP_TARGET_OPENCL_VERSION 300
+#define CL_HPP_ENABLE_EXCEPTIONS
 
 #include <CL/opencl.hpp>
 #include <iostream>
@@ -15,6 +14,12 @@ void use_dev(cl::Device ocldev)
 	printf("Using device %s\n", dname.c_str());
 	printf("\tVersion %s\n", dvers.c_str());
 
+	auto dimensions = ocldev.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
+	printf("\tMax dimensions: %d x %d x %d\n",
+		dimensions[0], dimensions[1], dimensions[2]);
+	size_t global_dim = dimensions[0] * dimensions[1] * dimensions[2];
+
+	// Copy in source code
 	std::ifstream helloWorldFile("hello.cl");
 	std::string src(std::istreambuf_iterator<char>(helloWorldFile), (std::istreambuf_iterator<char>()));
 
@@ -24,22 +29,44 @@ void use_dev(cl::Device ocldev)
 	cl::Context context(ocldev);
 	cl::Program program(context, sources);
 
-	auto err = program.build("-cl-std=CL1.2");
+	// Compile
+	try
+	{
+		auto err = program.build("-cl-std=CL1.2");
+	}
+	catch (const cl::Error& e)
+	{
+		printf("Aiiie build bonk! >>%s<< what %s\n",
+			program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(ocldev).c_str(),
+			e.what());
+		exit(1);
+	}
 
-	char buf[16];
+	// Set up I/O
+	char buf[256];
 	cl::Buffer memBuf(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, sizeof(buf));
+	int err;
 	cl::Kernel kernel(program, "HelloWorld", &err);
 	kernel.setArg(0, memBuf);
-printf("ping\n");
 
+	cl::Event *event_handler = new cl::Event();
+
+	// Launch
 	cl::CommandQueue queue(context, ocldev);
+
+#if 0
+	queue.enqueueNDRangeKernel(kernel,
+		cl::NullRange,
+		cl::NDRange(
+
+
 	queue.enqueueTask(kernel);
 	queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf);
 
 printf("ping\n");
-	std::cout << "hello";
 	std::cin.get();
 printf("pong\n");
+#endif
 }
 
 int main(int argc, char* argv[])
