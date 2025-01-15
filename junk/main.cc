@@ -32,7 +32,9 @@ void use_dev(cl::Device ocldev)
 	// Compile
 	try
 	{
-		auto err = program.build("-cl-std=CL1.2");
+		// Specifying flags causes exception.
+		// program.build("-cl-std=CL1.2");
+		program.build("");
 	}
 	catch (const cl::Error& e)
 	{
@@ -44,7 +46,10 @@ void use_dev(cl::Device ocldev)
 
 	// Set up I/O
 	char buf[256];
-	cl::Buffer memBuf(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, sizeof(buf));
+	// CL_MEM_USE_HOST_PTR
+	cl::Buffer memBuf(context,
+		CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
+		sizeof(buf));
 	int err;
 	cl::Kernel kernel(program, "HelloWorld", &err);
 	kernel.setArg(0, memBuf);
