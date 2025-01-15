@@ -6,13 +6,18 @@
 #include <iostream>
 #include <fstream>
 
+void use_dev(cl::Device ocldev)
+{
+}
+
 int main(int argc, char* argv[])
 {
 	std::vector<cl::Platform> platforms;
 	cl::Platform::get(&platforms);
 	printf("Got %d plaforms\n", platforms.size());
 
-	cl::Platform ocl3plat;
+	cl::Platform oclplat;
+	cl::Device ocldev;
 	for (const auto& plat : platforms)
 	{
 		std::string pname = plat.getInfo<CL_PLATFORM_NAME>();
@@ -23,18 +28,27 @@ int main(int argc, char* argv[])
 		printf("\tVersion %s\n", pvers.c_str());
 
 		std::vector<cl::Device> devices;
-		plat.getDevices(CL_DEVICE_TYPE_CPU, &devices);
+		// plat.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+		plat.getDevices(CL_DEVICE_TYPE_GPU, &devices);
 
-		printf("\tThis platform has %d devices\n", devices.size());
+		printf("\tThis platform has %d GPU devices\n", devices.size());
 
-		if (pvers.find("OpenCL 3.") != std::string::npos)
-			ocl3plat = plat;
+		for (const auto& dev: devices)
+		{
+			std::string dname = dev.getInfo<CL_DEVICE_NAME>();
+			std::string dvers = dev.getInfo<CL_DEVICE_VERSION>();
+			printf("\tDevice %s\n", dname.c_str());
+			printf("\t\tVersion %s\n", dvers.c_str());
+
+			// hacky
+			oclplat = plat;
+			ocldev = dev;
+		}
+
+		// I aint got no version 3.
+		// if (pvers.find("OpenCL 3.") != std::string::npos)
+		// 	oclplat = plat;
 	}
-
-	std::vector<cl::Device> devices;
-	ocl3plat.getDevices(CL_DEVICE_TYPE_CPU, &devices);
-
-	printf("Got %d devices\n", devices.size());
 
 #if 0
 	auto device = devices.front();
