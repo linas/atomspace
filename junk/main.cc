@@ -9,16 +9,31 @@ int main(int argc, char* argv[])
 {
 	std::vector<cl::Platform> platforms;
 	cl::Platform::get(&platforms);
+	printf("Got %d plaforms\n", platforms.size());
 
-	printf("got %d plaforms\n", platforms.size());
+	cl::Platform ocl3plat;
+	for (const auto& plat : platforms)
+	{
+		std::string platname = plat.getInfo<CL_PLATFORM_VERSION>();
+		printf("Platform %s\n", platname.c_str());
 
-	auto platform = platforms.front();
+		std::vector<cl::Device> devices;
+		plat.getDevices(CL_DEVICE_TYPE_CPU, &devices);
+
+		printf("\tThis platform has %d devices\n", devices.size());
+
+		if (platname.find("OpenCL 3.") != std::string::npos)
+			ocl3plat = plat;
+	}
+
 	std::vector<cl::Device> devices;
-	platform.getDevices(CL_DEVICE_TYPE_CPU, &devices);
+	ocl3plat.getDevices(CL_DEVICE_TYPE_CPU, &devices);
 
-	auto device = devices.front();
+	printf("Got %d devices\n", devices.size());
 
 #if 0
+	auto device = devices.front();
+
 	std::ifstream helloWorldFile("hello.cl");
 	std::string src(std::istreambuf_iterator<char>(helloWorldFile), (std::istreambuf_iterator<char>()));
 
