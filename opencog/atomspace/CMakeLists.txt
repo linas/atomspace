@@ -11,7 +11,7 @@ ADD_LIBRARY (atomspace
 	AtomSpace.cc
 	AtomTable.cc
 	Frame.cc
-	# IncomeIndex.cc Disabled. See notes in header file.
+	IncomeIndex.cc
 	Transient.cc
 	TypeIndex.cc
 )
@@ -50,7 +50,7 @@ INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
 INSTALL (FILES
 	AtomSpace.h
 	Frame.h
-	# IncomeIndex.h
+	IncomeIndex.h
 	Transient.h
 	TypeIndex.h
 	version.h
