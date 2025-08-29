@@ -58,6 +58,9 @@ EXECUTE_PROCESS(
 
 ADD_DEFINITIONS(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
+ADD_DEFINITIONS(-DUSE_INCOME_INDEX)
+SET(COMPILE_TIME_DEFS "USE_INCOME_INDEX=1")
+
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
 
