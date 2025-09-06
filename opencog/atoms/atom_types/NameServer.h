@@ -91,6 +91,7 @@ private:
 public:
     /** Gets the singleton instance (following meyer's design pattern) */
     friend NameServer& nameserver();
+    friend NameServer& inline_nameserver();
 
     bool beginTypeDecls(const char *);
     void endTypeDecls(void);
@@ -320,11 +321,17 @@ public:
     size_t getTypeHash(Type type) const { return _hash[type]; }
 };
 
-inline NameServer& nameserver()
+inline NameServer& inline_nameserver()
 {
     static NameServer* instance = new NameServer();
     return *instance;
 }
+
+// Provide a backwards compat symbol in the shilb.
+NameServer& nameserver();
+#ifndef OPENCOG_NAMESERVER_INLINE_BACKWARD_COMPAT
+    #define nameserver() inline_nameserver()
+#endif
 
 /** @}*/
 } // namespace opencog

@@ -27,6 +27,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#define OPENCOG_NAMESERVER_INLINE_BACKWARD_COMPAT 1
 #include "NameServer.h"
 
 #include <exception>
@@ -279,4 +280,12 @@ const std::string& NameServer::getTypeShortName(Type type) const
     const std::string* name = _code2ShortMap[type];
     if (name) return *name;
     return nullString;
+}
+
+// Non-inline version for any shlibs that have not been recompiled
+// with the inlline version. This provides backwards compat and thus
+// avoids breaking old code. Could probably be removed in a few weeks?
+NameServer& opencog::nameserver()
+{
+    return opencog::inline_nameserver();
 }
