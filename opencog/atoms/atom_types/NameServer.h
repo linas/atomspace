@@ -320,8 +320,11 @@ public:
     size_t getTypeHash(Type type) const { return _hash[type]; }
 };
 
-NameServer& nameserver();
-
+inline NameServer& nameserver()
+{
+    static NameServer* instance = new NameServer();
+    return *instance;
+}
 
 /** @}*/
 } // namespace opencog
