@@ -18,6 +18,11 @@
 // g++ -O1 insane-O2.cc -o insane-O2-good
 //
 // Offending compiler, linker, runtime loader:
+// gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+// GNU ld (GNU Binutils for Ubuntu) 2.42
+// ldd (Ubuntu GLIBC 2.39-0ubuntu8.5) 2.39
+//
+// Also affected:
 // gcc (Debian 12.2.0-14+deb12u1) 12.2.0
 // GNU ld (GNU Binutils for Debian) 2.40
 // ldd (Debian GLIBC 2.36-9+deb12u10) 2.36
