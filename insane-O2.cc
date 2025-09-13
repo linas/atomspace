@@ -4,6 +4,8 @@
 #include <stdio.h>
 
 // Bug: boolean values seem to be mis-handled with -O2 optimization.
+// Caution: yes, there are floats in this bug report. No, that's not
+// the problem, although I gess there is entanglement.
 //
 // The following attempts to compare vectors of floats.
 // The compare is done by casting the floats to int64_t
