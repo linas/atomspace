@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+// Reported to gcc bugzilla #121942
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121942
+// 13 Sept 2025
+//
 // Bug: boolean values seem to be mis-handled with -O2 optimization.
 // Caution: yes, there are floats in this bug report. No, that's not
 // "really" the problem, although they are entangled into it.
