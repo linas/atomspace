@@ -9,6 +9,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include "NumericFunctionLink.h"
 #include "DivideLink.h"
 #include "TimesLink.h"
@@ -48,17 +49,26 @@ void TimesLink::init(void)
 ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
+	ValuePtr vi(NumericFunctionLink::get_value(as, silent, fi));
+	if (vi->is_type(LINK_VALUE))
+	{
+		// Yikes. Cons.
+		const ValueSeq& vsq = LinkValueCast(vi)->value();
+		ValuePtr expr = fj;
+		for (const ValuePtr& item : vsq)
+			expr = kons(as, silent, item, expr);
+		return expr;
+	}
+
 	if (fj == knil)
 		return NumericFunctionLink::get_value(as, silent, fi);
 
 	// Try to yank out values, if possible.
-	ValuePtr vi(NumericFunctionLink::get_value(as, silent, fi));
-	Type vitype = vi->get_type();
-
 	ValuePtr vj(fj);
 	Type vjtype = vj->get_type();
 
 	// Is either one a TimesLink? If so, then flatten.
+	Type vitype = vi->get_type();
 	if (TIMES_LINK == vitype)
 	{
 		HandleSeq seq = HandleCast(vi)->getOutgoingSet();

@@ -9,6 +9,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include "MinusLink.h"
 #include "NumericFunctionLink.h"
 #include "PlusLink.h"
@@ -47,13 +48,21 @@ void PlusLink::init(void)
 ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
+	ValuePtr vi(NumericFunctionLink::get_value(as, silent, fi));
+	if (vi->is_type(LINK_VALUE))
+	{
+		// Yikes. Cons.
+		const ValueSeq& vsq = LinkValueCast(vi)->value();
+		ValuePtr expr = fj;
+		for (const ValuePtr& item : vsq)
+			expr = kons(as, silent, item, expr);
+		return expr;
+	}
+
 	if (fj == knil)
 		return NumericFunctionLink::get_value(as, silent, fi);
 
 	// Try to yank out values, if possible.
-	ValuePtr vi(NumericFunctionLink::get_value(as, silent, fi));
-	Type vitype = vi->get_type();
-
 	ValuePtr vj(fj);
 	Type vjtype = vj->get_type();
 
@@ -64,6 +73,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	// Are they numbers? If so, perform vector (pointwise) addition.
 	// Always lower the strength: Number+Number->Number
 	// but FloatValue+Number->FloatValue
+	Type vitype = vi->get_type();
 	try
 	{
 		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
