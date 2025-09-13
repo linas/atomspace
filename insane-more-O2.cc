@@ -28,6 +28,18 @@
 // gcc (Debian 12.2.0-14+deb12u1) 12.2.0
 // GNU ld (GNU Binutils for Debian) 2.40
 // ldd (Debian GLIBC 2.36-9+deb12u10) 2.36
+//
+// Both compilers fail, but they do behave differently(!)
+// Offending lines printed by gcc-12.2.0:
+//
+// duude lili=0x8000000000000000 lulu=0x8000000000000000 is it big? 1
+// duuude 2 lili=0x8000000000000000 and toobig = 1
+// duuude 2 keep going because toobig = 1
+//
+// Same offensive lines printed by gcc-13.3.0:
+// duude lili=0x8000000000000000 lulu=0x8000000000000000 is it big? 1
+// duuude 2 lili=0x8000000000000000 and toobig = 1
+// duuude 2 keep going because toobig = 0
 
 
 bool is_it_big(int64_t lili)
