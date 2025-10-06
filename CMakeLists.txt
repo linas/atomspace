@@ -27,7 +27,7 @@ PROJECT(atomspace)
 # SET(CMAKE_BUILD_TYPE Release)
 
 # Uncomment to build in debug mode.
-# SET(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_BUILD_TYPE Debug)
 
 # Uncomment to be in coverage testing mode.
 # SET(CMAKE_BUILD_TYPE Coverage)
