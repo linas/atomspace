@@ -1321,11 +1321,13 @@ void PatternLink::make_ttree_dummies(const PatternTermPtr& root,
 	// Skip the second pass below, when exploring the insides of an
 	// OrLink.  The problem is that add_unaries below will add terms
 	// inside the OrLink as mandatory, when of course, they are not.
+	const PatternTermPtr& parent = ptm->getParent();
 	const Handle& hpnt(parent->getHandle());
 	if (hpnt and OR_LINK == hpnt->get_type()) return;
 
 	// `h` is usually the same as `term`, unless there's quotation.
 	const Handle& h(ptm->getHandle());
+	Type t = h->get_type();
 
 	// Recurse down to the tips, first. (Why first? I duno.)
 	if (h->is_link())
