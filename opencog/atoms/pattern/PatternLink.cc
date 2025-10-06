@@ -1343,8 +1343,9 @@ void PatternLink::make_ttree_dummies(const PatternTermPtr& root,
 		chk_const = chk_const and not parent->hasAnyEvaluatable();
 		chk_const = chk_const and not ptm->isQuoted();
 
-		for (const Handle& ho: h->getOutgoingSet())
+		for (PatternTermPtr& po: ptm->getOutgoingSet())
 		{
+			const Handle& ho(po->getHandle());
 			if (chk_const and is_constant(_variables.varset, ho)) continue;
 			make_ttree_dummies(root, po);
 		}
