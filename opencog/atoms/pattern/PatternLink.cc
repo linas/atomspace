@@ -1127,6 +1127,7 @@ PatternTermPtr PatternLink::make_term_tree(const Handle& term)
 	PatternTermPtr top_term(createPatternTerm());
 	PatternTermPtr root_term(top_term->addOutgoingTerm(term));
 	make_ttree_recursive(root_term, root_term);
+	make_ttree_dummies(root_term, root_term);
 	return root_term;
 }
 
@@ -1151,7 +1152,7 @@ void PatternLink::pin_term_recursive(const PatternTermPtr& ptm,
 }
 
 void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
-                                           PatternTermPtr& ptm)
+                                       PatternTermPtr& ptm)
 {
 	// `h` is usually the same as `term`, unless there's quotation.
 	const Handle& h(ptm->getHandle());
@@ -1304,15 +1305,51 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 		}
 		return;
 	}
+}
 
+/// Perform second pass for evaluatables - this time to mark the left-overs
+/// as literals. We need to do this AFTER make_ttree_recursive, not before.
+/// The goal of adding dummies is that evaluatable terms will typically have
+/// an assortment of variables in them, in these will need to be attached to
+/// the rest of the pattern. But we can do this only after we know what the
+/// rest of the pattern is -- all of it, not just some of it. There's bad news
+/// if we stumble and add dummies that weren't needed; these create issues
+/// during grounding.
+void PatternLink::make_ttree_dummies(const PatternTermPtr& root,
+                                     PatternTermPtr& ptm)
+{
 	// Skip the second pass below, when exploring the insides of an
 	// OrLink.  The problem is that add_unaries below will add terms
 	// inside the OrLink as mandatory, when of course, they are not.
 	const Handle& hpnt(parent->getHandle());
 	if (hpnt and OR_LINK == hpnt->get_type()) return;
 
+	// `h` is usually the same as `term`, unless there's quotation.
+	const Handle& h(ptm->getHandle());
+
+	// Recurse down to the tips, first. (Why first? I duno.)
+	if (h->is_link())
+	{
+		// Remove constants from PresentLink, as they are pointless.
+		// The URE frequently puts them there.
+		// The gotcha is that some things look const, but that is only
+		// because they involve variables that are bound to some other
+		// scope up above. Those are NOT actually const. This is not
+		// particularly well-thought out. Might be buggy...
+		bool chk_const = (PRESENT_LINK == t or ABSENT_LINK == t);
+		chk_const = chk_const or ALWAYS_LINK == t or GROUP_LINK == t;
+		chk_const = chk_const and not parent->hasAnyEvaluatable();
+		chk_const = chk_const and not ptm->isQuoted();
+
+		for (const Handle& ho: h->getOutgoingSet())
+		{
+			if (chk_const and is_constant(_variables.varset, ho)) continue;
+			make_ttree_dummies(root, po);
+		}
+	}
+
 	// Second pass for evaluatables - this time to mark the left-overs
-	// as literals. We need to do this AFTER recursion, not before.
+	// as literals. We need to do this AFTER make_ttree_recursive, not before.
 	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
 	    and not ptm->isQuoted() and can_evaluate(h))
 	{
