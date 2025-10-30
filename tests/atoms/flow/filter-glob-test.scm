@@ -39,9 +39,11 @@
 			(List (Variable "$first") (Variable "$last")))
 			(ValueOf (Anchor "test") (Predicate PNAME)))))
 
+; Possible results from above harness.
 (define simple-pair
 	(LinkValue (List (Concept "A") (Concept "B"))))
 
+;-----------------
 ;; Trivial match.
 (define trivial-match
 	(harness '() '() "no-middle"))
@@ -49,6 +51,15 @@
 
 (test-assert "trivial-match"
 	(equal? trivial-match simple-pair))
+
+;-----------------
+;; Untyped Glob; requires one or more matches
+(define middle-match
+	(harness (Glob "$middle") (Glob "$middle") "have-middle"))
+(format #t "middle-match ~A\n" middle-match)
+
+(test-assert "middle-match"
+	(equal? middle-match simple-pair))
 
 (test-end tname)
 
