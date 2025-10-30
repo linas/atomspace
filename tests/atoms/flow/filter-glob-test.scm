@@ -48,6 +48,7 @@
 
 ;-----------------
 ;; Trivial match.
+(format #t "================================== trivial-match\n")
 (define trivial-match
 	(harness '() '() "no-middle"))
 
@@ -56,6 +57,7 @@
 
 ;-----------------
 ;; Trivial mis-match.
+(format #t "================================== mis-triv-match\n")
 (define mis-triv-match
 	(harness '() '() "have-middle"))
 
@@ -64,6 +66,7 @@
 
 ;-----------------
 ;; Untyped Glob; requires one or more matches
+(format #t "================================== mid-mis-match\n")
 (define mid-mis-match
 	(harness (Glob "$middle") (Glob "$middle") "no-middle"))
 
@@ -72,6 +75,7 @@
 
 ;-----------------
 ;; Untyped Glob; requires one or more matches
+(format #t "================================== middle-match\n")
 (define middle-match
 	(harness (Glob "$middle") (Glob "$middle") "have-middle"))
 
@@ -80,6 +84,7 @@
 
 ;-----------------
 ;; Typed Glob; requires zero or more matches
+(format #t "================================== type-zero-match\n")
 (define type-zero-match
 	(harness
 		(TypedVariable (Glob "$middle")
@@ -89,6 +94,19 @@
 (format #t "type-zero-match ~A\n" type-zero-match)
 (test-assert "type-zero-match" (equal? type-zero-match simple-pair))
 
+;-----------------
+;; Typed Glob; requires zero or more matches
+(format #t "================================== type-middle-match\n")
+(define type-middle-match
+	(harness
+		(TypedVariable (Glob "$middle")
+			(Interval (Number 0) (Number -1))) ; Allow 0+ matches
+		(Glob "$middle") "have-middle"))
+
+(format #t "type-middle-match ~A\n" type-middle-match)
+(test-assert "type-middle-match" (equal? type-middle-match simple-pair))
+
+;-----------------
 (test-end tname)
 
 (opencog-test-end)
