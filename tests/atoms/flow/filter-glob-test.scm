@@ -22,6 +22,15 @@
 			(Concept "MID")
 			(Concept "B"))))
 
+(cog-set-value! (Anchor "test") (Predicate "fat-middle")
+	(LinkValue
+		(LinkValue
+			(Concept "A")
+			(Concept "MID-1")
+			(Concept "MID-2")
+			(Concept "MID-3")
+			(Concept "B"))))
+
 ;; Test harness
 (define (harness DECL MATCH PNAME)
 	(cog-execute!
@@ -83,6 +92,15 @@
 (test-assert "middle-match" (equal? middle-match simple-pair))
 
 ;-----------------
+;; Untyped Glob; requires one or more matches
+(format #t "================================== fat-match\n")
+(define fat-match
+	(harness (Glob "$middle") (Glob "$middle") "fat-middle"))
+
+(format #t "fat-match ~A\n" fat-match)
+(test-assert "fat-match" (equal? fat-match simple-pair))
+
+;-----------------
 ;; Typed Glob; requires zero or more matches
 (format #t "================================== type-zero-match\n")
 (define type-zero-match
@@ -105,6 +123,18 @@
 
 (format #t "type-middle-match ~A\n" type-middle-match)
 (test-assert "type-middle-match" (equal? type-middle-match simple-pair))
+
+;-----------------
+;; Typed Glob; requires no more than two matches
+(format #t "================================== type-fat-match\n")
+(define type-fat-match
+	(harness
+		(TypedVariable (Glob "$middle")
+			(Interval (Number 0) (Number 2))) ; Allow no more than two matches
+		(Glob "$middle") "fat-middle"))
+
+(format #t "type-fat-match ~A\n" type-fat-match)
+(test-assert "type-fat-match" (equal? type-fat-match empty))
 
 ;-----------------
 (test-end tname)
