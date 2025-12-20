@@ -249,6 +249,11 @@ UNISET_VALUE <- CONTAINER_VALUE, BLOCKING_SIG
 // provided lambda arg. The buckets are themselves UnisetValues.
 GROUP_VALUE <- UNISET_VALUE, BLOCKING_SIG, HANDLE_ARG
 
+// A single thread-safe bucket. All items inserted into the bucket
+// are checked for equivalence; an attempt to insert a non-equivalent
+// item clears the collection and closes it.
+ALWAYS_VALUE <- GROUP_VALUE
+
 // A thread-safe set of Values that is maintained in sorted order.
 // Inherits from UnisetValue to minimize c++ duplication.
 SORTED_STREAM <- UNISET_VALUE, STREAMING_SIG, HANDLE_ARG, HANDLE_VEC_ARG
