@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/AlwaysValue.cc
+ * opencog/atoms/value/MonoValue.cc
  *
  * Copyright (C) 2025 BrainyBlaze Dynamics, LLC
  * All Rights Reserved
@@ -18,26 +18,26 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <opencog/atoms/value/AlwaysValue.h>
+#include <opencog/atoms/value/MonoValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
 // ==============================================================
 
-AlwaysValue::AlwaysValue(const Handle& h)
+MonoValue::MonoValue(const Handle& h)
 	: GroupValue(h)
 {
-	_type = ALWAYS_VALUE;
+	_type = MONO_VALUE;
 }
 
-AlwaysValue::~AlwaysValue()
+MonoValue::~MonoValue()
 {
 }
 
 // ==============================================================
 
-void AlwaysValue::add(const ValuePtr& vp)
+void MonoValue::add(const ValuePtr& vp)
 {
 	add(ValuePtr(vp));
 }
@@ -45,7 +45,7 @@ void AlwaysValue::add(const ValuePtr& vp)
 /// Add item to the container. Must be equivalent to existing items.
 /// If an attempt is made to add a non-equivalent item, the container
 /// is cleared and closed.
-void AlwaysValue::add(ValuePtr&& vp)
+void MonoValue::add(ValuePtr&& vp)
 {
 	if (is_closed()) return;
 
@@ -79,4 +79,4 @@ void AlwaysValue::add(ValuePtr&& vp)
 // ==============================================================
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(ALWAYS_VALUE, createAlwaysValue, const Handle&)
+DEFINE_VALUE_FACTORY(MONO_VALUE, createMonoValue, const Handle&)

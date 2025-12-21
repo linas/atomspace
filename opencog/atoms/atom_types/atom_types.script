@@ -252,7 +252,7 @@ GROUP_VALUE <- UNISET_VALUE, BLOCKING_SIG, HANDLE_ARG
 // A single thread-safe bucket. All items inserted into the bucket
 // are checked for equivalence; an attempt to insert a non-equivalent
 // item clears the collection and closes it.
-ALWAYS_VALUE <- GROUP_VALUE
+MONO_VALUE <- GROUP_VALUE
 
 // A thread-safe set of Values that is maintained in sorted order.
 // Inherits from UnisetValue to minimize c++ duplication.
