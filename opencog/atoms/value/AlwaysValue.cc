@@ -42,23 +42,20 @@ void AlwaysValue::add(const ValuePtr& vp)
 	add(ValuePtr(vp));
 }
 
-/// Add one item to the container. All items must be equivalent to
-/// each other. If an attempt is made to add a non-equivalent item,
-/// the container is cleared and closed.
+/// Add item to the container. Must be equivalent to existing items.
+/// If an attempt is made to add a non-equivalent item, the container
+/// is cleared and closed.
 void AlwaysValue::add(ValuePtr&& vp)
 {
-	// Already closed (either normally or due to failure) - ignore
 	if (is_closed()) return;
 
-	// VoidValue or empty LinkValue signals end-of-stream.
-	if ((vp->get_type() == VOID_VALUE) or
-	    (vp->is_type(LINK_VALUE) and 0 == vp->size()))
+	// Empty Values signal end-of-stream.
+	if (0 == vp->size()))
 	{
 		close();
 		return;
 	}
 
-	// First item - just add it directly
 	ValuePtr rep = peek();
 	if (nullptr == rep)
 	{
@@ -68,18 +65,15 @@ void AlwaysValue::add(ValuePtr&& vp)
 
 	_scratch->clear();
 
-	// Check equivalence against an existing item
 	if (equivalent(*vp, *rep))
 	{
-		// Equivalent - add it
 		_set.insert(std::move(vp));
+		return;
 	}
-	else
-	{
-		// Non-equivalent item - fail!
-		_set.clear();
-		close();
-	}
+
+	// Non-equivalent item - fail!
+	_set.clear();
+	close();
 }
 
 // ==============================================================
