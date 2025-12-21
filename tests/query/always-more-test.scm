@@ -1,9 +1,7 @@
 ;
-; always-mono-test.scm -- Test MonoValue combined with QueryLink.
-; This is a direct port of an older unit test for AlwaysLink;
-; results are meant to agree; MonoValue is simpler and more flexible.
+; always-more-test.scm -- Extended test for MonoValue as AlwaysLink replacement
 ;
-; Copyright (C) 2019, 2025 Linas Vepstas
+; Copyright (C) 2019 Linas Vepstas
 ; All Rights Reserved
 ;
 ; This program is free software; you can redistribute it and/or modify
@@ -16,6 +14,15 @@
 ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ; GNU General Public License for more details.
 ;
+; You should have received a copy of the GNU Affero General Public License
+; along with this program; if not, write to:
+; Free Software Foundation, Inc.,
+; 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+;
+; This is a port of AlwaysUTest::test_more() to use MonoValue instead
+; of AlwaysLink.
+;
+
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog test-runner))
@@ -23,28 +30,36 @@
 (opencog-test-runner)
 
 ; ---------------------------------------------------------------
+; Data from always-more.scm (inlined)
 
-; Three baskets holding balls
-(Inheritance (Concept "reds basket") (Concept "basket"))
+; Four baskets holding balls
+(Inheritance (Concept "reds basket")        (Concept "basket"))
+(Inheritance (Concept "another red basket") (Concept "basket"))
 (Inheritance (Concept "reds&greens basket") (Concept "basket"))
-(Inheritance (Concept "yellows basket") (Concept "basket"))
+(Inheritance (Concept "yellows basket")     (Concept "basket"))
 
 ; Balls placed into baskets
 (Member (Concept "red ball")      (Concept "reds basket"))
 (Member (Concept "red ball too")  (Concept "reds basket"))
 (Member (Concept "red ball also") (Concept "reds basket"))
 
-(Member (Concept "red ball")     (Concept "reds&greens basket"))
-(Member (Concept "red ball too") (Concept "reds&greens basket"))
-(Member (Concept "green ball")   (Concept "reds&greens basket"))
+(Member (Concept "a red ball")    (Concept "another red basket"))
+(Member (Concept "b red ball")    (Concept "another red basket"))
+(Member (Concept "red ball also") (Concept "another red basket"))
 
-(Member (Concept "yellow ball") (Concept "yellows basket"))
-(Member (Concept "ochre ball")  (Concept "yellows basket"))
+(Member (Concept "red ball")      (Concept "reds&greens basket"))
+(Member (Concept "red ball too")  (Concept "reds&greens basket"))
+(Member (Concept "green ball")    (Concept "reds&greens basket"))
 
-; Colors of the balls
+(Member (Concept "yellow ball")   (Concept "yellows basket"))
+(Member (Concept "ochre ball")    (Concept "yellows basket"))
+
+; Predicate that tests the colors of the balls
 (Evaluation (Predicate "is red") (Concept "red ball"))
 (Evaluation (Predicate "is red") (Concept "red ball too"))
 (Evaluation (Predicate "is red") (Concept "red ball also"))
+(Evaluation (Predicate "is red") (Concept "a red ball"))
+(Evaluation (Predicate "is red") (Concept "b red ball"))
 
 (Evaluation (Predicate "is green")  (Concept "green ball"))
 
@@ -52,7 +67,7 @@
 (Evaluation (Predicate "is yellow") (Concept "ochre ball"))
 
 ; ---------------------------------------------------------------
-; Query from always.scm: baskets-with-red-balls-only
+; Query from always-more.scm: get-baskets-with-only-red-balls
 ; Original used: (Always (Evaluation (Predicate "is red") (Variable "ball")))
 ; With MonoValue, we check each basket individually.
 
@@ -89,7 +104,7 @@
 	     (= (length red-balls) (length all-balls))))
 
 ; ---------------------------------------------------------------
-; Query from always.scm: baskets-with-same-color
+; Query from always-more.scm: baskets-with-same-color
 ; Original used: (Always (Equal (Variable "some color") (Variable "other color")))
 ; With MonoValue, we check if all colors in a basket are identical.
 
@@ -119,10 +134,10 @@
 	(not (null? (cog-value->list checker))))
 
 ; ---------------------------------------------------------------
-; Test baskets-with-red-balls-only
-; Expecting: 1 basket (reds basket)
+; Test get-baskets-with-only-red-balls
+; Expecting: 2 baskets (reds basket, another red basket)
 ;
-(define tname-red "baskets-with-red-balls-only")
+(define tname-red "baskets-with-only-red-balls")
 (test-begin tname-red)
 
 (define all-baskets
@@ -135,17 +150,19 @@
 (define red-only-baskets
 	(filter basket-has-only-red-balls? all-baskets))
 
-(format #t "Expecting red basket, got ~A\n" red-only-baskets)
+(format #t "Expecting two red baskets, got ~A\n" red-only-baskets)
 
-(test-assert "one-red-basket" (= 1 (length red-only-baskets)))
-(test-assert "is-reds-basket"
+(test-assert "two-red-baskets" (= 2 (length red-only-baskets)))
+(test-assert "has-reds-basket"
 	(member (Concept "reds basket") red-only-baskets))
+(test-assert "has-another-red-basket"
+	(member (Concept "another red basket") red-only-baskets))
 
 (test-end tname-red)
 
 ; ---------------------------------------------------------------
 ; Test baskets-with-same-color
-; Expecting: 2 baskets (reds basket, yellows basket)
+; Expecting: 3 baskets (reds basket, another red basket, yellows basket)
 ;
 (define tname-same "baskets-with-same-color")
 (test-begin tname-same)
@@ -155,9 +172,11 @@
 
 (format #t "Expecting red and yellow, got ~A\n" same-color-baskets)
 
-(test-assert "two-same-color-baskets" (= 2 (length same-color-baskets)))
+(test-assert "three-same-color-baskets" (= 3 (length same-color-baskets)))
 (test-assert "has-reds-basket"
 	(member (Concept "reds basket") same-color-baskets))
+(test-assert "has-another-red-basket"
+	(member (Concept "another red basket") same-color-baskets))
 (test-assert "has-yellows-basket"
 	(member (Concept "yellows basket") same-color-baskets))
 
