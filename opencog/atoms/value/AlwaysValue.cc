@@ -50,22 +50,22 @@ void AlwaysValue::add(ValuePtr&& vp)
 	if (is_closed()) return;
 
 	// Empty Values signal end-of-stream.
-	if (0 == vp->size()))
+	if (0 == vp->size())
 	{
 		close();
 		return;
 	}
 
-	ValuePtr rep = peek();
-	if (nullptr == rep)
-	{
-		_set.insert(std::move(vp));
-		return;
-	}
+	// Atomic insert into possibly empty set.
+	std::optional<ValuePtr> rep = _set.try_insert(std::move(vp));
+	if (not rep.has_value())
+		return;  // First item was inserted
 
+	// Set was non-empty. Check equivalence against existing item.
+	// Note: vp was NOT moved (try_insert didn't insert it), so still valid.
 	_scratch->clear();
 
-	if (equivalent(*vp, *rep))
+	if (equivalent(*vp, *rep.value()))
 	{
 		_set.insert(std::move(vp));
 		return;
