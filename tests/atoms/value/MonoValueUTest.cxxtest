@@ -1,0 +1,209 @@
+/*
+ * tests/atoms/value/MonoValueUTest.cxxtest
+ *
+ * Copyright (C) 2025 BrainyBlaze Dynamics, LLC
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include <opencog/atoms/value/MonoValue.h>
+#include <opencog/atoms/value/VoidValue.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+#include <cxxtest/TestSuite.h>
+#include <vector>
+
+using namespace opencog;
+
+class MonoValueUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpacePtr _asp;
+
+public:
+	MonoValueUTest(void);
+
+	void setUp(void);
+	void test_equivalent_items(void);
+	void test_non_equivalent_clears(void);
+	void test_identical_items(void);
+};
+
+MonoValueUTest::MonoValueUTest(void)
+	: _asp(createAtomSpace())
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+	logger().set_sync_flag(true);
+	logger().set_timestamp_flag(false);
+}
+
+void MonoValueUTest::setUp(void)
+{
+}
+
+// =========================================================
+
+// Test that equivalent items are all collected in the container.
+void MonoValueUTest::test_equivalent_items(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
+
+	// Create a MonoValue that considers items equivalent if they have
+	// the same size (arity).
+	ValuePtr mono_val = eval->eval_v(R"(
+		(MonoValue
+			(Lambda
+				(VariableList (Variable "$A") (Variable "$B"))
+				(Equal (SizeOf (Variable "$A")) (SizeOf (Variable "$B")))))
+	)");
+
+	MonoValuePtr mvp = MonoValueCast(mono_val);
+	TS_ASSERT(mvp != nullptr);
+
+	// Create items all with size 2 - they should all be equivalent
+	Handle size2_a = eval->eval_h("(List (Item \"a\") (Item \"b\"))");
+	Handle size2_b = eval->eval_h("(List (Item \"x\") (Item \"y\"))");
+	Handle size2_c = eval->eval_h("(List (Item \"p\") (Item \"q\"))");
+
+	mvp->add(size2_a);
+	mvp->add(size2_b);
+	mvp->add(size2_c);
+
+	// Close the MonoValue
+	mvp->close();
+
+	// Remove items
+	std::vector<ValuePtr> items;
+	while (true)
+	{
+		ValuePtr item = mvp->remove();
+		if (item->is_type(VOID_VALUE))
+			break;
+		items.push_back(item);
+	}
+
+	// Should have all 3 items
+	TS_ASSERT_EQUALS(items.size(), 3);
+
+	printf("Equivalent items test (%zu items):\n", items.size());
+	for (size_t i = 0; i < items.size(); i++)
+		printf("  Item[%zu]: %s\n", i, items[i]->to_string().c_str());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// =========================================================
+
+// Test that adding a non-equivalent item clears and closes the container.
+void MonoValueUTest::test_non_equivalent_clears(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
+
+	// Create a MonoValue that considers items equivalent if they have
+	// the same size (arity).
+	ValuePtr mono_val = eval->eval_v(R"(
+		(MonoValue
+			(Lambda
+				(VariableList (Variable "$A") (Variable "$B"))
+				(Equal (SizeOf (Variable "$A")) (SizeOf (Variable "$B")))))
+	)");
+
+	MonoValuePtr mvp = MonoValueCast(mono_val);
+	TS_ASSERT(mvp != nullptr);
+
+	// Add items with size 2
+	Handle size2_a = eval->eval_h("(List (Item \"a\") (Item \"b\"))");
+	Handle size2_b = eval->eval_h("(List (Item \"x\") (Item \"y\"))");
+
+	mvp->add(size2_a);
+	mvp->add(size2_b);
+
+	// Now add an item with size 3 - should clear and close
+	Handle size3 = eval->eval_h("(List (Item \"1\") (Item \"2\") (Item \"3\"))");
+	mvp->add(size3);
+
+	// Container should be closed
+	TS_ASSERT(mvp->is_closed());
+
+	// Container should be empty
+	TS_ASSERT_EQUALS(mvp->size(), 0);
+
+	// Remove should return VoidValue immediately
+	ValuePtr result = mvp->remove();
+	TS_ASSERT(result->is_type(VOID_VALUE));
+
+	printf("Non-equivalent clears test: container is closed=%d, empty=%d\n",
+		mvp->is_closed(), (int)(mvp->size() == 0));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// =========================================================
+
+// Test with Identical equivalence - only truly identical items are equivalent.
+void MonoValueUTest::test_identical_items(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
+
+	// Create a MonoValue that considers items equivalent only if identical.
+	ValuePtr mono_val = eval->eval_v(R"(
+		(MonoValue
+			(Lambda
+				(VariableList (Variable "$A") (Variable "$B"))
+				(Identical (Variable "$A") (Variable "$B"))))
+	)");
+
+	MonoValuePtr mvp = MonoValueCast(mono_val);
+	TS_ASSERT(mvp != nullptr);
+
+	// Add the same item multiple times
+	Handle item = eval->eval_h("(Item \"same\")");
+
+	mvp->add(item);
+	mvp->add(item);
+	mvp->add(item);
+
+	// Close the MonoValue
+	mvp->close();
+
+	// The set should contain only 1 unique item (deduplication)
+	size_t count = 0;
+	while (true)
+	{
+		ValuePtr val = mvp->remove();
+		if (val->is_type(VOID_VALUE))
+			break;
+		count++;
+	}
+
+	// Due to set semantics, we should have only 1 item
+	TS_ASSERT_EQUALS(count, 1);
+
+	printf("Identical items test: got %zu unique items\n", count);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ======================THE END============================
+// =========================================================

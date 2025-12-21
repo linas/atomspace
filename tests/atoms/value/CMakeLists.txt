@@ -6,6 +6,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(StreamUTest)
 	ADD_CXXTEST(SortedStreamUTest)
 	ADD_CXXTEST(GroupValueUTest)
+	ADD_CXXTEST(MonoValueUTest)
 
 	ADD_GUILE_TEST(BoolValuePrintTest bool-value-print-test.scm)
 	ADD_GUILE_TEST(CtorArgsTest ctor-args-test.scm)

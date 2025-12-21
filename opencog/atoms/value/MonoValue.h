@@ -51,6 +51,9 @@ public:
 
 	virtual void add(const ValuePtr&) override;
 	virtual void add(ValuePtr&&) override;
+
+	// Override close() because GroupValue does it wrong.
+	virtual void close(void) override { UnisetValue::close(); }
 };
 
 VALUE_PTR_DECL(MonoValue);
