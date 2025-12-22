@@ -263,6 +263,23 @@ class PatternMatchCallback
 		                                 const GroundingMap& term_gnds) = 0;
 
 		/**
+		 * Verify that an Always clause holds for all possible groundings.
+		 * This is used during the verification pass to ensure that the
+		 * Always condition holds not just for the values found, but for
+		 * ALL possible values of the Always-bound variables.
+		 *
+		 * @param always_clause The Always clause to verify
+		 * @param always_vars Variables appearing in Always clauses
+		 * @param mandatory The mandatory clauses to search
+		 * @param var_soln Current variable grounding
+		 * @return true if verification passes, false if any value fails
+		 */
+		virtual bool verify_always(const Handle& always_clause,
+		                           const HandleSet& always_vars,
+		                           const HandleSeq& mandatory,
+		                           const GroundingMap& var_soln) = 0;
+
+		/**
 		 * Called when a complete grounding for all clauses is found.
 		 * Should return false to search for more solutions; or return
 		 * true to terminate search.  (Just as in all the other callbacks,

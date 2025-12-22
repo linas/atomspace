@@ -77,6 +77,12 @@ class TermMatchMixin : public virtual PatternMatchCallback
 		                                 const Handle& grnd,
 		                                 const GroundingMap&);
 
+		/** Verify Always clause holds for all possible groundings */
+		virtual bool verify_always(const Handle& always_clause,
+		                           const HandleSet& always_vars,
+		                           const HandleSeq& mandatory,
+		                           const GroundingMap& var_soln);
+
 		virtual IncomingSet get_incoming_set(const Handle&, Type);
 		virtual Handle get_link(const Handle&, Type, HandleSeq&&);
 

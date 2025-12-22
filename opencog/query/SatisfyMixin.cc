@@ -91,6 +91,14 @@ class PMCGroundings : public SatisfyMixin
 		{
 			return _cb.always_clause_match(pattrn, grnd, term_gnds);
 		}
+		bool verify_always(const Handle& always_clause,
+		                   const HandleSet& always_vars,
+		                   const HandleSeq& mandatory,
+		                   const GroundingMap& var_soln)
+		{
+			return _cb.verify_always(always_clause, always_vars,
+			                         mandatory, var_soln);
+		}
 		IncomingSet get_incoming_set(const Handle& h, Type t)
 		{
 			return _cb.get_incoming_set(h, t);
