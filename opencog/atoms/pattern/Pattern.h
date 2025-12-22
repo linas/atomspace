@@ -95,6 +95,9 @@ struct Pattern
 	/// way. Any grounding failure at all invalidates all other groundings.
 	PatternTermSeq always;
 
+	/// Variables that appear in Always clauses.
+	HandleSet always_vars;
+
 	/// ExclusiveLink terms that operate within a single component.
 	/// Variables in an ExclusiveLink must have distinct groundings.
 	/// These can use constraint propagation during permutation search.

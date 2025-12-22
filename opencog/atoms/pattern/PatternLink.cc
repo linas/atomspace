@@ -639,6 +639,12 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 			pin_term(term);
 			term->markAlways();
 			_pat.always.push_back(term);
+
+			// Collect variables in Always clauses
+			FindAtoms fv(_variables.varset);
+			fv.search_set(ah);
+			for (const Handle& v : fv.varset)
+				_pat.always_vars.insert(v);
 		}
 		return true;
 	}
