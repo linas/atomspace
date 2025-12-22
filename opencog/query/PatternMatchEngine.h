@@ -251,6 +251,16 @@ private:
 	                      const GroundingMap &term_soln);
 	bool report_forall(void);
 
+	// Verify that Always clauses hold for ALL possible groundings.
+	// Returns true if verification passes, false if any fails.
+	bool verify_always_clauses(const GroundingMap& var_soln,
+	                           const GroundingMap& term_soln);
+
+	// Helper: verify a single Always clause.
+	bool verify_one_always(const PatternTermPtr& always_clause,
+	                       const GroundingMap& var_soln,
+	                       const HandleSet& always_vars);
+
 	// -------------------------------------------
 	// Recursive tree comparison algorithm.
 	unsigned int depth; // Recursion depth for tree_compare.

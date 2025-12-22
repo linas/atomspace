@@ -2822,6 +2822,11 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 	// Don't even bother caching, if we know we are losing.
 	if (not _forall_state) return false;
 
+	// Perform verification pass: check that the Always clauses
+	// hold for ALL possible values of the Always-bound variables.
+	if (not verify_always_clauses(var_soln, term_soln))
+		return false;  // Verification failed, reject this grounding
+
 	// If we are here, we need to record groundings, until later,
 	// when we find out if the for-all clauses were satsified.
 	_var_ground_cache.push_back(var_soln);
@@ -2853,6 +2858,29 @@ bool PatternMatchEngine::report_forall(void)
 	_var_ground_cache.clear();
 	_term_ground_cache.clear();
 	return halt;
+}
+
+/// Verify that Always clauses hold for ALL possible groundings of the
+/// Always-bound variables. This performs a sub-search to find all
+/// possible values, and checks each one.
+/// Returns true if verification passes, false if any fails.
+bool PatternMatchEngine::verify_always_clauses(
+    const GroundingMap& var_soln,
+    const GroundingMap& term_soln)
+{
+	// Stage 2 stub: always return true (no verification yet).
+	// Stage 3 will implement actual verification logic.
+	return true;
+}
+
+/// Helper: verify a single Always clause.
+bool PatternMatchEngine::verify_one_always(
+    const PatternTermPtr& always_clause,
+    const GroundingMap& var_soln,
+    const HandleSet& always_vars)
+{
+	// Stage 2 stub: always return true.
+	return true;
 }
 
 /* ======================================================== */
