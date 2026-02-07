@@ -39,7 +39,8 @@ void Link::init()
     for (const Handle& h: _outgoing)
         if (nullptr == h)
             throw InvalidParamException(TRACE_INFO,
-                "Link ctor: invalid outgoing set!");
+                "Link ctor for %s: null pointer in outgoing set!",
+                nameserver().getTypeName(_type).c_str());
 }
 
 Link::~Link()
