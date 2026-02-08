@@ -137,6 +137,7 @@ static Handle expand_definitions(const Handle& h, const AtomSpace* as,
 	if (h->is_type(DEFINED_PROCEDURE_NODE))
 	{
 		Handle defn = DefineLink::get_definition(h, as);
+		if (nullptr == defn)
 			throw RuntimeException(TRACE_INFO,
 				"Missing definition for %s", h->to_string().c_str());
 		return expand_definitions(defn, as, depth + 1);
