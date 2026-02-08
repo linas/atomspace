@@ -22,6 +22,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/grant/DefineLink.h>
+#include <opencog/atoms/grant/PipeLink.h>
 #include <opencog/atoms/scope/VariableSet.h>
 #include <opencog/atoms/rule/RuleLink.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -202,8 +203,24 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// matching.
 	for (Handle impl : _rewrite)
 	{
+		// DefineLinks and PipeNodes are very very similar.
+		// Special-case ValueOf, if it has no variables in it.
+		// (if it does, the execute() will fail...
 		if (impl->is_type(DEFINED_PROCEDURE_NODE))
-			impl = DefineLink::get_definition(impl);
+			impl = DefineLink::get_definition(impl, scratch);
+
+		if (impl->is_type(NAME_NODE))
+			impl = PipeLink::get_stream(impl, scratch);
+
+#if 0
+		// Hmm doing this causes unit tests to fail, but I don't know why.
+		if (impl->is_type(VALUE_OF_LINK))
+		{
+			ValuePtr vof(impl->execute(scratch, silent));
+			if (vof and vof->is_atom())
+				impl = HandleCast(vof);
+		}
+#endif
 
 		ValuePtr red(_mvars->substitute_nocheck(impl, valseq, true));
 		if (red->is_atom())
