@@ -117,6 +117,48 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 
 // ====================================================================
 
+/// Recursively expand nested DefinedProcedureNodes. The expansion
+/// allows variables in the nested definitions to become visible, and
+/// thus beta-reducible. This call got created because a real-life demo
+/// makes use of this -- the IRC echobot demo. The atomese *could be*
+/// rewritten to not require this; it's not that big of a deal. And so
+/// this function is "experimental" -- at enables a certain kind of
+/// modular programming style for Atomese... but at what cost? I dunno.
+/// Jury is out deliberating.
+static Handle expand_definitions(const Handle& h, const AtomSpace* as,
+                                 int depth = 0)
+{
+	// Guard against infinite recursion from circular definitions.
+	if (depth > 10)
+		throw RuntimeException(TRACE_INFO,
+			"Exceeded depth limit for %s", h->to_string().c_str());
+
+	// If it's a DefinedProcedureNode, expand and recurse.
+	if (h->is_type(DEFINED_PROCEDURE_NODE))
+	{
+		Handle defn = DefineLink::get_definition(h, as);
+			throw RuntimeException(TRACE_INFO,
+				"Missing definition for %s", h->to_string().c_str());
+		return expand_definitions(defn, as, depth + 1);
+	}
+
+	// Leaf nodes have nothing to expand.
+	if (not h->is_link()) return h;
+
+	// Walk the outgoing set and expand any nested definitions.
+	bool changed = false;
+	HandleSeq newout;
+	for (const Handle& child : h->getOutgoingSet())
+	{
+		Handle expanded = expand_definitions(child, as, depth);
+		if (expanded != child) changed = true;
+		newout.emplace_back(expanded);
+	}
+
+	if (not changed) return h;
+	return createLink(std::move(newout), h->get_type());
+}
+
 ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
                                  AtomSpace* scratch, bool silent) const
 {
@@ -208,7 +250,10 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 		// Special-case ValueOf, if it has no variables in it.
 		// (if it does, the execute() will fail...)
 		if (impl->is_type(DEFINED_PROCEDURE_NODE))
-			impl = DefineLink::get_definition(impl, scratch);
+			// DefineLink::get_definition is a one-level expansion.
+			// We're going to try supporting nested defns.
+			// impl = DefineLink::get_definition(impl, scratch);
+			impl = expand_definitions(impl, scratch);
 
 		if (impl->is_type(NAME_NODE))
 			impl = PipeLink::get_stream(impl, scratch);
