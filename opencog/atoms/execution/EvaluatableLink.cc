@@ -347,8 +347,9 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 		// atoms into the atomspace, to signal some event or state.
 		// These cannot be discarded. This is explicitly tested by
 		// SequenceUTest::test_or_put().
+		AtomSpace* main_as = _atom_space ? _atom_space : scratch;
 		for (const Handle& term : _outgoing)
-			exec_or_eval(_atom_space, term, scratch, silent);
+			exec_or_eval(main_as, term, scratch, silent);
 
 		if (TRUE_LINK == t) return true;
 		return false;
