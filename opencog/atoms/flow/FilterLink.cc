@@ -197,10 +197,14 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	}
 
 	ValueSeq rew;
-	// Beta reduce, and execute. No type-checking during
-	// beta-reduction; we've already done that, during matching.
-	for (const Handle& impl : _rewrite)
+	// Expand, then beta reduce, then execute. No type-checking
+	// during  beta-reduction; we've already done that, during
+	// matching.
+	for (Handle impl : _rewrite)
 	{
+		if (impl->is_type(DEFINED_PROCEDURE_NODE))
+			impl = DefineLink::get_definition(impl);
+
 		ValuePtr red(_mvars->substitute_nocheck(impl, valseq, true));
 		if (red->is_atom())
 		{
