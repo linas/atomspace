@@ -63,6 +63,66 @@
 			(StringValue "third")))))
 
 ; -----------
+; Test: Pipe/Name as Filter input
+(Pipe
+   (Name "input")
+   (LinkSignature (Type 'LinkValue)
+      (LinkSignature (Type 'LinkValue)
+         (Item "a") (Item "b") (Item "c"))))
+
+(define pipe-rule
+   (Filter
+      (Rule
+         (VariableList
+            (Variable "$from") (Variable "$to") (Variable "$msg"))
+         (LinkSignature (Type 'LinkValue)
+            (Variable "$from") (Variable "$to") (Variable "$msg"))
+         (LinkSignature (Type 'LinkValue)
+            (Item "PRIVMSG")
+            (Variable "$from")
+            (Item "you said: ")
+            (Variable "$msg")))
+      (Name "input")))
+
+(define e-pipe-rule (cog-execute! pipe-rule))
+(test-assert "filter pipe rule"
+   (equal? e-pipe-rule (LinkValue
+      (LinkValue
+         (Item "PRIVMSG")
+         (Item "a")
+         (Item "you said: ")
+         (Item "c")))))
+
+; -----------
+; Test: DefinedSchema as Rule implicand
+(Define
+   (DefinedSchema "reply-template")
+   (LinkSignature (Type 'LinkValue)
+      (Item "PRIVMSG")
+      (Variable "$from")
+      (Item "you said: ")
+      (Variable "$msg")))
+
+(define def-rule
+   (Filter
+      (Rule
+         (VariableList
+            (Variable "$from") (Variable "$to") (Variable "$msg"))
+         (LinkSignature (Type 'LinkValue)
+            (Variable "$from") (Variable "$to") (Variable "$msg"))
+         (DefinedSchema "reply-template"))
+      (Name "input")))
+
+(define e-def-rule (cog-execute! def-rule))
+(test-assert "filter defined-schema rule"
+   (equal? e-def-rule (LinkValue
+      (LinkValue
+         (Item "PRIVMSG")
+         (Item "a")
+         (Item "you said: ")
+         (Item "c")))))
+
+; -----------
 
 (test-end tname)
 
