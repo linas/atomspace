@@ -247,18 +247,21 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// matching.
 	for (Handle impl : _rewrite)
 	{
-		// DefineLinks and PipeNodes are very very similar.
-		// Special-case ValueOf, if it has no variables in it.
-		// (if it does, the execute() will fail...)
-		if (impl->is_type(DEFINED_PROCEDURE_NODE))
-			// DefineLink::get_definition is a one-level expansion.
-			// We're going to try supporting nested defns.
-			// impl = DefineLink::get_definition(impl, scratch);
-			impl = expand_definitions(impl, scratch);
+		// Find all DefineSchemaNodes, however nested they are, and
+		// expand them. They will typically have variables in them,
+		// that need to be substituted, below.
+		impl = expand_definitions(impl, scratch);
 
+		// Expand PipeNodes at top level. Since NameNodes are supposed to
+		// label output streams, and NOT function definitions, we do NOT
+		// want to recursively expand NameNodes (unlike the expand for
+		// definitions, above.) That's what currently maes sense to me.
 		if (impl->is_type(NAME_NODE))
 			impl = PipeLink::get_stream(impl, scratch);
 
+		// Expand ValueOf, but only if it has no variables in it.
+		// If it does have variables, then it cannot be execute()
+		// just yet.
 		if (impl->is_type(VALUE_OF_LINK) and
 		    not any_unquoted_in_tree(impl, _mvars->varset))
 		{
