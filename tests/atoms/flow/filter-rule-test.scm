@@ -123,6 +123,33 @@
          (Item "c")))))
 
 ; -----------
+; Test: DefinedSchema nested inside Rule implicand.
+; The nested DefinedSchema should be found and expanded, before the
+; substitution of the Rul variables.
+(define nested-def-rule
+   (Filter
+      (Rule
+         (VariableList
+            (Variable "$from") (Variable "$to") (Variable "$msg"))
+         (LinkSignature (Type 'LinkValue)
+            (Variable "$from") (Variable "$to") (Variable "$msg"))
+         (LinkSignature (Type 'LinkValue)
+            (Item "wrapped")
+            (DefinedSchema "reply-template")))
+      (Name "input")))
+
+(define e-nested-def-rule (cog-execute! nested-def-rule))
+(test-assert "filter nested defined-schema rule"
+   (equal? e-nested-def-rule (LinkValue
+      (LinkValue
+         (Item "wrapped")
+         (LinkValue
+            (Item "PRIVMSG")
+            (Item "a")
+            (Item "you said: ")
+            (Item "c"))))))
+
+; -----------
 
 (test-end tname)
 
